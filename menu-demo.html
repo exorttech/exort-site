@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo Restaurant | Живое QR-меню</title>
+    <meta
+      name="description"
+      content="QR-меню ресторана: категории, поиск, карточки блюд, стоп-лист и фото блюд."
+    />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <div class="service-modal" data-service-modal aria-hidden="false">
+      <div class="service-card" role="dialog" aria-modal="true" aria-labelledby="service-title">
+        <div class="service-top">
+          <p class="kicker">Информация для гостя</p>
+          <h2 id="service-title">Сервисный сбор</h2>
+        </div>
+        <div class="language-pills" aria-label="Выбор языка">
+          <button class="is-active" type="button">RU</button>
+          <button type="button">KZ</button>
+          <button type="button">EN</button>
+        </div>
+        <p>
+          К счету добавляется <strong>10%</strong> за обслуживание ресторана.
+          Если у вас есть пищевая аллергия, пожалуйста, предупредите официанта заранее.
+        </p>
+        <button class="wide-button" type="button" data-close-service>Понятно</button>
+      </div>
+    </div>
+
+    <header class="topbar">
+      <a class="brand" href="./index.html" aria-label="Demo Restaurant">
+        <span class="brand-mark">DR</span>
+        <span>Demo Restaurant</span>
+      </a>
+
+      <nav class="top-actions" aria-label="Быстрые действия">
+        <button class="icon-button" type="button" data-theme-toggle aria-label="Сменить тему">
+          <span aria-hidden="true"></span>
+        </button>
+        <a class="small-button" href="https://wa.me/77070000000" target="_blank" rel="noreferrer">WhatsApp</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="hero-content">
+          <p class="kicker" data-restaurant-type>Гастробар и завтраки</p>
+          <h1 data-restaurant-name>Меню сегодня</h1>
+          <p data-restaurant-description>
+            Выберите категорию, найдите блюдо по названию или откройте карточку, чтобы посмотреть состав и фото.
+          </p>
+          <div class="hero-meta">
+            <span>Открыто до 23:00</span>
+            <span>Алматы</span>
+            <span>10% сервис</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="menu-tools" aria-label="Поиск и фильтры меню">
+        <label class="search-field">
+          <span>Поиск</span>
+          <input data-search type="search" placeholder="Найти блюдо или ингредиент" autocomplete="off" />
+        </label>
+        <div class="category-strip" data-categories aria-label="Категории меню"></div>
+      </section>
+
+      <section class="status-row" data-status-row hidden aria-live="polite">
+        <p data-status></p>
+        <button class="link-button" type="button" data-reset>Очистить</button>
+      </section>
+
+      <section class="menu-grid" data-menu-list aria-label="Список блюд"></section>
+    </main>
+
+    <aside class="dish-drawer" data-dish-drawer aria-hidden="true">
+      <button class="drawer-backdrop" type="button" data-close-dish aria-label="Закрыть карточку блюда"></button>
+      <article class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+        <button class="drawer-close" type="button" data-close-dish aria-label="Закрыть">×</button>
+        <img data-drawer-image src="" alt="" />
+        <div class="drawer-body">
+          <p class="kicker" data-drawer-category></p>
+          <h2 id="drawer-title" data-drawer-title></h2>
+          <p data-drawer-description></p>
+          <div class="drawer-info">
+            <strong data-drawer-price></strong>
+            <span data-drawer-weight></span>
+          </div>
+          <div class="tag-list" data-drawer-tags></div>
+        </div>
+      </article>
+    </aside>
+  </body>
+</html>

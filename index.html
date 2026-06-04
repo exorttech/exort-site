@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>exort | Цифровое меню для ресторанов</title>
+    <meta
+      name="description"
+      content="exort создает цифровые меню для ресторанов со своей админкой: меняйте фото, названия, цены и стоп-лист онлайн без типографии."
+    />
+    <style>
+      :root {
+        --bg: #f7f4ee;
+        --surface: #fffdfa;
+        --surface-soft: #f1e9df;
+        --text: #17120e;
+        --muted: #6d6259;
+        --line: #ddd1c4;
+        --accent: #b96f63;
+        --accent-dark: #84483f;
+        --green: #496f57;
+        --ink: #0f0d0b;
+        --shadow: 0 24px 70px rgba(43, 30, 21, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        overflow-x: hidden;
+        scroll-behavior: smooth;
+      }
+
+      body {
+        overflow-x: hidden;
+        margin: 0;
+        color: var(--text);
+        font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+        background:
+          linear-gradient(120deg, rgba(185, 111, 99, 0.13), transparent 34%),
+          linear-gradient(260deg, rgba(73, 111, 87, 0.11), transparent 30%),
+          var(--bg);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        padding: 18px clamp(18px, 5vw, 72px);
+        background: rgba(247, 244, 238, 0.84);
+        border-bottom: 1px solid rgba(221, 209, 196, 0.7);
+        backdrop-filter: blur(16px);
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 22px;
+        font-weight: 900;
+        letter-spacing: 0;
+      }
+
+      .brand-mark {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        color: #fff;
+        background: var(--ink);
+        border-radius: 50%;
+        font-size: 14px;
+      }
+
+      .nav-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .nav-actions a,
+      .button {
+        display: inline-flex;
+        min-height: 46px;
+        align-items: center;
+        justify-content: center;
+        padding: 0 18px;
+        border-radius: 999px;
+        font-weight: 900;
+      }
+
+      .nav-actions a {
+        color: var(--muted);
+      }
+
+      .button.primary {
+        color: #fff;
+        background: var(--ink);
+      }
+
+      .button.secondary {
+        color: var(--accent-dark);
+        background: var(--surface);
+        border: 1px solid var(--line);
+      }
+
+      .hero {
+        min-height: calc(100vh - 79px);
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(330px, 430px);
+        gap: clamp(28px, 6vw, 72px);
+        align-items: center;
+        padding: clamp(34px, 6vw, 76px) clamp(18px, 5vw, 72px) 34px;
+      }
+
+      .hero > div {
+        min-width: 0;
+      }
+
+      .eyebrow {
+        width: fit-content;
+        margin: 0 0 18px;
+        padding: 8px 12px;
+        color: var(--accent-dark);
+        background: rgba(185, 111, 99, 0.13);
+        border: 1px solid rgba(185, 111, 99, 0.2);
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 900;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 820px;
+        margin-bottom: 22px;
+        font-size: clamp(46px, 8vw, 96px);
+        line-height: 0.94;
+        letter-spacing: 0;
+        overflow-wrap: break-word;
+      }
+
+      .lead {
+        max-width: 720px;
+        margin-bottom: 28px;
+        color: var(--muted);
+        font-size: clamp(18px, 2vw, 22px);
+        line-height: 1.55;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 26px;
+      }
+
+      .proof-row {
+        display: grid;
+        max-width: 760px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .proof {
+        min-height: 118px;
+        padding: 16px;
+        background: rgba(255, 253, 250, 0.78);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .proof strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 18px;
+      }
+
+      .proof span {
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .phone-wrap {
+        display: grid;
+        min-width: 0;
+        place-items: center;
+      }
+
+      .phone {
+        position: relative;
+        width: min(100%, 390px);
+        padding: 14px;
+        background: #17120e;
+        border-radius: 36px;
+        box-shadow: var(--shadow);
+      }
+
+      .phone::before {
+        position: absolute;
+        top: 8px;
+        left: 50%;
+        width: 86px;
+        height: 22px;
+        content: "";
+        background: #17120e;
+        border-radius: 0 0 16px 16px;
+        transform: translateX(-50%);
+        z-index: 2;
+      }
+
+      .phone-screen {
+        min-height: 720px;
+        overflow: hidden;
+        background: #faf7f2;
+        border-radius: 26px;
+      }
+
+      .demo-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px;
+        background: #fffdfa;
+      }
+
+      .demo-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 900;
+      }
+
+      .demo-logo {
+        display: grid;
+        width: 38px;
+        height: 38px;
+        place-items: center;
+        color: #fff;
+        background: #0f0d0b;
+        border-radius: 50%;
+        font-size: 12px;
+      }
+
+      .toggle-preview {
+        width: 58px;
+        height: 36px;
+        padding: 5px;
+        background: #f2d9d6;
+        border-radius: 999px;
+      }
+
+      .toggle-preview span {
+        display: block;
+        width: 26px;
+        height: 26px;
+        background: var(--accent);
+        border-radius: 50%;
+      }
+
+      .demo-hero {
+        min-height: 332px;
+        display: grid;
+        align-items: end;
+        padding: 20px;
+        color: #fff;
+        background:
+          linear-gradient(180deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.62)),
+          url("https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=900&q=86")
+            center / cover;
+      }
+
+      .demo-hero small {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 900;
+        text-transform: uppercase;
+      }
+
+      .demo-hero h2 {
+        margin-bottom: 8px;
+        font-size: 42px;
+        line-height: 0.96;
+      }
+
+      .demo-hero p {
+        margin-bottom: 16px;
+        font-size: 16px;
+        line-height: 1.42;
+      }
+
+      .demo-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .demo-badges span {
+        padding: 8px 10px;
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .demo-body {
+        padding: 16px;
+      }
+
+      .search-preview {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 52px;
+        margin-bottom: 14px;
+        padding: 0 14px;
+        color: #766b62;
+        background: #fffdfa;
+        border: 1px solid #e2d6c9;
+        border-radius: 999px;
+        font-size: 16px;
+      }
+
+      .search-icon {
+        width: 18px;
+        height: 18px;
+        border: 2px solid currentColor;
+        border-radius: 50%;
+        position: relative;
+      }
+
+      .search-icon::after {
+        position: absolute;
+        right: -6px;
+        bottom: -3px;
+        width: 8px;
+        height: 2px;
+        content: "";
+        background: currentColor;
+        border-radius: 999px;
+        transform: rotate(45deg);
+      }
+
+      .tabs-preview {
+        display: flex;
+        gap: 10px;
+        overflow: hidden;
+        margin-bottom: 16px;
+      }
+
+      .tabs-preview span {
+        flex: 0 0 auto;
+        padding: 11px 16px;
+        background: #fffdfa;
+        border: 1px solid #e2d6c9;
+        border-radius: 999px;
+        font-weight: 900;
+      }
+
+      .tabs-preview .active {
+        color: #fff;
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+
+      .dish-preview {
+        display: grid;
+        grid-template-columns: 86px minmax(0, 1fr);
+        gap: 12px;
+        padding: 10px;
+        background: #fffdfa;
+        border: 1px solid #e2d6c9;
+        border-radius: 8px;
+      }
+
+      .dish-preview img {
+        width: 86px;
+        height: 86px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      .dish-preview h3 {
+        margin: 2px 0 4px;
+        font-size: 18px;
+      }
+
+      .dish-preview p {
+        margin-bottom: 8px;
+        color: #766b62;
+        font-size: 13px;
+      }
+
+      .dish-preview strong {
+        color: var(--accent-dark);
+        font-size: 18px;
+      }
+
+      .section {
+        padding: 44px clamp(18px, 5vw, 72px) 72px;
+      }
+
+      .section-inner {
+        width: min(1140px, 100%);
+        margin: 0 auto;
+      }
+
+      .section h2 {
+        max-width: 720px;
+        margin-bottom: 18px;
+        font-size: clamp(32px, 5vw, 56px);
+        line-height: 1.02;
+      }
+
+      .section-copy {
+        max-width: 760px;
+        color: var(--muted);
+        font-size: 18px;
+        line-height: 1.6;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .feature {
+        min-height: 150px;
+        padding: 18px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .feature h3 {
+        margin-bottom: 8px;
+        font-size: 20px;
+      }
+
+      .feature p {
+        margin-bottom: 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      @media (max-width: 980px) {
+        .hero,
+        .proof-row,
+        .feature-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .phone {
+          width: min(390px, 100%);
+        }
+      }
+
+      @media (max-width: 620px) {
+        body {
+          overflow-x: hidden;
+        }
+
+        .topbar {
+          padding-inline: 14px;
+        }
+
+        .nav-actions a:not(.button) {
+          display: none;
+        }
+
+        .hero {
+          padding: 28px 14px;
+        }
+
+        h1 {
+          font-size: 38px;
+          line-height: 1;
+        }
+
+        .lead {
+          font-size: 17px;
+        }
+
+        .actions {
+          display: grid;
+          grid-template-columns: 1fr;
+        }
+
+        .button {
+          width: 100%;
+          text-align: center;
+        }
+
+        .phone-screen {
+          min-height: 660px;
+        }
+
+        .phone {
+          width: calc(100vw - 28px);
+          max-width: 390px;
+        }
+
+        .tabs-preview span:nth-child(3) {
+          display: none;
+        }
+
+        .demo-hero {
+          min-height: 300px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark">ex</span>
+        <span>exort</span>
+      </a>
+      <nav class="nav-actions" aria-label="Навигация">
+        <a href="#features">Возможности</a>
+        <a class="button primary" href="./menu-demo.html">Открыть демо</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div>
+          <p class="eyebrow">QR-меню для ресторанов</p>
+          <h1>exort создает цифровые меню, которые ресторан меняет сам</h1>
+          <p class="lead">
+            У ресторана появляется своя админка: можно онлайн менять фото блюд, названия,
+            описания, цены, категории и стоп-лист. Бумажное меню больше не нужно перепечатывать
+            после каждого обновления.
+          </p>
+          <div class="actions">
+            <a class="button primary" href="./menu-demo.html">Посмотреть живое демо</a>
+            <a class="button secondary" href="#features">Что внутри</a>
+          </div>
+
+          <div class="proof-row">
+            <div class="proof">
+              <strong>Без типографии</strong>
+              <span>Новые цены и блюда появляются онлайн, без печати новых меню.</span>
+            </div>
+            <div class="proof">
+              <strong>Своя админка</strong>
+              <span>Команда ресторана сама управляет контентом и стоп-листом.</span>
+            </div>
+            <div class="proof">
+              <strong>Всегда актуально</strong>
+              <span>Гость видит только свежие фото, цены и доступные позиции.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="phone-wrap" aria-label="Превью демо меню в смартфоне">
+          <div class="phone">
+            <div class="phone-screen">
+              <div class="demo-top">
+                <div class="demo-brand">
+                  <span class="demo-logo">DR</span>
+                  <span>Demo Restaurant</span>
+                </div>
+                <div class="toggle-preview"><span></span></div>
+              </div>
+              <div class="demo-hero">
+                <div>
+                  <small>Demo Restaurant</small>
+                  <h2>Меню сегодня</h2>
+                  <p>Выберите категорию, найдите блюдо по названию или откройте карточку.</p>
+                  <div class="demo-badges">
+                    <span>Открыто до 23:00</span>
+                    <span>Алматы</span>
+                    <span>10% сервис</span>
+                  </div>
+                </div>
+              </div>
+              <div class="demo-body">
+                <div class="search-preview">
+                  <span class="search-icon"></span>
+                  <span>Найти блюдо или ингредиент</span>
+                </div>
+                <div class="tabs-preview">
+                  <span class="active">Популярное</span>
+                  <span>Завтраки</span>
+                  <span>Горячее</span>
+                </div>
+                <div class="dish-preview">
+                  <img
+                    src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=400&q=84"
+                    alt="Маргарита"
+                  />
+                  <div>
+                    <h3>Маргарита</h3>
+                    <p>Томаты, моцарелла, базилик</p>
+                    <strong>3 200 ₸</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="features">
+        <div class="section-inner">
+          <h2>Меню работает как живой инструмент, а не как PDF на телефоне</h2>
+          <p class="section-copy">
+            exort делает страницу меню и админку под ресторан. Владелец или администратор
+            обновляет позиции в удобной панели, а гости сразу видят изменения по QR-коду.
+          </p>
+
+          <div class="feature-grid">
+            <article class="feature">
+              <h3>Фото, названия и цены</h3>
+              <p>Меняйте карточки блюд онлайн без разработчика и без повторной верстки.</p>
+            </article>
+            <article class="feature">
+              <h3>Категории и стоп-лист</h3>
+              <p>Скрывайте недоступные позиции и управляйте разделами меню в пару действий.</p>
+            </article>
+            <article class="feature">
+              <h3>Один QR надолго</h3>
+              <p>QR остается тем же, даже если меню меняется каждый день.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
