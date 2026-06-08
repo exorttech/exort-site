@@ -121,6 +121,174 @@ const mockSupabaseResponse = {
   ],
 };
 
+const SUPABASE_REST_URL = "https://jnxwbqcnpxezjvfgdabc.supabase.co/rest/v1/";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T2QhpE8LByMP8_uO_cBdPg_bbLkAbBv";
+const DEFAULT_RESTAURANT_SLUG = "exort-demo";
+const SUPPORTED_LOCALES = ["ru", "en", "kk"];
+const RESTAURANT_SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
+
+function getRequestedRestaurantSlug() {
+  const requestedSlug = new URLSearchParams(window.location.search)
+    .get("restaurant")
+    ?.trim()
+    .toLowerCase();
+
+  return RESTAURANT_SLUG_PATTERN.test(requestedSlug || "")
+    ? requestedSlug
+    : DEFAULT_RESTAURANT_SLUG;
+}
+
+function getRequestedLocale() {
+  const queryLocale = new URLSearchParams(window.location.search).get("lang")?.toLowerCase();
+  const htmlLocale = document.documentElement.lang?.toLowerCase().split("-")[0];
+
+  return SUPPORTED_LOCALES.includes(queryLocale)
+    ? queryLocale
+    : SUPPORTED_LOCALES.includes(htmlLocale)
+      ? htmlLocale
+      : "ru";
+}
+
+function getLocalizedValue(record, field, locale = getRequestedLocale()) {
+  const fallbackOrder = {
+    ru: ["ru", "en", "kk"],
+    en: ["en", "ru", "kk"],
+    kk: ["kk", "ru", "en"],
+  };
+
+  for (const language of fallbackOrder[locale] || fallbackOrder.ru) {
+    const value = record?.[`${field}_${language}`];
+
+    if (typeof value === "string" && value.trim()) {
+      return value.trim();
+    }
+  }
+
+  return "";
+}
+
+async function requestSupabase(table, query) {
+  const url = new URL(table, SUPABASE_REST_URL);
+
+  Object.entries(query).forEach(([key, value]) => {
+    url.searchParams.set(key, value);
+  });
+
+  const response = await fetch(url, {
+    headers: {
+      apikey: SUPABASE_PUBLISHABLE_KEY,
+      Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+    },
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Supabase ${table} request failed (${response.status}): ${details}`);
+  }
+
+  return response.json();
+}
+
+function isMenuItemActive(item) {
+  return item.is_active && (!item.inactive_until || new Date(item.inactive_until) <= new Date());
+}
+
+const DISH_IMAGE_PLACEHOLDER = `data:image/svg+xml,${encodeURIComponent(`
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
+    <rect width="600" height="600" fill="#f1e7dc"/>
+    <circle cx="300" cy="284" r="150" fill="#fffdfa" stroke="#d8c4b6" stroke-width="18"/>
+    <circle cx="300" cy="284" r="96" fill="none" stroke="#b66f62" stroke-width="12" stroke-dasharray="16 18"/>
+    <path d="M196 470h208" stroke="#8c4f45" stroke-width="18" stroke-linecap="round"/>
+  </svg>
+`)}`;
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function getSafeImageUrl(value) {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : DISH_IMAGE_PLACEHOLDER;
+  } catch {
+    return DISH_IMAGE_PLACEHOLDER;
+  }
+}
+
+async function loadMenuFromSupabase() {
+  const slug = getRequestedRestaurantSlug();
+  const locale = getRequestedLocale();
+  const restaurants = await requestSupabase("restaurants", {
+    select: "id,slug,name,is_active",
+    slug: `eq.${slug}`,
+    is_active: "eq.true",
+    limit: "1",
+  });
+  const restaurant = restaurants[0];
+
+  if (!restaurant) {
+    throw new Error(`Active restaurant "${slug}" was not found.`);
+  }
+
+  const [categories, items] = await Promise.all([
+    requestSupabase("menu_categories", {
+      select: "id,restaurant_id,title_ru,title_en,title_kk,sort_order,is_active",
+      restaurant_id: `eq.${restaurant.id}`,
+      is_active: "eq.true",
+      order: "sort_order.asc",
+    }),
+    requestSupabase("menu_items", {
+      select:
+        "id,restaurant_id,category_id,content_key,title_ru,title_en,title_kk,description_ru,description_en,description_kk,price,currency,image_url,badge_ru,badge_en,badge_kk,sort_order,is_active,inactive_until",
+      restaurant_id: `eq.${restaurant.id}`,
+      is_active: "eq.true",
+      order: "sort_order.asc",
+    }),
+  ]);
+
+  const activeCategories = categories.filter((category) => category.is_active);
+  const activeCategoryIds = new Set(activeCategories.map((category) => category.id));
+
+  return {
+    restaurant: {
+      name: restaurant.name,
+      type: "Exort Menu",
+      description:
+        locale === "en"
+          ? "Choose a category, search for a dish or open its card."
+          : locale === "kk"
+            ? "Санатты таңдаңыз, тағамды іздеңіз немесе карточкасын ашыңыз."
+            : "Выберите категорию, найдите блюдо или откройте его карточку.",
+    },
+    categories: activeCategories.map((category) => ({
+      id: category.id,
+      name: getLocalizedValue(category, "title", locale),
+    })),
+    items: items
+      .filter(isMenuItemActive)
+      .filter((item) => item.category_id === null || activeCategoryIds.has(item.category_id))
+      .map((item) => ({
+        id: item.id,
+        contentKey: item.content_key,
+        category: item.category_id,
+        title: getLocalizedValue(item, "title", locale),
+        description: getLocalizedValue(item, "description", locale),
+        price: Number(item.price || 0),
+        currency: item.currency || "₸",
+        weight: "",
+        available: true,
+        badge: getLocalizedValue(item, "badge", locale),
+        tags: [],
+        image: getSafeImageUrl(item.image_url),
+      })),
+  };
+}
+
 const serviceCopy = {
   RU: {
     kicker: "Информация для гостя",
@@ -179,8 +347,8 @@ const elements = {
   closeDishButtons: document.querySelectorAll("[data-close-dish]"),
 };
 
-function formatPrice(value) {
-  return new Intl.NumberFormat("ru-KZ").format(value) + " ₸";
+function formatPrice(value, currency = "₸") {
+  return `${new Intl.NumberFormat("ru-KZ").format(value)} ${currency}`;
 }
 
 function formatCount(value) {
@@ -229,7 +397,7 @@ function renderCategories() {
     .map(
       (category) => `
         <button class="${category.id === state.category ? "is-active" : ""}" type="button" data-category="${category.id}">
-          ${category.name}
+          ${escapeHtml(category.name)}
         </button>
       `,
     )
@@ -249,15 +417,15 @@ function updateActiveCategory(categoryId) {
 function createDishCard(item) {
   return `
     <article class="dish-card ${item.available ? "" : "is-unavailable"}" tabindex="0" role="button" data-dish-id="${item.id}">
-      <img src="${item.image}" alt="${item.title}" loading="lazy" />
+      <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" />
       <div class="dish-body">
         <div>
-          <h3>${item.title}</h3>
-          <p>${item.available ? item.description : "Временно недоступно"}</p>
+          <h3>${escapeHtml(item.title)}</h3>
+          <p>${escapeHtml(item.available ? item.description : "Временно недоступно")}</p>
         </div>
         <div class="dish-bottom">
-          <strong class="price">${formatPrice(item.price)}</strong>
-          <span class="badge ${item.available ? "success" : ""}">${item.badge}</span>
+          <strong class="price">${escapeHtml(formatPrice(item.price, item.currency))}</strong>
+          ${item.badge ? `<span class="badge ${item.available ? "success" : ""}">${escapeHtml(item.badge)}</span>` : ""}
         </div>
       </div>
     </article>
@@ -318,7 +486,7 @@ function renderMenu() {
 
       return `
         <section class="menu-section" id="section-${category.id}" data-menu-section="${category.id}">
-          <h2>${category.name}</h2>
+          <h2>${escapeHtml(category.name)}</h2>
           <div class="section-items">
             ${sectionItems.map(createDishCard).join("")}
           </div>
@@ -342,19 +510,20 @@ function renderAll() {
 }
 
 function openDish(itemId) {
-  const item = state.data.items.find((dish) => dish.id === Number(itemId));
-  const category = state.data.categories.find((entry) => entry.id === item.category);
+  const item = state.data.items.find((dish) => String(dish.id) === String(itemId));
 
   if (!item) {
     return;
   }
+
+  const category = state.data.categories.find((entry) => entry.id === item.category);
 
   elements.drawerImage.src = item.image;
   elements.drawerImage.alt = item.title;
   elements.drawerCategory.textContent = category?.name ?? "Меню";
   elements.drawerTitle.textContent = item.title;
   elements.drawerDescription.textContent = item.description;
-  elements.drawerPrice.textContent = formatPrice(item.price);
+  elements.drawerPrice.textContent = formatPrice(item.price, item.currency);
   elements.drawerWeight.textContent = item.weight;
   elements.drawerTags.innerHTML = item.tags.map((tag) => `<span>${tag}</span>`).join("");
   elements.drawer.setAttribute("aria-hidden", "false");
@@ -377,14 +546,24 @@ function setServiceLanguage(language) {
   });
 }
 
-function loadDemoMenu() {
+async function loadDemoMenu() {
   setLoadingState();
 
-  window.setTimeout(() => {
+  try {
+    state.data = await loadMenuFromSupabase();
     state.loaded = true;
-    state.data = mockSupabaseResponse;
+    state.category = state.data.categories[0]?.id || "";
     renderAll();
-  }, 720);
+  } catch (error) {
+    console.warn("Supabase menu fallback:", error);
+
+    window.setTimeout(() => {
+      state.loaded = true;
+      state.data = mockSupabaseResponse;
+      state.category = state.data.categories[0]?.id || "";
+      renderAll();
+    }, 420);
+  }
 }
 
 elements.closeService.addEventListener("click", () => {
@@ -429,11 +608,11 @@ elements.search.addEventListener("input", (event) => {
 });
 
 elements.reset.addEventListener("click", () => {
-  state.category = "popular";
+  state.category = state.data?.categories[0]?.id || "";
   state.query = "";
   elements.search.value = "";
   renderMenu();
-  updateActiveCategory("popular");
+  updateActiveCategory(state.category);
 });
 
 elements.menuList.addEventListener("click", (event) => {

@@ -3,271 +3,311 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Exort | QR-меню для ресторанов Казахстана</title>
+    <title>Exort Arctic — QR-меню и система управления для ресторанов</title>
     <meta
       name="description"
-      content="Exort помогает ресторанам Казахстана самостоятельно управлять QR-меню без разработчиков: административная панель, стоп-листы, фото блюд, домен и будущие интеграции."
+      content="Exort помогает ресторанам управлять меню, ценами, стоп-листом, языками и аналитикой из одной системы."
     />
-    <link rel="stylesheet" href="./exort-premium.css" />
-    <script defer src="./exort-premium.js"></script>
+    <meta property="og:title" content="Exort Arctic — цифровое меню без хаоса" />
+    <meta
+      property="og:description"
+      content="QR-меню, система управления, стоп-лист, языки и аналитика для ресторанов."
+    />
+    <!-- TODO: create /og-image.png before production deploy. -->
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#EAF2FF" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./css/exort-arctic.css" />
+    <script defer src="./js/exort-arctic.js"></script>
   </head>
   <body>
-    <div class="ambient ambient-one" aria-hidden="true"></div>
-    <div class="ambient ambient-two" aria-hidden="true"></div>
-
-    <header class="site-header" data-header>
-      <a class="brand" href="#top" aria-label="Exort">
-        <span class="brand-mark">E</span>
+    <header class="arctic-header" data-header>
+      <a class="brand" href="#top" aria-label="Exort Arctic">
+        <span class="brand__mark">E</span>
         <span>Exort</span>
       </a>
+
       <nav class="nav" aria-label="Навигация">
-        <a href="#demo">Демо</a>
+        <a href="#flow">Продукт</a>
         <a href="#features">Возможности</a>
-        <a href="#how">Как работает</a>
+        <a href="#launch">Запуск</a>
         <a href="#contacts">Контакты</a>
       </nav>
+
       <div class="header-actions">
-        <button
-          class="theme-switch"
-          type="button"
-          data-theme-toggle
-          aria-label="Включить темную тему"
-          aria-pressed="false"
-        >
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Сменить тему">
           <span aria-hidden="true"></span>
+          <strong data-theme-label>Light</strong>
         </button>
-        <a class="header-cta" href="https://wa.me/77000000000" target="_blank" rel="noreferrer">
-          WhatsApp
+        <a class="button button--small button--primary" href="https://wa.me/77712033044" target="_blank" rel="noreferrer">
+          Запустить меню
         </a>
       </div>
     </header>
 
     <main id="top">
-      <section class="hero">
-        <div class="hero-copy reveal">
-          <p class="eyebrow">SaaS платформа для ресторанов</p>
-          <h1>QR-меню для ресторанов Казахстана</h1>
-          <p class="hero-text">
-            Управляйте меню самостоятельно. Меняйте цены, скрывайте блюда и обновляйте
-            информацию без разработчиков.
+      <section class="hero shell">
+        <div class="hero__copy reveal">
+          <p class="eyebrow">Arctic Tech для ресторанов</p>
+          <h1>Цифровое меню без хаоса</h1>
+          <p>
+            Блюда, цены, фото, стоп-лист, языки и аналитика — в одной системе для ресторана.
           </p>
-          <div class="hero-actions">
-            <a class="button primary" href="#demo">Посмотреть демо</a>
-            <a class="button secondary" href="https://wa.me/77000000000" target="_blank" rel="noreferrer">
-              Связаться в WhatsApp
+          <div class="hero__actions">
+            <a class="button button--primary" href="https://wa.me/77712033044" target="_blank" rel="noreferrer">
+              Запустить меню
+            </a>
+            <a class="button button--secondary" href="./pages/menu-demo.html?restaurant=exort-demo">
+              Посмотреть пример
             </a>
           </div>
-          <div class="metric-row" aria-label="Ключевые показатели">
+          <div class="signal-row" aria-label="Ключевые сигналы продукта">
             <span>QR-меню</span>
-            <span>Административная панель</span>
-            <span>R-Keeper / iiko ready</span>
+            <span>Стоп-лист</span>
+            <span>RU / KZ / EN</span>
           </div>
         </div>
 
-        <aside class="phone-stage reveal" id="demo" aria-label="Живая демо-версия меню в iPhone">
-          <div class="status-chip">
-            <span>Live</span>
-            <strong>Меню обновлено</strong>
-          </div>
-          <div class="iphone">
-            <div class="dynamic-island" aria-hidden="true"></div>
-            <div class="phone-screen" data-phone-screen>
-              <iframe
-                class="demo-frame"
-                data-demo-frame
-                src="./menu-demo.html?phonePreview=1"
-                title="Живая демо-версия меню Exort"
-                loading="lazy"
-              ></iframe>
-              <div class="menu-header">
-                <div>
-                  <span class="restaurant-logo">R</span>
-                  <strong>Resto Demo</strong>
-                </div>
-                <button class="mode-toggle" type="button" data-phone-theme aria-label="Сменить тему меню">
+        <div class="hero-product reveal" aria-label="Продуктовый интерфейс Exort">
+          <div class="orb orb--blue" aria-hidden="true"></div>
+          <div class="orb orb--cyan" aria-hidden="true"></div>
+
+          <section class="phone-card" aria-label="Скриншот QR-меню">
+            <div class="phone-card__top">
+              <span>QR menu</span>
+              <strong>Live</strong>
+            </div>
+            <img
+              src="./assets/menu-demo-preview.jpeg"
+              alt="Скриншот демо-страницы QR-меню Exort"
+              loading="lazy"
+            />
+          </section>
+
+          <section class="control-card" aria-label="Панель управления меню">
+            <div class="control-card__bar">
+              <span></span>
+              <strong>Панель управления</strong>
+              <em>synced</em>
+            </div>
+            <div class="control-grid">
+              <div class="category-rail">
+                <button class="is-active" type="button">Горячее</button>
+                <button type="button">Завтраки</button>
+                <button type="button">Напитки</button>
+              </div>
+              <div class="item-stack">
+                <button class="item-row is-live" type="button">
+                  <span></span>
+                  <div>
+                    <strong>Маргарита</strong>
+                    <small>3 200 ₸</small>
+                  </div>
+                  <em>active</em>
+                </button>
+                <button class="item-row is-stop" type="button" data-stop-row>
+                  <span></span>
+                  <div>
+                    <strong>Флэт уайт</strong>
+                    <small>1 400 ₸</small>
+                  </div>
+                  <em data-stop-label>stop</em>
+                </button>
+              </div>
+              <div class="edit-card">
+                <small>Live update</small>
+                <strong>Флэт уайт</strong>
+                <p>Гость увидит изменение сразу после сохранения.</p>
+                <button class="switch" type="button" data-stop-toggle aria-label="Переключить стоп-лист">
                   <span></span>
                 </button>
               </div>
-              <section class="menu-cover">
-                <div>
-                  <small>Сегодня в меню</small>
-                  <h2>Авторская кухня</h2>
-                  <p>Категории, поиск, фото блюд, цены и стоп-листы.</p>
-                </div>
-              </section>
-              <div class="menu-body">
-                <label class="search-box">
-                  <span aria-hidden="true"></span>
-                  <input data-menu-search type="search" placeholder="Найти блюдо" />
-                </label>
-                <div class="category-tabs" aria-label="Категории меню">
-                  <button class="is-active" type="button" data-category="popular">Популярное</button>
-                  <button type="button" data-category="breakfast">Завтраки</button>
-                  <button type="button" data-category="drinks">Напитки</button>
-                </div>
-                <div class="dish-list" data-dish-list></div>
-              </div>
             </div>
-          </div>
-          <div class="status-chip secondary-chip">
-            <span>Stop-list</span>
-            <strong>1 позиция скрыта</strong>
-          </div>
-        </aside>
-      </section>
+          </section>
 
-      <section class="section trust">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Создано для ресторанов Казахстана</p>
-          <h2>Один продукт для меню, управления и роста</h2>
-        </div>
-        <div class="tile-grid six">
-          <article class="tile reveal"><h3>QR-меню</h3><p>Гость открывает меню на телефоне без приложений.</p></article>
-          <article class="tile reveal"><h3>Административная панель</h3><p>Команда ресторана управляет меню самостоятельно.</p></article>
-          <article class="tile reveal"><h3>Собственный домен</h3><p>Меню выглядит как часть бренда, а не внешняя ссылка.</p></article>
-          <article class="tile reveal"><h3>Фото блюд</h3><p>Визуальные карточки помогают гостю быстрее выбрать.</p></article>
-          <article class="tile reveal"><h3>Многоязычность</h3><p>Русский, казахский и английский для разных гостей.</p></article>
-          <article class="tile reveal"><h3>Стоп-листы</h3><p>Недоступные блюда скрываются в один клик.</p></article>
-        </div>
-      </section>
-
-      <section class="section problems">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Старый подход ломает скорость</p>
-          <h2>Почему PDF и бумажные меню устарели</h2>
-        </div>
-        <div class="tile-grid six">
-          <article class="problem-card reveal"><span>01</span><h3>Сложно обновлять</h3></article>
-          <article class="problem-card reveal"><span>02</span><h3>Цены быстро устаревают</h3></article>
-          <article class="problem-card reveal"><span>03</span><h3>Нет поиска</h3></article>
-          <article class="problem-card reveal"><span>04</span><h3>Нет фото блюд</h3></article>
-          <article class="problem-card reveal"><span>05</span><h3>Нет аналитики</h3></article>
-          <article class="problem-card reveal"><span>06</span><h3>Нужен подрядчик</h3></article>
-        </div>
-      </section>
-
-      <section class="section solution" id="how">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Решение</p>
-          <h2>Меняйте меню за минуты</h2>
-        </div>
-        <div class="flow reveal" aria-label="Схема обновления меню">
-          <div class="flow-step is-active"><span>01</span><strong>Административная панель</strong></div>
-          <div class="flow-arrow"></div>
-          <div class="flow-step"><span>02</span><strong>Изменили блюдо</strong></div>
-          <div class="flow-arrow"></div>
-          <div class="flow-step"><span>03</span><strong>Сайт обновился</strong></div>
-          <div class="flow-arrow"></div>
-          <div class="flow-step"><span>04</span><strong>Гость увидел изменения</strong></div>
-        </div>
-      </section>
-
-      <section class="section admin-section">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Самый важный блок</p>
-          <h2>Управление меню без разработчика</h2>
-          <p>Любой сотрудник сможет обновить меню за несколько минут.</p>
-        </div>
-        <div class="admin-window reveal">
-          <div class="admin-sidebar">
-            <strong>Категории</strong>
-            <button class="is-active">Популярное</button>
-            <button>Завтраки</button>
-            <button>Напитки</button>
-            <button>Десерты</button>
-          </div>
-          <div class="admin-list">
-            <div class="admin-toolbar">
-              <span>Блюда</span>
-              <button>+ Добавить</button>
+          <aside class="analytics-card" aria-label="Мини-график просмотров">
+            <span>Просмотры меню</span>
+            <div class="bars" aria-hidden="true">
+              <i style="height: 42%"></i>
+              <i style="height: 74%"></i>
+              <i style="height: 55%"></i>
+              <i style="height: 92%"></i>
+              <i style="height: 68%"></i>
             </div>
-            <article class="admin-dish is-active"><span class="food-art pizza"></span><div><strong>Маргарита</strong><small>3 200 ₸</small></div></article>
-            <article class="admin-dish"><span class="food-art steak"></span><div><strong>Стейк</strong><small>6 900 ₸</small></div></article>
-            <article class="admin-dish"><span class="food-art drink"></span><div><strong>Лимонад</strong><small>1 800 ₸</small></div></article>
+          </aside>
+        </div>
+      </section>
+
+      <section class="flow-section shell" id="flow">
+        <div class="section-head reveal">
+          <p class="eyebrow">Product flow</p>
+          <h2>QR → меню → изменение → обновление для гостя</h2>
+        </div>
+        <div class="flow-grid reveal">
+          <article><span>01</span><strong>Гость сканирует QR</strong><p>Меню открывается без приложения.</p></article>
+          <article><span>02</span><strong>Ресторан меняет данные</strong><p>Цена, фото, описание или стоп-лист.</p></article>
+          <article><span>03</span><strong>Система публикует</strong><p>Изменение уходит в живую страницу.</p></article>
+          <article><span>04</span><strong>Гость видит актуальное</strong><p>Без PDF, печати и ручных правок.</p></article>
+        </div>
+      </section>
+
+      <section class="compare shell">
+        <div class="compare__grid">
+          <article class="compare-panel compare-panel--plain reveal">
+            <p class="eyebrow">Обычно</p>
+            <h2>Меню быстро устаревает</h2>
+            <ul>
+              <li><span>PDF</span> Нужно пересобирать файл после правок</li>
+              <li><span>Печать</span> Каждая версия стоит времени и денег</li>
+              <li><span>Стоп-лист</span> Гости спрашивают то, чего уже нет</li>
+              <li><span>Данные</span> Нет поиска, языков и аналитики</li>
+            </ul>
+          </article>
+          <article class="compare-panel compare-panel--exort reveal">
+            <p class="eyebrow">С Exort</p>
+            <h2>Меню работает как продукт</h2>
+            <ul>
+              <li><span>Live</span> Изменения публикуются за секунды</li>
+              <li><span>QR</span> Гость всегда открывает актуальную версию</li>
+              <li><span>Stop</span> Недоступное скрывается одним действием</li>
+              <li><span>Insight</span> Видно, что смотрят чаще</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="features shell" id="features">
+        <div class="section-head reveal">
+          <p class="eyebrow">Возможности</p>
+          <h2>Четыре рабочих слоя системы</h2>
+        </div>
+
+        <div class="feature-mosaic">
+          <article class="feature-card feature-card--wide reveal">
+            <div>
+              <p class="eyebrow">Управление меню</p>
+              <h3>Категории, блюда и цены в одном контуре</h3>
+              <p>Команда ресторана обновляет структуру меню без разработчика и без пересборки страницы.</p>
+            </div>
+            <div class="table-ui" aria-hidden="true">
+              <span>Блюдо <strong>Цена</strong></span>
+              <span>Маргарита <strong>3 200 ₸</strong></span>
+              <span>Боул <strong>2 800 ₸</strong></span>
+              <span>Флэт уайт <strong>stop</strong></span>
+            </div>
+          </article>
+
+          <article class="feature-card reveal">
+            <p class="eyebrow">Стоп-лист</p>
+            <h3>Отключайте позиции до того, как гость спросит</h3>
+            <div class="stop-ui" aria-hidden="true">
+              <span>Флэт уайт</span>
+              <strong>stop</strong>
+            </div>
+          </article>
+
+          <article class="feature-card reveal">
+            <p class="eyebrow">Языки</p>
+            <h3>RU / KZ / EN в одной системе</h3>
+            <div class="language-ui" aria-hidden="true">
+              <span>RU</span><span>KZ</span><span>EN</span>
+            </div>
+          </article>
+
+          <article class="feature-card feature-card--chart reveal">
+            <p class="eyebrow">Аналитика</p>
+            <h3>Понимайте интерес гостей</h3>
+            <div class="radar-ui" aria-hidden="true">
+              <span></span>
+              <i></i>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="integrations shell">
+        <div class="integration-card reveal">
+          <div>
+            <p class="eyebrow">Integrations ready</p>
+            <h2>Архитектура готовится к будущим интеграциям</h2>
+            <p>
+              Exort проектируется так, чтобы дальше подключать r_keeper, iiko,
+              delivery-сценарии и future API без смены продуктовой логики.
+            </p>
           </div>
-          <form class="edit-panel">
-            <span>Форма редактирования блюда</span>
-            <label>Название<input value="Маргарита" readonly /></label>
-            <label>Цена<input value="3 200 ₸" readonly /></label>
-            <label>Статус<select disabled><option>Опубликовано</option></select></label>
-            <div class="upload-preview">Фото блюда</div>
-            <button type="button">Сохранить изменения</button>
-          </form>
+          <div class="integration-orbit" aria-label="Будущие интеграции">
+            <span>r_keeper</span>
+            <span>iiko</span>
+            <span>delivery</span>
+            <span>future API</span>
+          </div>
         </div>
       </section>
 
-      <section class="section comparison">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Сравнение</p>
-          <h2>PDF меню vs Exort</h2>
+      <section class="launch shell" id="launch">
+        <div class="section-head reveal">
+          <p class="eyebrow">Запуск</p>
+          <h2>От текущего меню до QR и домена</h2>
         </div>
-        <div class="compare reveal">
-          <div class="compare-row head"><span>Возможность</span><span>PDF меню</span><span>Exort</span></div>
-          <div class="compare-row"><span>Поиск</span><small>Нет</small><strong>Есть</strong></div>
-          <div class="compare-row"><span>Фото</span><small>Ограниченно</small><strong>Карточки блюд</strong></div>
-          <div class="compare-row"><span>Обновления</span><small>Новый файл</small><strong>Мгновенно</strong></div>
-          <div class="compare-row"><span>Стоп-листы</span><small>Нет</small><strong>В один клик</strong></div>
-          <div class="compare-row"><span>QR</span><small>Ссылка на PDF</small><strong>Живое меню</strong></div>
-          <div class="compare-row"><span>Домен</span><small>Нет</small><strong>Собственный</strong></div>
-          <div class="compare-row"><span>Административная панель</span><small>Нет</small><strong>Есть</strong></div>
-          <div class="compare-row"><span>Многоязычность</span><small>Сложно</small><strong>Поддерживается</strong></div>
+        <div class="timeline reveal">
+          <article><span>01</span><h3>Получаем текущее меню</h3><p>Собираем позиции, цены, языки и фотографии.</p></article>
+          <article><span>02</span><h3>Собираем структуру</h3><p>Переводим меню в управляемую цифровую модель.</p></article>
+          <article><span>03</span><h3>Подключаем систему</h3><p>Ресторан получает рабочий процесс обновления меню.</p></article>
+          <article><span>04</span><h3>Запускаем QR и домен</h3><p>Гости открывают меню с телефона и видят актуальные данные.</p></article>
         </div>
       </section>
 
-      <section class="section integrations">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Готово к интеграциям</p>
-          <h2>Архитектура Exort создается с учетом дальнейшего масштабирования</h2>
-        </div>
-        <div class="integration-row">
-          <article class="integration-card reveal">R-Keeper</article>
-          <article class="integration-card reveal">iiko</article>
-          <article class="integration-card reveal">Собственный домен</article>
-          <article class="integration-card reveal">Meta Pixel</article>
-          <article class="integration-card reveal">Ретаргетинг</article>
-        </div>
+      <section class="offer shell">
+        <article class="offer-card reveal">
+          <div>
+            <p class="eyebrow">Запуск под ключ</p>
+            <h2>Система меню для ресторана, а не разовый лендинг</h2>
+            <p>
+              QR-меню, система управления, стоп-лист, мультиязычность,
+              базовая аналитика и подключение домена.
+            </p>
+          </div>
+          <aside>
+            <span>Старт</span>
+            <strong>30 000 ₸</strong>
+            <em>/ месяц</em>
+            <a class="button button--primary" href="https://wa.me/77712033044" target="_blank" rel="noreferrer">
+              Обсудить запуск
+            </a>
+            <a class="button button--secondary" href="./pages/menu-demo.html?restaurant=exort-demo">
+              Смотреть демо
+            </a>
+          </aside>
+        </article>
       </section>
 
-      <section class="section pricing">
-        <div class="section-heading reveal">
-          <p class="eyebrow">Цены</p>
-          <h2>Тарифы для разных форматов ресторанов</h2>
-        </div>
-        <div class="pricing-grid">
-          <article class="price-card reveal">
-            <p>Старт</p>
-            <h3>от 15 000 ₸ / месяц</h3>
-            <span>Для кафе и небольших ресторанов.</span>
-          </article>
-          <article class="price-card featured reveal">
-            <p>Бизнес</p>
-            <h3>от 25 000 ₸ / месяц</h3>
-            <span>Оптимально для активных ресторанов с регулярными обновлениями.</span>
-          </article>
-          <article class="price-card reveal">
-            <p>Индивидуально</p>
-            <h3>по запросу</h3>
-            <span>Для сетей, отелей и интеграций.</span>
-          </article>
-        </div>
-      </section>
-
-      <section class="section final-cta" id="contacts">
-        <div class="reveal">
-          <p class="eyebrow">Следующий шаг</p>
-          <h2>Покажем как будет выглядеть меню вашего ресторана</h2>
-        </div>
-        <div class="cta-actions reveal">
-          <a class="button primary" href="https://wa.me/77000000000" target="_blank" rel="noreferrer">WhatsApp</a>
-          <a class="button secondary" href="mailto:hello@exort.kz">Email</a>
+      <section class="final shell" id="contacts">
+        <div class="final__inner reveal">
+          <p class="eyebrow">Next step</p>
+          <h2>Меню должно обновляться быстрее, чем гости успевают спросить официанта.</h2>
+          <div class="hero__actions">
+            <a class="button button--primary" href="https://wa.me/77712033044" target="_blank" rel="noreferrer">
+              WhatsApp
+            </a>
+            <a class="button button--secondary" href="./pages/menu-demo.html?restaurant=exort-demo">
+              Демо
+            </a>
+          </div>
         </div>
       </section>
     </main>
 
-    <footer class="footer">
-      <span>Exort</span>
+    <footer class="footer shell">
+      <span>Exort Arctic</span>
       <a href="mailto:hello@exort.kz">hello@exort.kz</a>
-      <a href="https://wa.me/77000000000" target="_blank" rel="noreferrer">+7 700 000 00 00</a>
+      <a href="https://wa.me/77712033044" target="_blank" rel="noreferrer">+7 771 203 30 44</a>
     </footer>
   </body>
 </html>
