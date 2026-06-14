@@ -160,7 +160,7 @@ function syncRestaurantIdentity() {
   el.restaurantInitials.forEach(node => node.textContent = state.restaurant.name.charAt(0).toUpperCase());
   document.documentElement.style.setProperty("--brand", state.restaurant.brand || "#2563eb");
   document.querySelectorAll("[data-menu-link]").forEach(link => {
-    link.href = "/pages/menu-demo.html";
+    link.href = "/menu-demo";
   });
 }
 

@@ -1,4 +1,14 @@
 [[redirects]]
-  from = "/admin-demo"
+  from = "/menu-demo"
+  to = "/pages/menu-demo.html"
+  status = 200
+
+[[redirects]]
+  from = "/demo-admin"
   to = "/pages/demo-admin.html"
   status = 200
+
+[[redirects]]
+  from = "/admin-demo"
+  to = "/demo-admin"
+  status = 301
