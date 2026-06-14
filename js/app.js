@@ -124,18 +124,14 @@ const mockSupabaseResponse = {
 const SUPABASE_REST_URL = "https://jnxwbqcnpxezjvfgdabc.supabase.co/rest/v1/";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T2QhpE8LByMP8_uO_cBdPg_bbLkAbBv";
 const DEFAULT_RESTAURANT_SLUG = "exort-demo";
+const DEMO_ADMIN_STORAGE_KEY = "exort-demo:linked-menu";
+const THEME_STORAGE_KEY = "exort_theme";
+const LANGUAGE_STORAGE_KEY = "exort_language";
+const SERVICE_ACCEPTED_KEY = "exort_service_charge_accepted";
 const SUPPORTED_LOCALES = ["ru", "en", "kk"];
-const RESTAURANT_SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 
 function getRequestedRestaurantSlug() {
-  const requestedSlug = new URLSearchParams(window.location.search)
-    .get("restaurant")
-    ?.trim()
-    .toLowerCase();
-
-  return RESTAURANT_SLUG_PATTERN.test(requestedSlug || "")
-    ? requestedSlug
-    : DEFAULT_RESTAURANT_SLUG;
+  return DEFAULT_RESTAURANT_SLUG;
 }
 
 function getRequestedLocale() {
@@ -220,6 +216,72 @@ function getSafeImageUrl(value) {
   }
 }
 
+function loadMenuFromDemoAdmin() {
+  const raw = localStorage.getItem(DEMO_ADMIN_STORAGE_KEY);
+
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const demo = JSON.parse(raw);
+    const locale = getRequestedLocale();
+    const localeField = locale === "kk" ? "kz" : locale;
+    const categories = [...(demo.categories || [])]
+      .filter((category) => category.active)
+      .sort((a, b) => a.sort - b.sort);
+    const activeCategoryIds = new Set(categories.map((category) => category.id));
+    const localized = (item, field) => {
+      const orders = {
+        ru: ["ru", "en", "kz"],
+        en: ["en", "ru", "kz"],
+        kz: ["kz", "ru", "en"],
+      };
+
+      for (const language of orders[localeField] || orders.ru) {
+        const value = item?.[`${field}_${language}`];
+        if (typeof value === "string" && value.trim()) return value.trim();
+      }
+      return "";
+    };
+
+    const restaurantCopy = {
+      ru: ["Меню сегодня", "Выберите категорию, найдите блюдо или откройте его карточку."],
+      kk: ["Бүгінгі мәзір", "Санатты таңдаңыз, тағамды іздеңіз немесе карточкасын ашыңыз."],
+      en: ["Today's menu", "Choose a category, search for a dish or open its card."],
+    }[locale] || ["Меню сегодня", "Выберите категорию, найдите блюдо или откройте его карточку."];
+
+    return {
+      restaurant: {
+        name: restaurantCopy[0],
+        type: demo.restaurant?.name || "Demo Restaurant",
+        description: restaurantCopy[1],
+      },
+      categories: categories.map((category) => ({ id: category.id, name: getLocalizedCategoryName(category, locale) })),
+      items: [...(demo.items || [])]
+        .filter((item) => activeCategoryIds.has(item.category_id))
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((item) => ({
+          id: item.id,
+          contentKey: item.id,
+          category: item.category_id,
+          title: localized(item, "name"),
+          description: localized(item, "description"),
+          price: Number(item.price || 0),
+          currency: "₸",
+          weight: "",
+          available: item.is_active !== false && item.in_stock !== false && item.unavailable !== true && item.stop_list !== true,
+          badge: item.in_stock === false ? localizeDishMeta("Стоп", locale) : "",
+          tags: [],
+          image: item.image || DISH_IMAGE_PLACEHOLDER,
+        })),
+    };
+  } catch (error) {
+    console.warn("Demo admin data is invalid:", error);
+    return null;
+  }
+}
+
 async function loadMenuFromSupabase() {
   const slug = getRequestedRestaurantSlug();
   const locale = getRequestedLocale();
@@ -239,7 +301,6 @@ async function loadMenuFromSupabase() {
     requestSupabase("menu_categories", {
       select: "id,restaurant_id,title_ru,title_en,title_kk,sort_order,is_active",
       restaurant_id: `eq.${restaurant.id}`,
-      is_active: "eq.true",
       order: "sort_order.asc",
     }),
     requestSupabase("menu_items", {
@@ -270,7 +331,6 @@ async function loadMenuFromSupabase() {
       name: getLocalizedValue(category, "title", locale),
     })),
     items: items
-      .filter(isMenuItemActive)
       .filter((item) => item.category_id === null || activeCategoryIds.has(item.category_id))
       .map((item) => ({
         id: item.id,
@@ -281,8 +341,8 @@ async function loadMenuFromSupabase() {
         price: Number(item.price || 0),
         currency: item.currency || "₸",
         weight: "",
-        available: true,
-        badge: getLocalizedValue(item, "badge", locale),
+        available: isMenuItemActive(item) && item.unavailable !== true && item.stop_list !== true,
+        badge: localizeDishMeta(getLocalizedValue(item, "badge", locale), locale),
         tags: [],
         image: getSafeImageUrl(item.image_url),
       })),
@@ -291,24 +351,90 @@ async function loadMenuFromSupabase() {
 
 const serviceCopy = {
   RU: {
-    kicker: "Информация для гостя",
-    title: "Сервисный сбор",
-    text: "К счету добавляется <strong>10%</strong> за обслуживание ресторана. Если у вас есть пищевая аллергия, пожалуйста, предупредите официанта заранее.",
-    action: "Понятно",
+    kicker: "Важная информация",
+    title: "Плата за обслуживание",
+    text: "В заведении действует плата за обслуживание.<br>Продолжая пользоваться меню, вы подтверждаете, что ознакомились с этим условием.",
+    action: "Я согласен(a)",
   },
   KZ: {
-    kicker: "Қонаққа ақпарат",
-    title: "Қызмет ақысы",
-    text: "Есепшотқа мейрамхана қызметі үшін қосымша <strong>10%</strong> үстеме ақы қосылады. Тағамдық аллергияңыз болса, даяшыға алдын ала хабарлаңыз.",
-    action: "Түсіндім",
+    kicker: "Маңызды ақпарат",
+    title: "Қызмет көрсету ақысы",
+    text: "Мекемеде қызмет көрсету ақысы қолданылады.<br>Мәзірді пайдалануды жалғастыра отырып, сіз осы шартпен танысқаныңызды растайсыз.",
+    action: "Келісемін",
   },
   EN: {
-    kicker: "Guest information",
-    title: "Service fee",
-    text: "A <strong>10%</strong> restaurant service fee is added to the bill. If you have a food allergy, please inform the waiter in advance.",
-    action: "Got it",
+    kicker: "Important information",
+    title: "Service charge",
+    text: "A service charge applies at this venue.<br>By continuing to use the menu, you confirm that you have read and understood this condition.",
+    action: "I agree",
   },
 };
+const uiCopy = {
+  ru: {
+    title: "Demo Restaurant | Живое QR-меню", description: "QR-меню ресторана: категории, поиск, карточки блюд, стоп-лист и фото блюд.",
+    search: "Найти блюдо или ингредиент", searchLabel: "Поиск", unavailable: "Нет в наличии",
+    empty: "По этому запросу ничего не найдено.", noMatches: "Нет совпадений",
+    tryAgain: "Попробуйте выбрать другую категорию или изменить поиск.", menu: "Меню",
+    openUntil: "Открыто до 23:00", city: "Алматы", service: "10% сервис",
+    quickActions: "Быстрые действия", chooseLanguage: "Выбор языка", changeTheme: "Сменить тему",
+    menuSearch: "Поиск и фильтры меню", menuCategories: "Категории меню", dishList: "Список блюд",
+    closeDish: "Закрыть карточку блюда", close: "Закрыть",
+  },
+  kk: {
+    title: "Demo Restaurant | Интерактивті QR-мәзір", description: "Мейрамхананың QR-мәзірі: санаттар, іздеу, тағам карточкалары, стоп-лист және фотосуреттер.",
+    search: "Тағамды немесе ингредиентті іздеу", searchLabel: "Іздеу", unavailable: "Қолжетімді емес",
+    empty: "Бұл сұрау бойынша ештеңе табылмады.", noMatches: "Сәйкестік жоқ",
+    tryAgain: "Басқа санатты таңдаңыз немесе іздеуді өзгертіңіз.", menu: "Мәзір",
+    openUntil: "23:00-ге дейін ашық", city: "Алматы", service: "10% қызмет көрсету",
+    quickActions: "Жылдам әрекеттер", chooseLanguage: "Тілді таңдау", changeTheme: "Тақырыпты ауыстыру",
+    menuSearch: "Мәзірден іздеу және сүзгілер", menuCategories: "Мәзір санаттары", dishList: "Тағамдар тізімі",
+    closeDish: "Тағам карточкасын жабу", close: "Жабу",
+  },
+  en: {
+    title: "Demo Restaurant | Live QR menu", description: "Restaurant QR menu with categories, search, dish details, stop list and photos.",
+    search: "Find a dish or ingredient", searchLabel: "Search", unavailable: "Out of stock",
+    empty: "Nothing was found for this search.", noMatches: "No matches",
+    tryAgain: "Choose another category or change your search.", menu: "Menu",
+    openUntil: "Open until 23:00", city: "Almaty", service: "10% service charge",
+    quickActions: "Quick actions", chooseLanguage: "Choose language", changeTheme: "Change theme",
+    menuSearch: "Menu search and filters", menuCategories: "Menu categories", dishList: "Dish list",
+    closeDish: "Close dish details", close: "Close",
+  },
+};
+
+const categoryCopy = {
+  popular: { ru: "Популярное", kk: "Танымал", en: "Popular" },
+  breakfast: { ru: "Завтраки", kk: "Таңғы ас", en: "Breakfast" },
+  mains: { ru: "Горячее", kk: "Ыстық тағамдар", en: "Mains" },
+  salads: { ru: "Салаты", kk: "Салаттар", en: "Salads" },
+  drinks: { ru: "Напитки", kk: "Сусындар", en: "Drinks" },
+  desserts: { ru: "Десерты", kk: "Десерттер", en: "Desserts" },
+};
+
+const dishMetaCopy = {
+  "Хит": { kk: "Хит", en: "Popular" }, "Новое": { kk: "Жаңа", en: "New" },
+  "Стоп": { kk: "Стоп", en: "Stop" }, "Утро": { kk: "Таңғы", en: "Morning" },
+  "Классика": { kk: "Классика", en: "Classic" }, "Вегетарианское": { kk: "Вегетариандық", en: "Vegetarian" },
+  "20 минут": { kk: "20 минут", en: "20 minutes" }, "Можно без глютена": { kk: "Глютенсіз дайындауға болады", en: "Gluten-free option" },
+  "Легкое": { kk: "Жеңіл", en: "Light" }, "Без мяса": { kk: "Етсіз", en: "Meat-free" },
+  "Свежая зелень": { kk: "Балғын көк шөп", en: "Fresh herbs" }, "Кофе": { kk: "Кофе", en: "Coffee" },
+  "Временно недоступно": { kk: "Уақытша қолжетімсіз", en: "Temporarily unavailable" },
+  "Завтрак": { kk: "Таңғы ас", en: "Breakfast" }, "Сладкое": { kk: "Тәтті", en: "Sweet" },
+  "15 минут": { kk: "15 минут", en: "15 minutes" }, "Горячее": { kk: "Ыстық тағам", en: "Main course" },
+  "Мясо": { kk: "Ет", en: "Meat" }, "Средняя прожарка": { kk: "Орташа қуырылған", en: "Medium doneness" },
+  "Салат": { kk: "Салат", en: "Salad" }, "Курица": { kk: "Тауық", en: "Chicken" },
+  "Пармезан": { kk: "Пармезан", en: "Parmesan" }, "Холодный напиток": { kk: "Салқын сусын", en: "Cold drink" },
+  "Без алкоголя": { kk: "Алкогольсіз", en: "Non-alcoholic" }, "Подается теплым": { kk: "Жылы күйде беріледі", en: "Served warm" },
+};
+
+function localizeDishMeta(value, locale) {
+  return locale === "ru" ? value : dishMetaCopy[value]?.[locale] || value;
+}
+
+function getLocalizedCategoryName(category, locale = getRequestedLocale()) {
+  const databaseName = getLocalizedValue(category, "title", locale) || getLocalizedValue(category, "name", locale);
+  return databaseName || categoryCopy[category?.id]?.[locale] || category?.name || uiCopy[locale]?.menu || uiCopy.ru.menu;
+}
 
 const state = {
   category: "popular",
@@ -325,7 +451,7 @@ const elements = {
   serviceTitle: document.querySelector("#service-title"),
   serviceText: document.querySelector(".service-card > p"),
   closeService: document.querySelector("[data-close-service]"),
-  languagePills: document.querySelector(".language-pills"),
+  languageButtons: document.querySelectorAll("[data-language]"),
   themeToggle: document.querySelector("[data-theme-toggle]"),
   restaurantType: document.querySelector("[data-restaurant-type]"),
   restaurantName: document.querySelector("[data-restaurant-name]"),
@@ -335,7 +461,10 @@ const elements = {
   statusRow: document.querySelector("[data-status-row]"),
   status: document.querySelector("[data-status]"),
   search: document.querySelector("[data-search]"),
-  reset: document.querySelector("[data-reset]"),
+  searchLabel: document.querySelector("[data-search-label]"),
+  heroOpenUntil: document.querySelector("[data-hero-open-until]"),
+  heroCity: document.querySelector("[data-hero-city]"),
+  heroService: document.querySelector("[data-hero-service]"),
   drawer: document.querySelector("[data-dish-drawer]"),
   drawerImage: document.querySelector("[data-drawer-image]"),
   drawerCategory: document.querySelector("[data-drawer-category]"),
@@ -415,17 +544,18 @@ function updateActiveCategory(categoryId) {
 }
 
 function createDishCard(item) {
+  const copy = uiCopy[getRequestedLocale()] || uiCopy.ru;
   return `
     <article class="dish-card ${item.available ? "" : "is-unavailable"}" tabindex="0" role="button" data-dish-id="${item.id}">
-      <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" />
+      <div class="dish-image"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" />${item.available ? "" : `<span class="unavailable-badge">${copy.unavailable}</span>`}</div>
       <div class="dish-body">
         <div>
           <h3>${escapeHtml(item.title)}</h3>
-          <p>${escapeHtml(item.available ? item.description : "Временно недоступно")}</p>
+          <p>${escapeHtml(item.description)}</p>
         </div>
         <div class="dish-bottom">
           <strong class="price">${escapeHtml(formatPrice(item.price, item.currency))}</strong>
-          ${item.badge ? `<span class="badge ${item.available ? "success" : ""}">${escapeHtml(item.badge)}</span>` : ""}
+          ${item.available && item.badge ? `<span class="badge success">${escapeHtml(item.badge)}</span>` : ""}
         </div>
       </div>
     </article>
@@ -462,15 +592,16 @@ function setupScrollSpy() {
 function renderMenu() {
   const items = getFilteredItems();
   const hasSearch = Boolean(state.query.trim());
+  const copy = uiCopy[getRequestedLocale()] || uiCopy.ru;
 
-  elements.statusRow.hidden = items.length > 0 && !hasSearch;
-  elements.status.textContent = items.length ? "" : "По этому запросу ничего не найдено.";
+  elements.statusRow.hidden = items.length > 0;
+  elements.status.textContent = items.length ? "" : copy.empty;
 
   if (!items.length) {
     elements.menuList.innerHTML = `
       <div class="empty-state">
-        <h2>Нет совпадений</h2>
-        <p>Попробуйте выбрать другую категорию или очистить поиск.</p>
+        <h2>${copy.noMatches}</h2>
+        <p>${copy.tryAgain}</p>
       </div>
     `;
     return;
@@ -520,7 +651,7 @@ function openDish(itemId) {
 
   elements.drawerImage.src = item.image;
   elements.drawerImage.alt = item.title;
-  elements.drawerCategory.textContent = category?.name ?? "Меню";
+  elements.drawerCategory.textContent = category?.name ?? (uiCopy[getRequestedLocale()] || uiCopy.ru).menu;
   elements.drawerTitle.textContent = item.title;
   elements.drawerDescription.textContent = item.description;
   elements.drawerPrice.textContent = formatPrice(item.price, item.currency);
@@ -541,13 +672,53 @@ function setServiceLanguage(language) {
   elements.serviceText.innerHTML = copy.text;
   elements.closeService.textContent = copy.action;
 
-  elements.languagePills.querySelectorAll("button").forEach((button) => {
-    button.classList.toggle("is-active", button.textContent.trim() === language);
+  elements.languageButtons.forEach((button) => {
+    const languageCode = language === "KZ" ? "kk" : language.toLowerCase();
+    button.classList.toggle("is-active", button.dataset.language === languageCode);
   });
+}
+
+function applyLanguage(language, reloadMenu = true) {
+  const nextLanguage = SUPPORTED_LOCALES.includes(language) ? language : "ru";
+  const copy = uiCopy[nextLanguage];
+  document.documentElement.lang = nextLanguage;
+  document.body.classList.toggle("lang-kz", nextLanguage === "kk");
+  localStorage.setItem(LANGUAGE_STORAGE_KEY, nextLanguage);
+  const url = new URL(window.location.href);
+  url.searchParams.set("lang", nextLanguage);
+  window.history.replaceState({}, "", url);
+  elements.search.placeholder = copy.search;
+  document.title = copy.title;
+  document.querySelector('meta[name="description"]')?.setAttribute("content", copy.description);
+  if (elements.searchLabel) elements.searchLabel.textContent = copy.searchLabel;
+  if (elements.heroOpenUntil) elements.heroOpenUntil.textContent = copy.openUntil;
+  if (elements.heroCity) elements.heroCity.textContent = copy.city;
+  if (elements.heroService) elements.heroService.textContent = copy.service;
+  document.querySelectorAll("[data-ui-aria]").forEach((node) => {
+    const value = copy[node.dataset.uiAria];
+    if (value) node.setAttribute("aria-label", value);
+  });
+  setServiceLanguage(nextLanguage === "kk" ? "KZ" : nextLanguage.toUpperCase());
+  if (reloadMenu && state.loaded) loadDemoMenu();
+}
+
+function applyTheme(theme) {
+  const nextTheme = theme === "dark" ? "dark" : "light";
+  document.documentElement.dataset.theme = nextTheme;
+  localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
 }
 
 async function loadDemoMenu() {
   setLoadingState();
+
+  const linkedDemo = loadMenuFromDemoAdmin();
+  if (linkedDemo) {
+    state.data = linkedDemo;
+    state.loaded = true;
+    state.category = state.data.categories[0]?.id || "";
+    renderAll();
+    return;
+  }
 
   try {
     state.data = await loadMenuFromSupabase();
@@ -559,33 +730,54 @@ async function loadDemoMenu() {
 
     window.setTimeout(() => {
       state.loaded = true;
-      state.data = mockSupabaseResponse;
+      const locale = getRequestedLocale();
+      state.data = {
+        ...mockSupabaseResponse,
+        restaurant: {
+          ...mockSupabaseResponse.restaurant,
+          name: locale === "kk" ? "Бүгінгі мәзір" : locale === "en" ? "Today's menu" : mockSupabaseResponse.restaurant.name,
+          description: locale === "kk"
+            ? "Санатты таңдаңыз, тағамды атауы бойынша іздеңіз немесе құрамы мен фотосын көру үшін карточкасын ашыңыз."
+            : locale === "en"
+              ? "Choose a category, find a dish by name or open its card to see ingredients and photos."
+              : mockSupabaseResponse.restaurant.description,
+        },
+        categories: mockSupabaseResponse.categories.map((category) => ({
+          ...category,
+          name: getLocalizedCategoryName(category, locale),
+        })),
+        items: mockSupabaseResponse.items.map((item) => ({
+          ...item,
+          badge: localizeDishMeta(item.badge, locale),
+          tags: item.tags.map((tag) => localizeDishMeta(tag, locale)),
+          weight: locale === "en" ? item.weight.replace(" г", " g") : item.weight,
+        })),
+      };
       state.category = state.data.categories[0]?.id || "";
       renderAll();
     }, 420);
   }
 }
 
+window.addEventListener("storage", (event) => {
+  if (event.key !== DEMO_ADMIN_STORAGE_KEY) return;
+  const linkedDemo = loadMenuFromDemoAdmin();
+  if (!linkedDemo) return;
+  state.data = linkedDemo;
+  state.category = state.data.categories[0]?.id || "";
+  renderAll();
+});
+
 elements.closeService.addEventListener("click", () => {
+  localStorage.setItem(SERVICE_ACCEPTED_KEY, "true");
+  document.documentElement.dataset.serviceAccepted = "true";
   elements.serviceModal.setAttribute("aria-hidden", "true");
 });
 
-elements.languagePills.addEventListener("click", (event) => {
-  const button = event.target.closest("button");
-
-  if (button) {
-    setServiceLanguage(button.textContent.trim());
-  }
-});
+elements.languageButtons.forEach(button => button.addEventListener("click", () => applyLanguage(button.dataset.language)));
 
 elements.themeToggle.addEventListener("click", () => {
-  const nextTheme = elements.body.dataset.theme === "dark" ? "" : "dark";
-
-  if (nextTheme) {
-    elements.body.dataset.theme = nextTheme;
-  } else {
-    elements.body.removeAttribute("data-theme");
-  }
+  applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
 });
 
 elements.categories.addEventListener("click", (event) => {
@@ -605,14 +797,6 @@ elements.categories.addEventListener("click", (event) => {
 elements.search.addEventListener("input", (event) => {
   state.query = event.target.value;
   renderMenu();
-});
-
-elements.reset.addEventListener("click", () => {
-  state.category = state.data?.categories[0]?.id || "";
-  state.query = "";
-  elements.search.value = "";
-  renderMenu();
-  updateActiveCategory(state.category);
 });
 
 elements.menuList.addEventListener("click", (event) => {
@@ -643,8 +827,10 @@ elements.closeDishButtons.forEach((button) => {
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     closeDish();
-    elements.serviceModal.setAttribute("aria-hidden", "true");
   }
 });
 
+applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || document.documentElement.dataset.theme || "light");
+applyLanguage(getRequestedLocale(), false);
+if (localStorage.getItem(SERVICE_ACCEPTED_KEY) === "true") elements.serviceModal.setAttribute("aria-hidden", "true");
 loadDemoMenu();

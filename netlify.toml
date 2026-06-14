@@ -1,0 +1,4 @@
+[[redirects]]
+  from = "/admin-demo"
+  to = "/pages/demo-admin.html"
+  status = 200

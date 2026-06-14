@@ -48,6 +48,10 @@ body {
   line-height: 1.5;
 }
 
+body.lang-kz {
+  font-family: "Inter", "Noto Sans", system-ui, sans-serif;
+}
+
 button,
 input {
   font: inherit;
@@ -115,6 +119,8 @@ a {
   gap: 10px;
 }
 
+.menu-language{display:flex;gap:2px;padding:3px;background:var(--surface);border:1px solid var(--line);border-radius:999px}.menu-language button{min-width:29px;height:28px;padding:0 6px;color:var(--muted);background:transparent;border:0;border-radius:999px;font-size:10px;font-weight:900}.menu-language button.is-active{color:#fff;background:var(--accent)}
+
 .icon-button,
 .small-button,
 .link-button,
@@ -127,27 +133,17 @@ a {
 }
 
 .icon-button {
-  position: relative;
-  width: 54px;
-  height: 34px;
-  padding: 4px;
+  display: grid;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  place-items: center;
   background: var(--accent-soft);
   border: 1px solid var(--line);
   border-radius: 999px;
 }
 
-.icon-button span {
-  display: block;
-  width: 24px;
-  height: 24px;
-  background: var(--accent);
-  border-radius: 50%;
-  transition: transform 220ms ease;
-}
-
-[data-theme="dark"] .icon-button span {
-  transform: translateX(18px);
-}
+.theme-icon{width:20px;height:20px;fill:none;stroke:var(--accent-dark);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.theme-icon--sun,[data-theme="dark"] .theme-icon--moon{display:none}[data-theme="dark"] .theme-icon--sun{display:block}
 
 .small-button {
   min-height: 34px;
@@ -399,12 +395,14 @@ h1 {
 }
 
 .dish-card.is-unavailable {
-  opacity: 0.72;
+  opacity: 1;
 }
 
-.dish-card.is-unavailable img {
-  filter: grayscale(0.7);
+.dish-card.is-unavailable .dish-image img {
+  filter: saturate(0.68) brightness(0.72);
 }
+
+.dish-image{position:relative;width:132px;height:144px}
 
 .dish-card img {
   width: 132px;
@@ -412,6 +410,11 @@ h1 {
   object-fit: cover;
   border-radius: 12px;
 }
+
+.unavailable-badge{position:absolute;top:9px;left:9px;max-width:calc(100% - 18px);padding:6px 9px;color:#fff;background:rgba(24,18,14,.72);border:1px solid rgba(255,255,255,.24);border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.22);backdrop-filter:blur(8px);font-size:10px;font-weight:900;line-height:1.15}
+
+html[data-service-accepted="true"] .service-modal{display:none}
+body:has(.service-modal:not([aria-hidden="true"])){overflow:hidden}
 
 .dish-body {
   min-width: 0;
@@ -717,11 +720,20 @@ h1 {
 
 @media (max-width: 520px) {
   .topbar {
+    gap: 8px;
     padding-inline: 12px;
   }
 
   .small-button {
     display: none;
+  }
+
+  .brand span:last-child {
+    max-width: 104px;
+  }
+
+  .top-actions {
+    gap: 6px;
   }
 
   .hero-content {
@@ -744,6 +756,9 @@ h1 {
     width: 108px;
     height: 114px;
   }
+
+  .dish-image{width:108px;height:114px}
+  .menu-language button{min-width:25px;padding-inline:4px}
 
   .dish-card h3 {
     font-size: 17px;
