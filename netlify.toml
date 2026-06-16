@@ -1,4 +1,9 @@
 [[redirects]]
+  from = "/bdayvideo"
+  to = "/pages/bdayvideo.html"
+  status = 200
+
+[[redirects]]
   from = "/menu-demo"
   to = "/pages/menu-demo.html"
   status = 200
