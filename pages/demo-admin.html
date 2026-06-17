@@ -4,13 +4,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f7f8fb" />
+    <script>
+      (() => {
+        try { document.documentElement.dataset.theme = localStorage.getItem("exort_theme") || "light"; }
+        catch { document.documentElement.dataset.theme = "light"; }
+      })();
+    </script>
     <title>Exort — административная панель</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="../css/demo-admin.css" />
-    <link rel="stylesheet" href="../css/demo-admin-navigation.css" />
-    <script defer src="../js/demo-admin.js?v=3"></script>
+    <link rel="stylesheet" href="../css/demo-admin.css?v=4" />
+    <link rel="stylesheet" href="../css/demo-admin-navigation.css?v=4" />
+    <script defer src="../js/demo-admin.js?v=5"></script>
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -27,6 +33,12 @@
       <div class="login-orb login-orb--one"></div>
       <div class="login-orb login-orb--two"></div>
       <div class="login-card">
+        <button class="theme-toggle admin-theme-toggle" type="button" data-theme-toggle aria-label="Сменить тему">
+          <span class="theme-toggle__track"><span class="theme-toggle__thumb">
+            <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+            <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
+          </span></span>
+        </button>
         <div class="login-brand"><span>E</span><strong>Exort</strong></div>
         <div class="restaurant-identity">
           <div class="restaurant-avatar" data-restaurant-initial>E</div>
@@ -66,7 +78,7 @@
           <button type="button" data-nav="photos"><svg><use href="#icon-photo"/></svg><span>Фотографии</span></button>
         </nav>
         <div class="side-footer">
-          <a data-menu-link href="/menu-demo?restaurant=exort-demo" target="_blank" rel="noreferrer"><svg><use href="#icon-external"/></svg><span>Открыть меню</span></a>
+          <a data-menu-link href="/pages/menu-demo.html?restaurant=exort-demo" target="_blank" rel="noreferrer"><svg><use href="#icon-external"/></svg><span>Открыть меню</span></a>
           <a href="mailto:hello@exort.kz"><svg><use href="#icon-support"/></svg><span>Поддержка Exort</span></a>
           <button type="button" data-logout><svg><use href="#icon-logout"/></svg><span>Выйти</span></button>
         </div>
@@ -79,8 +91,14 @@
             <h1 data-view-title>Обзор</h1>
           </div>
           <div class="topbar-actions">
+            <button class="theme-toggle" type="button" data-theme-toggle aria-label="Сменить тему">
+              <span class="theme-toggle__track"><span class="theme-toggle__thumb">
+                <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+                <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
+              </span></span>
+            </button>
             <span class="connection-status"><i></i><span>Меню онлайн</span></span>
-            <a class="secondary-button compact" data-menu-link href="/menu-demo?restaurant=exort-demo" target="_blank" rel="noreferrer">Открыть меню</a>
+            <a class="secondary-button compact" data-menu-link href="/pages/menu-demo.html?restaurant=exort-demo" target="_blank" rel="noreferrer">Открыть меню</a>
             <button class="icon-button" type="button" data-logout aria-label="Выйти">↗</button>
           </div>
         </header>
@@ -93,7 +111,7 @@
               <div class="quick-actions">
                 <button type="button" data-action="add-item"><span>+</span><strong>Добавить блюдо</strong><small>Название, цена и фото</small></button>
                 <button type="button" data-action="add-category"><span>+</span><strong>Добавить категорию</strong><small>Новый раздел меню</small></button>
-                <a data-menu-link href="/menu-demo?restaurant=exort-demo" target="_blank" rel="noreferrer"><span>↗</span><strong>Открыть меню</strong><small>Посмотреть глазами гостя</small></a>
+                <a data-menu-link href="/pages/menu-demo.html?restaurant=exort-demo" target="_blank" rel="noreferrer"><span>↗</span><strong>Открыть меню</strong><small>Посмотреть глазами гостя</small></a>
               </div>
             </article>
             <article class="panel attention-panel">
@@ -108,7 +126,7 @@
             <label class="search-control"><span>⌕</span><input type="search" data-menu-search placeholder="Найти блюдо" /></label>
             <select data-category-filter aria-label="Фильтр категорий"></select>
             <select data-status-filter aria-label="Фильтр статуса">
-              <option value="all">Все статусы</option><option value="active">В продаже</option><option value="stop">Стоп-лист</option><option value="inactive">Неактивные</option>
+              <option value="all">Все статусы</option><option value="active">В продаже</option><option value="stop">Стоп-лист</option><option value="temporary">Временно недоступные</option><option value="inactive">Неактивные</option>
             </select>
             <button class="primary-button compact" type="button" data-action="add-item">Добавить блюдо</button>
           </div>

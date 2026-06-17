@@ -189,6 +189,23 @@ function isMenuItemActive(item) {
   return item.is_active && (!item.inactive_until || new Date(item.inactive_until) <= new Date());
 }
 
+function isMenuItemAvailable(item) {
+  return item.is_active !== false
+    && item.is_stoplisted !== true
+    && item.in_stock !== false
+    && item.unavailable !== true
+    && item.stop_list !== true
+    && (!item.inactive_until || new Date(item.inactive_until).getTime() <= Date.now());
+}
+
+function getUnavailableBadge(locale) {
+  return {
+    ru: "Временно недоступно",
+    kk: "Уақытша қолжетімсіз",
+    en: "Temporarily unavailable",
+  }[locale] || "Временно недоступно";
+}
+
 const DISH_IMAGE_PLACEHOLDER = `data:image/svg+xml,${encodeURIComponent(`
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
     <rect width="600" height="600" fill="#f1e7dc"/>
@@ -304,10 +321,8 @@ async function loadMenuFromSupabase() {
       order: "sort_order.asc",
     }),
     requestSupabase("menu_items", {
-      select:
-        "id,restaurant_id,category_id,content_key,title_ru,title_en,title_kk,description_ru,description_en,description_kk,price,currency,image_url,badge_ru,badge_en,badge_kk,sort_order,is_active,inactive_until",
+      select: "*",
       restaurant_id: `eq.${restaurant.id}`,
-      is_active: "eq.true",
       order: "sort_order.asc",
     }),
   ]);
@@ -341,8 +356,8 @@ async function loadMenuFromSupabase() {
         price: Number(item.price || 0),
         currency: item.currency || "₸",
         weight: "",
-        available: isMenuItemActive(item) && item.unavailable !== true && item.stop_list !== true,
-        badge: localizeDishMeta(getLocalizedValue(item, "badge", locale), locale),
+        available: isMenuItemAvailable(item),
+        badge: isMenuItemAvailable(item) ? localizeDishMeta(getLocalizedValue(item, "badge", locale), locale) : getUnavailableBadge(locale),
         tags: [],
         image: getSafeImageUrl(item.image_url),
       })),
@@ -378,7 +393,7 @@ const uiCopy = {
     openUntil: "Открыто до 23:00", city: "Алматы", service: "10% сервис",
     quickActions: "Быстрые действия", chooseLanguage: "Выбор языка", changeTheme: "Сменить тему",
     menuSearch: "Поиск и фильтры меню", menuCategories: "Категории меню", dishList: "Список блюд",
-    closeDish: "Закрыть карточку блюда", close: "Закрыть",
+    closeDish: "Закрыть карточку блюда", close: "Закрыть", backToTop: "Наверх",
   },
   kk: {
     title: "Demo Restaurant | Интерактивті QR-мәзір", description: "Мейрамхананың QR-мәзірі: санаттар, іздеу, тағам карточкалары, стоп-лист және фотосуреттер.",
@@ -388,7 +403,7 @@ const uiCopy = {
     openUntil: "23:00-ге дейін ашық", city: "Алматы", service: "10% қызмет көрсету",
     quickActions: "Жылдам әрекеттер", chooseLanguage: "Тілді таңдау", changeTheme: "Тақырыпты ауыстыру",
     menuSearch: "Мәзірден іздеу және сүзгілер", menuCategories: "Мәзір санаттары", dishList: "Тағамдар тізімі",
-    closeDish: "Тағам карточкасын жабу", close: "Жабу",
+    closeDish: "Тағам карточкасын жабу", close: "Жабу", backToTop: "Жоғарыға",
   },
   en: {
     title: "Demo Restaurant | Live QR menu", description: "Restaurant QR menu with categories, search, dish details, stop list and photos.",
@@ -398,7 +413,7 @@ const uiCopy = {
     openUntil: "Open until 23:00", city: "Almaty", service: "10% service charge",
     quickActions: "Quick actions", chooseLanguage: "Choose language", changeTheme: "Change theme",
     menuSearch: "Menu search and filters", menuCategories: "Menu categories", dishList: "Dish list",
-    closeDish: "Close dish details", close: "Close",
+    closeDish: "Close dish details", close: "Close", backToTop: "Back to top",
   },
 };
 
@@ -474,6 +489,7 @@ const elements = {
   drawerWeight: document.querySelector("[data-drawer-weight]"),
   drawerTags: document.querySelector("[data-drawer-tags]"),
   closeDishButtons: document.querySelectorAll("[data-close-dish]"),
+  backToTop: document.querySelector("[data-back-to-top]"),
 };
 
 function formatPrice(value, currency = "₸") {
@@ -705,20 +721,13 @@ function applyLanguage(language, reloadMenu = true) {
 function applyTheme(theme) {
   const nextTheme = theme === "dark" ? "dark" : "light";
   document.documentElement.dataset.theme = nextTheme;
+  elements.themeToggle?.setAttribute("aria-pressed", String(nextTheme === "dark"));
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", nextTheme === "dark" ? "#120f0d" : "#f4f1ec");
   localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
 }
 
 async function loadDemoMenu() {
   setLoadingState();
-
-  const linkedDemo = loadMenuFromDemoAdmin();
-  if (linkedDemo) {
-    state.data = linkedDemo;
-    state.loaded = true;
-    state.category = state.data.categories[0]?.id || "";
-    renderAll();
-    return;
-  }
 
   try {
     state.data = await loadMenuFromSupabase();
@@ -761,11 +770,7 @@ async function loadDemoMenu() {
 
 window.addEventListener("storage", (event) => {
   if (event.key !== DEMO_ADMIN_STORAGE_KEY) return;
-  const linkedDemo = loadMenuFromDemoAdmin();
-  if (!linkedDemo) return;
-  state.data = linkedDemo;
-  state.category = state.data.categories[0]?.id || "";
-  renderAll();
+  loadDemoMenu();
 });
 
 elements.closeService.addEventListener("click", () => {
@@ -824,6 +829,13 @@ elements.closeDishButtons.forEach((button) => {
   button.addEventListener("click", closeDish);
 });
 
+const updateBackToTop = () => elements.backToTop?.classList.toggle("is-visible", window.scrollY > 520);
+elements.backToTop?.addEventListener("click", () => window.scrollTo({
+  top: 0,
+  behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+}));
+window.addEventListener("scroll", updateBackToTop, { passive: true });
+
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") {
     closeDish();
@@ -834,3 +846,4 @@ applyTheme(localStorage.getItem(THEME_STORAGE_KEY) || document.documentElement.d
 applyLanguage(getRequestedLocale(), false);
 if (localStorage.getItem(SERVICE_ACCEPTED_KEY) === "true") elements.serviceModal.setAttribute("aria-hidden", "true");
 loadDemoMenu();
+updateBackToTop();

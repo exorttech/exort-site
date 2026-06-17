@@ -21,7 +21,9 @@ create table if not exists public.restaurants (
 );
 
 alter table public.restaurants
-  add column if not exists city text;
+  add column if not exists city text,
+  add column if not exists hero_image_url text,
+  add column if not exists menu_cover_url text;
 
 create table if not exists public.restaurant_admin_access (
   id uuid primary key default gen_random_uuid(),
@@ -123,6 +125,9 @@ alter table public.menu_items
   add column if not exists name_en text,
   add column if not exists description_kz text,
   add column if not exists version integer not null default 1,
+  add column if not exists is_stoplisted boolean not null default false,
+  add column if not exists inactive_until timestamptz,
+  add column if not exists image_path text,
   add column if not exists title_ru text,
   add column if not exists title_kk text,
   add column if not exists title_en text,
@@ -163,6 +168,10 @@ create index if not exists menu_categories_restaurant_sort_order_idx
   on public.menu_categories (restaurant_id, sort_order);
 create index if not exists menu_items_restaurant_category_sort_order_idx
   on public.menu_items (restaurant_id, category_id, sort_order);
+create index if not exists menu_items_restaurant_stoplisted_idx
+  on public.menu_items (restaurant_id, is_stoplisted);
+create index if not exists menu_items_restaurant_inactive_until_idx
+  on public.menu_items (restaurant_id, inactive_until);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -368,8 +377,7 @@ on public.menu_items
 for select
 to anon, authenticated
 using (
-  is_active
-  and exists (
+  exists (
     select 1
     from public.restaurants restaurant
     where restaurant.id = menu_items.restaurant_id
@@ -405,7 +413,7 @@ insert into public.restaurant_admin_access (
 )
 select
   restaurant.id,
-  'demo_hash_1234',
+  'sha256:03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4',
   true
 from public.restaurants restaurant
 where restaurant.slug = 'exort-demo'

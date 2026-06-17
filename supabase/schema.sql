@@ -57,6 +57,7 @@ create table if not exists public.menu_items (
   badge_kk text,
   sort_order integer not null default 0,
   is_active boolean not null default true,
+  is_stoplisted boolean not null default false,
   inactive_until timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
@@ -69,6 +70,10 @@ create table if not exists public.menu_items (
 
 -- Upgrade path for databases created by an earlier version of this file.
 alter table public.menu_items add column if not exists content_key text;
+alter table public.menu_items add column if not exists is_stoplisted boolean not null default false;
+alter table public.menu_items add column if not exists inactive_until timestamptz;
+alter table public.restaurants add column if not exists hero_image_url text;
+alter table public.restaurants add column if not exists menu_cover_url text;
 update public.menu_items
 set content_key = 'item-' || replace(id::text, '-', '')
 where content_key is null or btrim(content_key) = '';
@@ -104,7 +109,9 @@ create unique index if not exists menu_items_restaurant_content_key_uidx
   on public.menu_items (restaurant_id, content_key);
 create index if not exists menu_items_public_listing_idx
   on public.menu_items (restaurant_id, category_id, sort_order)
-  where is_active;
+  where is_active or is_stoplisted;
+create index if not exists menu_items_restaurant_stoplisted_idx
+  on public.menu_items (restaurant_id, is_stoplisted);
 create index if not exists menu_categories_public_listing_idx
   on public.menu_categories (restaurant_id, sort_order)
   where is_active;
@@ -126,7 +133,9 @@ comment on table public.menu_items is
 comment on column public.menu_items.content_key is
   'Stable restaurant-scoped item identifier for rendering, imports, and future CRUD operations.';
 comment on column public.menu_items.inactive_until is
-  'When set in the future, temporarily hides the item from the public menu until this timestamp.';
+  'When set in the future, the item remains visible but is marked as temporarily unavailable until this timestamp.';
+comment on column public.menu_items.is_stoplisted is
+  'When true, the dish remains visible in the public menu but is marked as temporarily unavailable.';
 comment on column public.menu_items.image_path is
   'Object path inside the restaurant-assets bucket, for example exort-demo/menu-items/photo.webp.';
 
@@ -297,9 +306,7 @@ create policy "Public can read active menu items"
 on public.menu_items for select
 to anon, authenticated
 using (
-  is_active
-  and (inactive_until is null or inactive_until <= now())
-  and exists (
+  exists (
     select 1
     from public.restaurants restaurant
     where restaurant.id = menu_items.restaurant_id
