@@ -1,17 +1,18 @@
 const crypto = require("crypto");
 
-const SUPABASE_URL = (process.env.SUPABASE_URL || "https://jnxwbqcnpxezjvfgdabc.supabase.co").replace(/\/$/, "");
-const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.EXORT_SUPABASE_SERVICE_ROLE_KEY || "";
-const SESSION_SECRET = process.env.EXORT_ADMIN_SESSION_SECRET || SERVICE_KEY;
+const SUPABASE_URL = (process.env.SUPABASE_URL || "").trim().replace(/\/$/, "");
+const SUPABASE_SERVICE_ROLE_KEY = (process.env.SUPABASE_SERVICE_ROLE_KEY || "").trim();
+const SERVICE_KEY = SUPABASE_SERVICE_ROLE_KEY;
+const SESSION_SECRET = (process.env.EXORT_ADMIN_SESSION_SECRET || "").trim();
 const BUCKET = "restaurant-assets";
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
 
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") return response(204, {});
   if (event.httpMethod !== "POST") return response(405, { error: "Method not allowed" });
-  if (!SERVICE_KEY || !SESSION_SECRET) {
-    return response(500, { error: "Admin backend is not configured. Add SUPABASE_SERVICE_ROLE_KEY and EXORT_ADMIN_SESSION_SECRET in Netlify." });
-  }
+
+  const configError = getConfigError();
+  if (configError) return response(500, { error: configError });
 
   try {
     const body = JSON.parse(event.body || "{}");
@@ -256,12 +257,10 @@ async function uploadImage(slug, filename, dataUrl) {
   const path = `${slug}/${filename}`;
   const upload = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`, {
     method: "POST",
-    headers: {
-      apikey: SERVICE_KEY,
-      Authorization: `Bearer ${SERVICE_KEY}`,
+    headers: createSupabaseHeaders({
       "Content-Type": contentType,
       "x-upsert": "true",
-    },
+    }),
     body: buffer,
   });
   if (!upload.ok) throw new Error(`Image upload failed: ${await upload.text()}`);
@@ -275,12 +274,13 @@ async function uploadImage(slug, filename, dataUrl) {
 async function supabaseRest(table, { method = "GET", query = {}, body, prefer = "" } = {}) {
   const url = new URL(`${SUPABASE_URL}/rest/v1/${table}`);
   Object.entries(query).forEach(([key, value]) => url.searchParams.set(key, value));
-  const headers = {
-    apikey: SERVICE_KEY,
-    Authorization: `Bearer ${SERVICE_KEY}`,
+  const headers = createSupabaseHeaders({
     "Content-Type": "application/json",
-  };
-  if (prefer) headers.Prefer = prefer;
+  });
+  if (prefer) {
+    assertHeaderValue("Prefer", prefer);
+    headers.Prefer = prefer;
+  }
 
   const result = await fetch(url, {
     method,
@@ -292,6 +292,69 @@ async function supabaseRest(table, { method = "GET", query = {}, body, prefer = 
   if (result.status === 204) return [];
   const text = await result.text();
   return text ? JSON.parse(text) : [];
+}
+
+function getConfigError() {
+  if (!SUPABASE_URL) return "Admin backend is not configured: SUPABASE_URL is missing.";
+  if (!isAsciiPrintable(SUPABASE_URL)) return "Admin backend is not configured: SUPABASE_URL contains non-ASCII characters.";
+
+  try {
+    const parsedUrl = new URL(SUPABASE_URL);
+    if (!["https:", "http:"].includes(parsedUrl.protocol)) {
+      return "Admin backend is not configured: SUPABASE_URL must start with https:// or http://.";
+    }
+  } catch {
+    return "Admin backend is not configured: SUPABASE_URL is not a valid URL.";
+  }
+
+  if (!SUPABASE_SERVICE_ROLE_KEY) return "Admin backend is not configured: SUPABASE_SERVICE_ROLE_KEY is missing.";
+  if (!isAsciiToken(SUPABASE_SERVICE_ROLE_KEY)) {
+    return "Admin backend is not configured: SUPABASE_SERVICE_ROLE_KEY contains spaces or non-ASCII characters.";
+  }
+
+  if (!SESSION_SECRET) return "Admin backend is not configured: EXORT_ADMIN_SESSION_SECRET is missing.";
+  if (!isAsciiPrintable(SESSION_SECRET)) {
+    return "Admin backend is not configured: EXORT_ADMIN_SESSION_SECRET contains non-ASCII characters.";
+  }
+
+  return "";
+}
+
+function createSupabaseHeaders(extraHeaders = {}) {
+  const headers = {
+    apikey: SUPABASE_SERVICE_ROLE_KEY,
+    Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+  };
+
+  Object.entries(extraHeaders).forEach(([name, value]) => {
+    assertHeaderName(name);
+    assertHeaderValue(name, value);
+    headers[name] = value;
+  });
+
+  assertHeaderValue("apikey", headers.apikey);
+  assertHeaderValue("Authorization", headers.Authorization);
+  return headers;
+}
+
+function assertHeaderName(name) {
+  if (!/^[A-Za-z0-9!#$%&'*+.^_`|~-]+$/.test(String(name))) {
+    throw new Error(`Invalid HTTP header name: ${name}`);
+  }
+}
+
+function assertHeaderValue(name, value) {
+  if (!isAsciiPrintable(String(value))) {
+    throw new Error(`Invalid HTTP header value for ${name}: only ASCII characters are allowed.`);
+  }
+}
+
+function isAsciiToken(value) {
+  return /^[\x21-\x7E]+$/.test(String(value || ""));
+}
+
+function isAsciiPrintable(value) {
+  return /^[\x20-\x7E]*$/.test(String(value || ""));
 }
 
 function verifyPin(pin, pinHash) {
@@ -321,7 +384,7 @@ function signSession(payload) {
 function verifySession(token, slug) {
   const [encoded, signature] = String(token || "").split(".");
   if (!encoded || !signature || !safeEqual(signature, hmac(encoded))) return null;
-  const payload = JSON.parse(Buffer.from(encoded, "base64url").toString("utf8"));
+  const payload = JSON.parse(Buffer.from(fromBase64url(encoded), "base64").toString("utf8"));
   if (payload.exp < Math.floor(Date.now() / 1000)) return null;
   if (payload.slug !== slug) return null;
   return payload;
@@ -332,7 +395,7 @@ function sha256(value) {
 }
 
 function hmac(value) {
-  return crypto.createHmac("sha256", SESSION_SECRET).update(value).digest("base64url");
+  return toBase64url(crypto.createHmac("sha256", SESSION_SECRET).update(value).digest("base64"));
 }
 
 function safeEqual(left, right) {
@@ -342,7 +405,17 @@ function safeEqual(left, right) {
 }
 
 function base64url(value) {
-  return Buffer.from(value).toString("base64url");
+  return toBase64url(Buffer.from(value).toString("base64"));
+}
+
+function toBase64url(value) {
+  return String(value).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function fromBase64url(value) {
+  const normalized = String(value).replace(/-/g, "+").replace(/_/g, "/");
+  const padding = normalized.length % 4 ? "=".repeat(4 - (normalized.length % 4)) : "";
+  return normalized + padding;
 }
 
 function clean(value) {
