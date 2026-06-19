@@ -3,12 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Exort Arctic — QR-меню и система управления для ресторанов</title>
+    <title>Exort — QR-меню и система управления для ресторанов</title>
     <meta
       name="description"
       content="Exort помогает ресторанам управлять меню, ценами, стоп-листом, языками и аналитикой из одной системы."
     />
-    <meta property="og:title" content="Exort Arctic — цифровое меню без хаоса" />
+    <meta property="og:title" content="Exort — цифровое меню без хаоса" />
     <meta
       property="og:description"
       content="QR-меню, система управления, стоп-лист, языки и аналитика для ресторанов."
@@ -32,19 +32,19 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="./css/exort-arctic.css?v=6" />
-    <script defer src="./js/exort-arctic.js?v=6"></script>
+    <link rel="stylesheet" href="./css/exort.css?v=8" />
+    <script defer src="./js/exort.js?v=8"></script>
   </head>
   <body>
-    <header class="arctic-header" data-header>
-      <a class="brand" href="#top" aria-label="Exort Arctic">
+    <header class="exort-header" data-header>
+      <a class="brand" href="#top" aria-label="Exort">
         <span class="brand__mark">E</span>
         <span>Exort</span>
       </a>
 
       <nav class="nav" aria-label="Навигация">
         <a href="#top" data-i18n="navHome">Главная</a>
-        <a href="/menu-demo" data-i18n="navDemo">Демо</a>
+        <a href="./pages/menu-demo.html?restaurant=exort-demo" data-i18n="navDemo">Демо</a>
         <a href="#features" data-i18n="navFeatures">Возможности</a>
         <a href="#pricing" data-i18n="navPricing">Тарифы</a>
         <a href="#contacts" data-i18n="navContacts">Контакты</a>
@@ -55,10 +55,14 @@
           <button class="is-active" type="button" data-language="ru">RU</button><button type="button" data-language="kk">KZ</button><button type="button" data-language="en">EN</button>
         </div>
         <button class="theme-toggle" type="button" data-theme-toggle aria-label="Сменить тему">
-          <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
-          <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+          <span class="theme-toggle__track">
+            <span class="theme-toggle__thumb">
+              <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+              <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
+            </span>
+          </span>
         </button>
-        <a class="button button--small button--primary" href="https://wa.me/77712033044" target="_blank" rel="noreferrer">
+        <a class="button button--small button--primary" href="https://wa.me/77776580940" target="_blank" rel="noreferrer">
           <span data-i18n="launchMenu">Запустить меню</span>
         </a>
       </div>
@@ -67,16 +71,16 @@
     <main id="top">
       <section class="hero shell">
         <div class="hero__copy reveal">
-          <p class="eyebrow">Arctic Tech для ресторанов</p>
+          <p class="eyebrow">Exort для ресторанов</p>
           <h1 data-i18n="heroTitle">Цифровое меню без хаоса</h1>
           <p data-i18n="heroText">
             Блюда, цены, фото, стоп-лист, языки и аналитика — в одной системе для ресторана.
           </p>
           <div class="hero__actions">
-            <a class="button button--primary" href="https://wa.me/77712033044" target="_blank" rel="noreferrer">
+            <a class="button button--primary" href="https://wa.me/77776580940" target="_blank" rel="noreferrer">
               <span data-i18n="launchMenu">Запустить меню</span>
             </a>
-            <a class="button button--secondary" href="/menu-demo?restaurant=exort-demo">
+            <a class="button button--secondary" href="./pages/menu-demo.html?restaurant=exort-demo">
               <span data-i18n="openDemoMenu">Открыть демо-меню</span>
             </a>
           </div>
@@ -270,10 +274,10 @@
             <span>Старт</span>
             <strong>30 000 ₸</strong>
             <em>/ месяц</em>
-            <a class="button button--primary" href="https://wa.me/77712033044" target="_blank" rel="noreferrer">
+            <a class="button button--primary" href="https://wa.me/77776580940" target="_blank" rel="noreferrer">
               <span data-i18n="discussLaunch">Обсудить запуск</span>
             </a>
-            <a class="button button--secondary" href="/menu-demo?restaurant=exort-demo">
+            <a class="button button--secondary" href="./pages/menu-demo.html?restaurant=exort-demo">
               <span data-i18n="navDemo">Демо</span>
             </a>
           </aside>
@@ -285,10 +289,10 @@
           <p class="eyebrow">Next step</p>
           <h2 data-i18n="finalTitle">Меню должно обновляться быстрее, чем гости успевают спросить официанта.</h2>
           <div class="hero__actions">
-            <a class="button button--primary" href="https://wa.me/77712033044" target="_blank" rel="noreferrer">
+            <a class="button button--primary" href="https://wa.me/77776580940" target="_blank" rel="noreferrer">
               WhatsApp
             </a>
-            <a class="button button--secondary" href="/menu-demo?restaurant=exort-demo">
+            <a class="button button--secondary" href="./pages/menu-demo.html?restaurant=exort-demo">
               Демо
             </a>
           </div>
@@ -296,10 +300,14 @@
       </section>
     </main>
 
+    <button class="back-to-top" type="button" data-back-to-top aria-label="Наверх">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>
+    </button>
+
     <footer class="footer shell">
-      <span>Exort Arctic</span>
+      <span>Exort</span>
       <a href="mailto:hello@exort.kz">hello@exort.kz</a>
-      <a href="https://wa.me/77712033044" target="_blank" rel="noreferrer">+7 771 203 30 44</a>
+      <a href="https://wa.me/77776580940" target="_blank" rel="noreferrer">+7 777 658 09 40</a>
     </footer>
   </body>
 </html>

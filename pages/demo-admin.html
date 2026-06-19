@@ -14,9 +14,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="../css/demo-admin.css?v=4" />
-    <link rel="stylesheet" href="../css/demo-admin-navigation.css?v=4" />
-    <script defer src="../js/demo-admin.js?v=5"></script>
+    <link rel="stylesheet" href="../css/demo-admin.css?v=10" />
+    <link rel="stylesheet" href="../css/demo-admin-navigation.css?v=8" />
+    <script defer src="../js/demo-admin.js?v=10"></script>
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -33,12 +33,6 @@
       <div class="login-orb login-orb--one"></div>
       <div class="login-orb login-orb--two"></div>
       <div class="login-card">
-        <button class="theme-toggle admin-theme-toggle" type="button" data-theme-toggle aria-label="Сменить тему">
-          <span class="theme-toggle__track"><span class="theme-toggle__thumb">
-            <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
-            <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
-          </span></span>
-        </button>
         <div class="login-brand"><span>E</span><strong>Exort</strong></div>
         <div class="restaurant-identity">
           <div class="restaurant-avatar" data-restaurant-initial>E</div>
@@ -79,7 +73,7 @@
         </nav>
         <div class="side-footer">
           <a data-menu-link href="/pages/menu-demo.html?restaurant=exort-demo" target="_blank" rel="noreferrer"><svg><use href="#icon-external"/></svg><span>Открыть меню</span></a>
-          <a href="mailto:hello@exort.kz"><svg><use href="#icon-support"/></svg><span>Поддержка Exort</span></a>
+          <a href="https://wa.me/77066402106" target="_blank" rel="noreferrer"><svg><use href="#icon-support"/></svg><span>Поддержка Exort</span></a>
           <button type="button" data-logout><svg><use href="#icon-logout"/></svg><span>Выйти</span></button>
         </div>
       </aside>
@@ -91,12 +85,6 @@
             <h1 data-view-title>Обзор</h1>
           </div>
           <div class="topbar-actions">
-            <button class="theme-toggle" type="button" data-theme-toggle aria-label="Сменить тему">
-              <span class="theme-toggle__track"><span class="theme-toggle__thumb">
-                <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
-                <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
-              </span></span>
-            </button>
             <span class="connection-status"><i></i><span>Меню онлайн</span></span>
             <a class="secondary-button compact" data-menu-link href="/pages/menu-demo.html?restaurant=exort-demo" target="_blank" rel="noreferrer">Открыть меню</a>
             <button class="icon-button" type="button" data-logout aria-label="Выйти">↗</button>
@@ -134,7 +122,7 @@
         </section>
 
         <section class="view" data-view="categories">
-          <div class="section-toolbar"><p>Управляйте порядком и видимостью разделов меню.</p><button class="primary-button compact" type="button" data-action="add-category">Добавить категорию</button></div>
+          <div class="section-toolbar"><p>Управляйте порядком и видимостью категорий.</p><button class="primary-button compact" type="button" data-action="add-category">Добавить категорию</button></div>
           <div class="category-list" data-category-list></div>
         </section>
 
@@ -168,12 +156,43 @@
         <header><div><p class="kicker">Карточка блюда</p><h2 data-drawer-title>Новое блюдо</h2></div><button type="button" data-close-drawer aria-label="Закрыть">×</button></header>
         <div class="drawer-body">
           <input type="hidden" name="id" />
-          <div class="image-editor"><div data-editor-image></div><label><input type="file" accept="image/png,image/jpeg,image/webp" data-editor-file />Загрузить фото</label></div>
+          <section class="image-editor" aria-label="Фото блюда">
+            <div class="editor-photo-preview" data-editor-image></div>
+            <div class="editor-photo-actions">
+              <label class="secondary-button compact">
+                <input type="file" accept="image/png,image/jpeg,image/webp" data-editor-file />
+                <span data-editor-file-label>Загрузить фото</span>
+              </label>
+              <button class="secondary-button compact editor-photo-remove" type="button" data-remove-editor-image hidden>Удалить фото</button>
+              <small>Фото будет оптимизировано перед загрузкой.</small>
+            </div>
+          </section>
+          <aside class="dish-live-preview" data-dish-preview aria-label="Предпросмотр блюда"></aside>
+          <section class="dish-status-editor">
+            <div class="drawer-section-heading">
+              <span>Статус блюда</span>
+              <strong class="editor-status-badge is-sale" data-editor-status-badge>В продаже</strong>
+            </div>
+            <div class="status-segment" data-status-segment>
+              <label data-status-choice>
+                <input type="radio" name="is_stoplisted" value="false" checked />
+                <span>В продаже</span>
+              </label>
+              <label data-status-choice>
+                <input type="radio" name="is_stoplisted" value="true" />
+                <span>На стопе</span>
+              </label>
+            </div>
+          </section>
           <div class="language-tabs"><button class="is-active" type="button" data-lang-tab="ru">RU</button><button type="button" data-lang-tab="kz">KZ</button><button type="button" data-lang-tab="en">EN</button></div>
+          <div class="drawer-tools">
+            <button class="secondary-button compact" type="button" data-translate-current-item>Перевести с RU</button>
+            <small>Заполнит KZ и EN автоматически.</small>
+          </div>
           <div class="language-pane is-active" data-lang-pane="ru"><label>Название RU<input name="name_ru" required /></label><label>Описание RU<textarea name="description_ru" rows="3"></textarea></label></div>
           <div class="language-pane" data-lang-pane="kz"><label>Название KZ<input name="name_kz" /></label><label>Описание KZ<textarea name="description_kz" rows="3"></textarea></label></div>
           <div class="language-pane" data-lang-pane="en"><label>Название EN<input name="name_en" /></label><label>Описание EN<textarea name="description_en" rows="3"></textarea></label></div>
-          <div class="form-grid"><label>Цена<input name="price" type="number" min="0" required /></label><label>Категория<select name="category_id" required></select></label><label>Сортировка<input name="sort_order" type="number" min="0" /></label><label class="check-line"><input name="is_active" type="checkbox" /> Активно в меню</label></div>
+          <div class="form-grid"><label>Цена<input name="price" type="number" min="0" required /></label><label>Категория<select name="category_id" required></select></label><label>Сортировка<input name="sort_order" type="number" min="0" /></label></div>
         </div>
         <footer><button class="danger-button" type="button" data-delete-item hidden>Удалить</button><div><button class="secondary-button compact" type="button" data-close-drawer>Отмена</button><button class="primary-button compact" type="submit">Сохранить</button></div></footer>
       </form>

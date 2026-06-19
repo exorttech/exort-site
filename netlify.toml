@@ -1,3 +1,9 @@
+[build.environment]
+  NODE_VERSION = "18"
+
+[functions]
+  directory = "netlify/functions"
+
 [[redirects]]
   from = "/bdayvideo"
   to = "/pages/bdayvideo.html"

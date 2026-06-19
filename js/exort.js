@@ -4,6 +4,7 @@ const themeToggle = document.querySelector("[data-theme-toggle]");
 const stopToggle = document.querySelector("[data-stop-toggle]");
 const stopRow = document.querySelector("[data-stop-row]");
 const stopLabel = document.querySelector("[data-stop-label]");
+const backToTop = document.querySelector("[data-back-to-top]");
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const themeStorageKey = "exort_theme";
 const languageStorageKey = "exort_language";
@@ -15,7 +16,7 @@ const translations = {
 
 const staticTranslations = {
   "Демо": { ru: "Демо", kk: "Демо", en: "Demo" },
-  "Arctic Tech для ресторанов": { ru: "Arctic Tech для ресторанов", kk: "Мейрамханаларға арналған Arctic Tech", en: "Arctic Tech for restaurants" },
+  "Exort для ресторанов": { ru: "Exort для ресторанов", kk: "Мейрамханаларға арналған Exort", en: "Exort for restaurants" },
   "QR-меню": { ru: "QR-меню", kk: "QR-мәзір", en: "QR menu" },
   "Стоп-лист": { ru: "Стоп-лист", kk: "Стоп-лист", en: "Stop list" },
   "Меню синхронизировано": { ru: "Меню синхронизировано", kk: "Мәзір синхрондалды", en: "Menu synchronized" },
@@ -93,21 +94,22 @@ const attributeTranslations = {
   "Скриншот QR-меню": { ru: "Скриншот QR-меню", kk: "QR-мәзір скриншоты", en: "QR menu screenshot" },
   "Скриншот демо-страницы QR-меню Exort": { ru: "Скриншот демо-страницы QR-меню Exort", kk: "Exort QR-мәзір демо бетінің скриншоты", en: "Exort QR menu demo screenshot" },
   "Будущие интеграции": { ru: "Будущие интеграции", kk: "Болашақ интеграциялар", en: "Future integrations" },
+  "Наверх": { ru: "Наверх", kk: "Жоғарыға", en: "Back to top" },
 };
 
 const originalText = new WeakMap();
 const originalAttributes = new WeakMap();
 const metadataTranslations = {
   ru: {
-    title: "Exort Arctic — QR-меню и система управления для ресторанов",
+    title: "Exort — QR-меню и система управления для ресторанов",
     description: "Exort помогает ресторанам управлять меню, ценами, стоп-листом, языками и аналитикой из одной системы.",
   },
   kk: {
-    title: "Exort Arctic — мейрамханаларға арналған QR-мәзір және басқару жүйесі",
+    title: "Exort — мейрамханаларға арналған QR-мәзір және басқару жүйесі",
     description: "Exort мейрамханаларға мәзірді, бағаларды, стоп-листті, тілдерді және аналитиканы бір жүйеден басқаруға көмектеседі.",
   },
   en: {
-    title: "Exort Arctic — QR menu and management system for restaurants",
+    title: "Exort — QR menu and management system for restaurants",
     description: "Exort helps restaurants manage menus, prices, stop lists, languages and analytics from one system.",
   },
 };
@@ -152,7 +154,7 @@ function getSavedTheme() {
       return savedTheme;
     }
   } catch (error) {
-    // localStorage may be blocked. Light Arctic remains the default.
+    // localStorage may be blocked. Light theme remains the default.
   }
 
   return "light";
@@ -196,6 +198,7 @@ function applyLanguage(language) {
 
 function updateHeader() {
   header?.classList.toggle("is-scrolled", window.scrollY > 12);
+  backToTop?.classList.toggle("is-visible", window.scrollY > 520);
 }
 
 function toggleStopState() {
@@ -215,6 +218,7 @@ themeToggle?.addEventListener("click", () => {
 document.querySelectorAll("[data-language]").forEach(button => button.addEventListener("click", () => applyLanguage(button.dataset.language)));
 
 stopToggle?.addEventListener("click", toggleStopState);
+backToTop?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: reducedMotion ? "auto" : "smooth" }));
 window.addEventListener("scroll", updateHeader, { passive: true });
 
 if (reducedMotion) {

@@ -22,8 +22,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="../css/styles.css?v=5" />
-    <script defer src="../js/app.js?v=5"></script>
+    <link rel="stylesheet" href="../css/styles.css?v=7" />
+    <script defer src="../js/app.js?v=7"></script>
   </head>
   <body>
     <div class="service-modal" data-service-modal aria-hidden="false">
@@ -54,11 +54,13 @@
         <div class="menu-language" aria-label="Выбор языка" data-ui-aria="chooseLanguage">
           <button class="is-active" type="button" data-language="ru">RU</button><button type="button" data-language="kk">KZ</button><button type="button" data-language="en">EN</button>
         </div>
-        <button class="icon-button" type="button" data-theme-toggle aria-label="Сменить тему" data-ui-aria="changeTheme">
-          <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
-          <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Сменить тему" data-ui-aria="changeTheme">
+          <span class="theme-toggle__track"><span class="theme-toggle__thumb">
+            <svg class="theme-icon theme-icon--sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+            <svg class="theme-icon theme-icon--moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
+          </span></span>
         </button>
-        <a class="small-button" href="https://wa.me/77712033044" target="_blank" rel="noreferrer">WhatsApp</a>
+        <a class="small-button" href="https://wa.me/77776580940" target="_blank" rel="noreferrer">WhatsApp</a>
       </nav>
     </header>
 
@@ -111,5 +113,9 @@
         </div>
       </article>
     </aside>
+
+    <button class="back-to-top" type="button" data-back-to-top aria-label="Наверх" data-ui-aria="backToTop">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>
+    </button>
   </body>
 </html>

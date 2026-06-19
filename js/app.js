@@ -387,7 +387,7 @@ const serviceCopy = {
 const uiCopy = {
   ru: {
     title: "Demo Restaurant | Живое QR-меню", description: "QR-меню ресторана: категории, поиск, карточки блюд, стоп-лист и фото блюд.",
-    search: "Найти блюдо или ингредиент", searchLabel: "Поиск", unavailable: "Нет в наличии",
+    search: "Найти блюдо или ингредиент", searchLabel: "Поиск", unavailable: "Временно недоступно",
     empty: "По этому запросу ничего не найдено.", noMatches: "Нет совпадений",
     tryAgain: "Попробуйте выбрать другую категорию или изменить поиск.", menu: "Меню",
     openUntil: "Открыто до 23:00", city: "Алматы", service: "10% сервис",
@@ -397,7 +397,7 @@ const uiCopy = {
   },
   kk: {
     title: "Demo Restaurant | Интерактивті QR-мәзір", description: "Мейрамхананың QR-мәзірі: санаттар, іздеу, тағам карточкалары, стоп-лист және фотосуреттер.",
-    search: "Тағамды немесе ингредиентті іздеу", searchLabel: "Іздеу", unavailable: "Қолжетімді емес",
+    search: "Тағамды немесе ингредиентті іздеу", searchLabel: "Іздеу", unavailable: "Уақытша қолжетімсіз",
     empty: "Бұл сұрау бойынша ештеңе табылмады.", noMatches: "Сәйкестік жоқ",
     tryAgain: "Басқа санатты таңдаңыз немесе іздеуді өзгертіңіз.", menu: "Мәзір",
     openUntil: "23:00-ге дейін ашық", city: "Алматы", service: "10% қызмет көрсету",
@@ -407,7 +407,7 @@ const uiCopy = {
   },
   en: {
     title: "Demo Restaurant | Live QR menu", description: "Restaurant QR menu with categories, search, dish details, stop list and photos.",
-    search: "Find a dish or ingredient", searchLabel: "Search", unavailable: "Out of stock",
+    search: "Find a dish or ingredient", searchLabel: "Search", unavailable: "Temporarily unavailable",
     empty: "Nothing was found for this search.", noMatches: "No matches",
     tryAgain: "Choose another category or change your search.", menu: "Menu",
     openUntil: "Open until 23:00", city: "Almaty", service: "10% service charge",
