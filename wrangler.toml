@@ -1,0 +1,15 @@
+name = "exort-admin"
+main = "worker/exort-admin.js"
+compatibility_date = "2025-01-01"
+
+# Optional route example for production:
+# routes = [{ pattern = "exort.kz/api/exort-admin", zone_name = "exort.kz" }]
+
+[vars]
+SUPABASE_URL = ""
+EXORT_ALLOW_LEGACY_DEMO_PIN = "true"
+
+# Add secrets through Wrangler or Cloudflare Dashboard:
+# wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+# wrangler secret put EXORT_ADMIN_SESSION_SECRET
+# wrangler secret put EXORT_TRANSLATE_API_URL

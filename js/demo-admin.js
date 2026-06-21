@@ -7,7 +7,7 @@ const themeStorageKey = "exort_theme";
 
 // TEMP DEVELOPMENT MODE
 // Set to false before production launch
-const DEV_BYPASS_AUTH = true;
+const DEV_BYPASS_AUTH = false;
 
 const state = {
   restaurant: { slug: DEFAULT_RESTAURANT_SLUG, name: "Exort Demo Restaurant", city: "Almaty", brand: "#2563eb" },
