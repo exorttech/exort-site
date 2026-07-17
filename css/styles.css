@@ -6,25 +6,11 @@
   --muted: #74695f;
   --line: #e4d8ca;
   --accent: #b66f62;
-  --accent-dark: #8c4f45;
+  --accent-strong: #8c4f45;
   --accent-soft: #f4dfdc;
   --success: #597b57;
   --shadow: 0 22px 60px rgba(48, 32, 22, 0.14);
   --radius: 8px;
-}
-
-[data-theme="dark"] {
-  --bg: #120f0d;
-  --surface: #1d1713;
-  --surface-strong: #251d18;
-  --text: #fff8ee;
-  --muted: #c1aa98;
-  --line: #3b2c24;
-  --accent: #d69b77;
-  --accent-dark: #f0bb8d;
-  --accent-soft: #3a261f;
-  --success: #9ebb89;
-  --shadow: 0 22px 60px rgba(0, 0, 0, 0.36);
 }
 
 * {
@@ -193,8 +179,6 @@ a {
   border-radius: 999px;
 }
 
-.theme-toggle{display:inline-grid;width:76px;height:40px;padding:3px;background:transparent;border:0;border-radius:999px;cursor:pointer}.theme-toggle__track{position:relative;display:block;width:100%;height:100%;background:#eee5dc;border:1px solid var(--line);border-radius:999px;box-shadow:inset 0 2px 5px rgba(48,32,22,.09),0 8px 20px rgba(48,32,22,.08);transition:background 240ms ease,border-color 240ms ease}.theme-toggle__thumb{position:absolute;top:3px;left:3px;display:grid;width:28px;height:28px;place-items:center;color:#a85f38;background:#fffdfa;border-radius:50%;box-shadow:0 4px 12px rgba(48,32,22,.2);transition:transform 260ms cubic-bezier(.2,.8,.2,1),color 240ms ease,background 240ms ease}.theme-icon{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}.theme-icon--moon{display:none}[data-theme="dark"] .theme-toggle__track{background:#33261f;border-color:#5b4336}[data-theme="dark"] .theme-toggle__thumb{color:#efc29e;background:#17110e;transform:translateX(36px)}[data-theme="dark"] .theme-icon--sun{display:none}[data-theme="dark"] .theme-icon--moon{display:block}.theme-toggle:hover .theme-toggle__track{border-color:var(--accent)}.theme-toggle:active .theme-toggle__thumb{width:31px}
-
 .small-button {
   min-height: 34px;
   padding: 8px 13px;
@@ -231,7 +215,7 @@ a {
 
 .kicker {
   margin: 0 0 10px;
-  color: var(--accent-dark);
+  color: var(--accent-strong);
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0;
@@ -385,7 +369,7 @@ h1 {
 
 .link-button {
   padding: 0;
-  color: var(--accent-dark);
+  color: var(--accent-strong);
   background: transparent;
   font-size: 14px;
 }
@@ -493,14 +477,14 @@ body:has(.service-modal:not([aria-hidden="true"])){overflow:hidden}
 }
 
 .price {
-  color: var(--accent-dark);
+  color: var(--accent-strong);
   font-size: 20px;
   font-weight: 950;
 }
 
 .badge {
   padding: 6px 9px;
-  color: var(--accent-dark);
+  color: var(--accent-strong);
   background: var(--accent-soft);
   border-radius: 999px;
   font-size: 12px;
@@ -619,7 +603,7 @@ body:has(.service-modal:not([aria-hidden="true"])){overflow:hidden}
 }
 
 .service-card strong {
-  color: var(--accent-dark);
+  color: var(--accent-strong);
 }
 
 .language-pills {
@@ -727,7 +711,7 @@ body:has(.service-modal:not([aria-hidden="true"])){overflow:hidden}
 }
 
 .drawer-info strong {
-  color: var(--accent-dark);
+  color: var(--accent-strong);
   font-size: 26px;
 }
 
@@ -742,7 +726,7 @@ body:has(.service-modal:not([aria-hidden="true"])){overflow:hidden}
 }
 
 .tag-list span {
-  color: var(--accent-dark);
+  color: var(--accent-strong);
   background: var(--accent-soft);
   border-color: transparent;
 }
@@ -812,8 +796,6 @@ body:has(.service-modal:not([aria-hidden="true"])){overflow:hidden}
     gap: 6px;
   }
 
-  .theme-toggle{width:66px;height:36px;padding:0}.theme-toggle__thumb{top:3px;left:3px;width:28px;height:28px}[data-theme="dark"] .theme-toggle__thumb{transform:translateX(30px)}
-
   .hero-content {
     padding-inline: 18px;
   }
@@ -865,4 +847,50 @@ body:has(.service-modal:not([aria-hidden="true"])){overflow:hidden}
   .back-to-top {
     transition: none;
   }
+}
+
+.dish-traits,
+.drawer-meta,
+.price-stack {
+  display: flex;
+  align-items: center;
+}
+
+.dish-traits,
+.drawer-meta {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dish-traits {
+  margin-top: 10px;
+}
+
+.dish-traits span,
+.drawer-meta span {
+  padding: 5px 10px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--surface) 82%, var(--accent-soft));
+  border: 1px solid color-mix(in srgb, var(--line) 76%, transparent);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.price-stack {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.old-price {
+  color: #9a8576;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: line-through;
+}
+
+.drawer-meta {
+  margin-top: 14px;
 }

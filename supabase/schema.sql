@@ -49,12 +49,16 @@ create table if not exists public.menu_items (
   description_en text,
   description_kk text,
   price numeric(10, 2),
+  old_price numeric(10, 2),
   currency text not null default '₸',
   image_url text,
   image_path text,
   badge_ru text,
   badge_en text,
   badge_kk text,
+  weight text,
+  calories integer,
+  spice_level text,
   sort_order integer not null default 0,
   is_active boolean not null default true,
   is_stoplisted boolean not null default false,
@@ -65,13 +69,50 @@ create table if not exists public.menu_items (
     check (content_key = lower(content_key) and content_key ~ '^[a-z0-9][a-z0-9-]{0,79}$'),
   constraint menu_items_title_ru_not_blank_check check (btrim(title_ru) <> ''),
   constraint menu_items_currency_not_blank_check check (btrim(currency) <> ''),
-  constraint menu_items_price_nonnegative_check check (price is null or price >= 0)
+  constraint menu_items_price_nonnegative_check check (price is null or price >= 0),
+  constraint menu_items_old_price_nonnegative_check check (old_price is null or old_price >= 0),
+  constraint menu_items_calories_nonnegative_check check (calories is null or calories >= 0),
+  constraint menu_items_spice_level_check check (spice_level is null or spice_level in ('mild', 'medium', 'hot'))
+);
+
+create table if not exists public.menu_analytics_events (
+  id uuid primary key default gen_random_uuid(),
+  restaurant_id uuid not null references public.restaurants(id) on delete cascade,
+  event_type text not null,
+  menu_item_id uuid references public.menu_items(id) on delete set null,
+  language text,
+  device_type text,
+  session_id text,
+  user_agent text,
+  referrer text,
+  created_at timestamptz not null default now(),
+  constraint menu_analytics_events_event_type_check
+    check (event_type in ('menu_open', 'dish_open', 'dish_close', 'language_change')),
+  constraint menu_analytics_events_device_type_check
+    check (device_type is null or device_type in ('mobile', 'tablet', 'desktop')),
+  constraint menu_analytics_events_language_check
+    check (language is null or language in ('ru', 'kk', 'kz', 'en')),
+  constraint menu_analytics_events_session_length_check
+    check (session_id is null or char_length(session_id) <= 120),
+  constraint menu_analytics_events_user_agent_length_check
+    check (user_agent is null or char_length(user_agent) <= 500),
+  constraint menu_analytics_events_referrer_length_check
+    check (referrer is null or char_length(referrer) <= 500)
 );
 
 -- Upgrade path for databases created by an earlier version of this file.
+alter table public.menu_analytics_events
+  drop constraint if exists menu_analytics_events_event_type_check;
+alter table public.menu_analytics_events
+  add constraint menu_analytics_events_event_type_check
+  check (event_type in ('menu_open', 'dish_open', 'dish_close', 'language_change'));
 alter table public.menu_items add column if not exists content_key text;
 alter table public.menu_items add column if not exists is_stoplisted boolean not null default false;
 alter table public.menu_items add column if not exists inactive_until timestamptz;
+alter table public.menu_items add column if not exists old_price numeric(10, 2);
+alter table public.menu_items add column if not exists weight text;
+alter table public.menu_items add column if not exists calories integer;
+alter table public.menu_items add column if not exists spice_level text;
 alter table public.restaurants add column if not exists hero_image_url text;
 alter table public.restaurants add column if not exists menu_cover_url text;
 update public.menu_items
@@ -119,6 +160,22 @@ create index if not exists restaurant_members_user_id_idx
   on public.restaurant_members (user_id);
 create index if not exists restaurant_members_restaurant_id_idx
   on public.restaurant_members (restaurant_id);
+create index if not exists menu_analytics_events_restaurant_id_idx
+  on public.menu_analytics_events (restaurant_id);
+create index if not exists menu_analytics_events_event_type_idx
+  on public.menu_analytics_events (event_type);
+create index if not exists menu_analytics_events_menu_item_id_idx
+  on public.menu_analytics_events (menu_item_id);
+create index if not exists menu_analytics_events_created_at_idx
+  on public.menu_analytics_events (created_at);
+create index if not exists menu_analytics_events_language_idx
+  on public.menu_analytics_events (language);
+create index if not exists menu_analytics_events_device_type_idx
+  on public.menu_analytics_events (device_type);
+create index if not exists menu_analytics_events_session_id_idx
+  on public.menu_analytics_events (session_id);
+create index if not exists menu_analytics_events_restaurant_created_idx
+  on public.menu_analytics_events (restaurant_id, created_at desc);
 
 comment on table public.restaurants is
   'Restaurant tenants. The slug maps to the restaurant subdomain.';
@@ -138,6 +195,10 @@ comment on column public.menu_items.is_stoplisted is
   'When true, the dish remains visible in the public menu but is marked as temporarily unavailable.';
 comment on column public.menu_items.image_path is
   'Object path inside the restaurant-assets bucket, for example exort-demo/menu-items/photo.webp.';
+comment on table public.menu_analytics_events is
+  'Append-only public menu analytics events. Raw reads are blocked from public clients; admin analytics are aggregated through the backend.';
+comment on column public.menu_analytics_events.session_id is
+  'Random technical session id stored in sessionStorage. It must not contain personal data.';
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -235,6 +296,7 @@ alter table public.restaurants enable row level security;
 alter table public.restaurant_members enable row level security;
 alter table public.menu_categories enable row level security;
 alter table public.menu_items enable row level security;
+alter table public.menu_analytics_events enable row level security;
 
 grant usage on schema public to anon, authenticated;
 grant select on public.restaurants to anon, authenticated;
@@ -243,6 +305,8 @@ grant select on public.menu_items to anon, authenticated;
 grant select on public.restaurant_members to authenticated;
 grant insert, update, delete on public.menu_categories to authenticated;
 grant insert, update, delete on public.menu_items to authenticated;
+grant insert on public.menu_analytics_events to anon, authenticated;
+grant all on public.menu_analytics_events to service_role;
 
 drop policy if exists "Public can read active restaurants" on public.restaurants;
 create policy "Public can read active restaurants"
@@ -348,6 +412,19 @@ create policy "Members can delete their menu items"
 on public.menu_items for delete
 to authenticated
 using ((select private.is_restaurant_member(restaurant_id)));
+
+drop policy if exists "Public can insert analytics events" on public.menu_analytics_events;
+create policy "Public can insert analytics events"
+on public.menu_analytics_events for insert
+to anon, authenticated
+with check (
+  exists (
+    select 1
+    from public.restaurants restaurant
+    where restaurant.id = menu_analytics_events.restaurant_id
+      and restaurant.is_active
+  )
+);
 
 -- Storage bucket and policies.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)

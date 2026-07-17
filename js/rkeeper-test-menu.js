@@ -123,12 +123,11 @@ const mockSupabaseResponse = {
 
 const SUPABASE_REST_URL = "https://jnxwbqcnpxezjvfgdabc.supabase.co/rest/v1/";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T2QhpE8LByMP8_uO_cBdPg_bbLkAbBv";
-const DEFAULT_RESTAURANT_SLUG = "exort-demo";
+const DEFAULT_RESTAURANT_SLUG = "rkeeper-test";
 const DEMO_ADMIN_STORAGE_KEY = "exort-demo:linked-menu";
 const LANGUAGE_STORAGE_KEY = "exort_language";
 const SERVICE_ACCEPTED_KEY = "exort_service_charge_accepted";
 const ANALYTICS_SESSION_KEY = "exort_menu_analytics_session";
-const ANALYTICS_STARTED_AT = Date.now();
 const MIN_DISH_VIEW_MS = 1500;
 const SUPPORTED_LOCALES = ["ru", "en", "kk"];
 const MENU_ANALYTICS_API_URL = getMenuAnalyticsApiUrl();
@@ -211,32 +210,13 @@ function getAnalyticsSessionId() {
     const key = `${ANALYTICS_SESSION_KEY}:${getRequestedRestaurantSlug()}`;
     let sessionId = sessionStorage.getItem(key);
     if (!sessionId) {
-      sessionId = createAnalyticsSessionId();
+      sessionId = window.crypto?.randomUUID?.() || `session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
       sessionStorage.setItem(key, sessionId);
     }
     return sessionId;
   } catch {
-    return createAnalyticsSessionId();
+    return `session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
-}
-
-function createAnalyticsSessionId() {
-  if (window.crypto?.randomUUID) return window.crypto.randomUUID();
-  if (window.crypto?.getRandomValues) {
-    const bytes = new Uint8Array(16);
-    window.crypto.getRandomValues(bytes);
-    return `session-${Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
-  }
-  return `session-${Date.now()}`;
-}
-
-function getAnalyticsSource() {
-  const rawSource = new URLSearchParams(window.location.search).get("source");
-  const sourcePublicId = /^[A-Za-z0-9_-]{12,64}$/.test(rawSource || "") ? rawSource : "";
-  return {
-    sourcePublicId,
-    sourceFallback: sourcePublicId ? "QR-код" : rawSource ? "Источник не определён" : "Прямой переход",
-  };
 }
 
 function getDeviceType() {
@@ -253,8 +233,6 @@ function trackMenuEvent(eventType, extra = {}) {
     language: getRequestedLocale(),
     deviceType: getDeviceType(),
     sessionId: getAnalyticsSessionId(),
-    menuPageId: getRequestedRestaurantSlug(),
-    ...getAnalyticsSource(),
     userAgent: navigator.userAgent || "",
     referrer: document.referrer || "",
     ...extra,
@@ -286,16 +264,7 @@ function trackMenuOpenOnce() {
   } catch {
     // If sessionStorage is unavailable, tracking can still be best-effort.
   }
-  trackMenuEvent("session_start");
   trackMenuEvent("menu_open");
-}
-
-let menuExitTracked = false;
-function trackMenuExit() {
-  if (menuExitTracked) return;
-  menuExitTracked = true;
-  trackDishClose();
-  trackMenuEvent("menu_exit", { durationMs: Math.max(0, Date.now() - ANALYTICS_STARTED_AT) });
 }
 
 function isMenuItemActive(item) {
@@ -495,6 +464,82 @@ async function loadMenuFromSupabase() {
       })),
   };
 }
+
+(() => {
+  const originalLoader = loadMenuFromSupabase;
+  loadMenuFromSupabase = async function loadMenuFromSupabaseRkeeper() {
+    const result = await originalLoader();
+    return {
+      ...result,
+      restaurant: {
+        ...result.restaurant,
+        name: result.restaurant?.name || "r_keeper test menu",
+        type: "Тестовая интеграция r_keeper",
+        description: "Это отдельная тестовая страница. Цены приходят из r_keeper, а фото и описания остаются из Exort.",
+      },
+      items: (result.items || []).map((item) => ({
+        ...item,
+        badge: item.available ? (item.badge || "r_keeper") : item.badge,
+      })),
+    };
+  };
+
+  const originalRestaurantRender = renderRestaurant;
+  renderRestaurant = function renderRestaurantRkeeper() {
+    originalRestaurantRender();
+    if (elements.heroService) elements.heroService.textContent = "r_keeper test";
+    if (elements.restaurantType) elements.restaurantType.textContent = "Тестовая интеграция r_keeper";
+    if (elements.restaurantDescription) {
+      elements.restaurantDescription.textContent = "Это отдельная тестовая страница. Цены приходят из r_keeper, а фото и описания остаются из Exort.";
+    }
+  };
+
+  const originalMenuRender = renderMenu;
+  renderMenu = function renderMenuRkeeper() {
+    originalMenuRender();
+    if (!state.data?.items?.length && elements.status) {
+      elements.status.textContent = "Данные r_keeper еще не загружены";
+    }
+  };
+})();
+
+const originalLoadMenuFromSupabase = loadMenuFromSupabase;
+loadMenuFromSupabase = async function loadRkeeperMenuFromSupabase() {
+  const result = await originalLoadMenuFromSupabase();
+  return {
+    ...result,
+    restaurant: {
+      ...result.restaurant,
+      name: result.restaurant?.name || "r_keeper test menu",
+      type: "Тестовая интеграция r_keeper",
+      description: "Это отдельное тестовое меню r_keeper. Цены синхронизируются из r_keeper, а фото и описания берутся из Exort.",
+    },
+    items: (result.items || []).map((item) => ({
+      ...item,
+      badge: item.available ? (item.badge || "r_keeper") : item.badge,
+    })),
+  };
+};
+
+const originalRenderRestaurant = renderRestaurant;
+renderRestaurant = function renderRkeeperRestaurant() {
+  originalRenderRestaurant();
+  if (elements.heroService) elements.heroService.textContent = "r_keeper test";
+  if (elements.restaurantName) elements.restaurantName.textContent = state.data?.restaurant?.name || "r_keeper test menu";
+  if (elements.restaurantType) elements.restaurantType.textContent = "Тестовая интеграция r_keeper";
+  if (elements.restaurantDescription) {
+    elements.restaurantDescription.textContent = "Это отдельная тестовая страница. Цены приходят из r_keeper, а фото и описания остаются из Exort.";
+  }
+};
+
+const originalRenderMenu = renderMenu;
+renderMenu = function renderRkeeperMenu() {
+  originalRenderMenu();
+  const hasItems = Boolean(state.data?.items?.length);
+  if (!hasItems && elements.status) {
+    elements.status.textContent = "Данные r_keeper еще не загружены";
+  }
+};
 
 const serviceCopy = {
   RU: {
@@ -922,26 +967,15 @@ elements.categories.addEventListener("click", (event) => {
   }
 
   updateActiveCategory(button.dataset.category);
-  trackMenuEvent("category_view", { categoryId: button.dataset.category });
   document.querySelector(`#section-${button.dataset.category}`)?.scrollIntoView({
     behavior: "smooth",
     block: "start",
   });
 });
 
-let analyticsSearchTimer = 0;
 elements.search.addEventListener("input", (event) => {
   state.query = event.target.value;
   renderMenu();
-  window.clearTimeout(analyticsSearchTimer);
-  analyticsSearchTimer = window.setTimeout(() => {
-    const queryLength = state.query.trim().length;
-    if (!queryLength) return;
-    const resultCount = getFilteredItems().length;
-    trackMenuEvent(resultCount ? "search" : "search_no_results", {
-      metadata: { queryLength, resultCount },
-    });
-  }, 500);
 });
 
 elements.menuList.addEventListener("click", (event) => {
@@ -983,10 +1017,10 @@ document.addEventListener("keydown", (event) => {
 });
 
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden") trackMenuExit();
+  if (document.visibilityState === "hidden") trackDishClose();
 });
 
-window.addEventListener("pagehide", trackMenuExit);
+window.addEventListener("pagehide", trackDishClose);
 
 applyLanguage(getRequestedLocale(), false);
 if (localStorage.getItem(SERVICE_ACCEPTED_KEY) === "true") elements.serviceModal.setAttribute("aria-hidden", "true");
@@ -1176,3 +1210,44 @@ async function loadMenuFromSupabase() {
       })),
   };
 }
+
+(() => {
+  if (window.__rkeeperTestMenuFinalPatch) return;
+  window.__rkeeperTestMenuFinalPatch = true;
+
+  const originalLoader = loadMenuFromSupabase;
+  loadMenuFromSupabase = async function loadMenuFromSupabaseRkeeper() {
+    const result = await originalLoader();
+    return {
+      ...result,
+      restaurant: {
+        ...result.restaurant,
+        name: result.restaurant?.name || "r_keeper test menu",
+        type: "�������� ���������� r_keeper",
+        description: "��� ��������� �������� ��������. ���� �������� �� r_keeper, � ���� � �������� �������� �� Exort.",
+      },
+      items: (result.items || []).map((item) => ({
+        ...item,
+        badge: item.available ? (item.badge || "r_keeper") : item.badge,
+      })),
+    };
+  };
+
+  const originalRestaurantRender = renderRestaurant;
+  renderRestaurant = function renderRestaurantRkeeper() {
+    originalRestaurantRender();
+    if (elements.heroService) elements.heroService.textContent = "r_keeper test";
+    if (elements.restaurantType) elements.restaurantType.textContent = "�������� ���������� r_keeper";
+    if (elements.restaurantDescription) {
+      elements.restaurantDescription.textContent = "��� ��������� �������� ��������. ���� �������� �� r_keeper, � ���� � �������� �������� �� Exort.";
+    }
+  };
+
+  const originalMenuRender = renderMenu;
+  renderMenu = function renderMenuRkeeper() {
+    originalMenuRender();
+    if (!state.data?.items?.length && elements.status) {
+      elements.status.textContent = "������ r_keeper ��� �� ���������";
+    }
+  };
+})();

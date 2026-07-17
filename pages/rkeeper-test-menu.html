@@ -11,10 +11,10 @@
         if (accepted) document.documentElement.dataset.serviceAccepted = "true";
       })();
     </script>
-    <title>Demo Restaurant | Живое QR-меню</title>
+    <title>r_keeper Test Menu | Exort</title>
     <meta
       name="description"
-      content="QR-меню ресторана: категории, поиск, карточки блюд, стоп-лист и фото блюд."
+      content="Тестовое QR-меню r_keeper: категории, блюда, цены из r_keeper и данные Exort."
     />
     <link rel="preconnect" href="https://images.unsplash.com" />
     <link rel="preconnect" href="https://jnxwbqcnpxezjvfgdabc.supabase.co" />
@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../css/styles.css?v=9" />
-    <script defer src="../js/app.js?v=21"></script>
+    <script defer src="../js/rkeeper-test-menu.js?v=1"></script>
   </head>
   <body>
     <div class="service-modal" data-service-modal aria-hidden="false">
@@ -45,8 +45,8 @@
 
     <header class="topbar">
       <a class="brand" href="../index.html" aria-label="Demo Restaurant">
-        <span class="brand-mark">DR</span>
-        <span>Demo Restaurant</span>
+        <span class="brand-mark">RK</span>
+        <span>r_keeper test menu</span>
       </a>
 
       <nav class="top-actions" aria-label="Быстрые действия" data-ui-aria="quickActions">
@@ -61,17 +61,21 @@
       <section class="hero">
         <div class="hero-bg" aria-hidden="true"></div>
         <div class="hero-content">
-          <p class="kicker" data-restaurant-type>Гастробар и завтраки</p>
-          <h1 data-restaurant-name>Меню сегодня</h1>
+          <p class="kicker" data-restaurant-type>Тестовая интеграция r_keeper</p>
+          <h1 data-restaurant-name>r_keeper test menu</h1>
           <p data-restaurant-description>
-            Выберите категорию, найдите блюдо по названию или откройте карточку, чтобы посмотреть состав и фото.
+            Это отдельная тестовая страница. Цены приходят из r_keeper, а фото и описания остаются из Exort.
           </p>
           <div class="hero-meta">
             <span data-hero-open-until>Открыто до 23:00</span>
             <span data-hero-city>Алматы</span>
-            <span data-hero-service>10% сервис</span>
+            <span data-hero-service>r_keeper test</span>
           </div>
         </div>
+      </section>
+
+      <section class="status-row" aria-live="polite">
+        <p>Тестовая интеграция r_keeper. Боевые demo-страницы Exort не изменены.</p>
       </section>
 
       <section class="menu-tools" aria-label="Поиск и фильтры меню" data-ui-aria="menuSearch">

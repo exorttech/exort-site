@@ -109,14 +109,49 @@ create table if not exists public.menu_items (
   description_kz text,
   description_en text,
   price integer not null,
+  old_price integer,
   currency text not null default 'KZT',
   image_url text,
+  weight text,
+  calories integer,
+  spice_level text,
   is_active boolean not null default true,
   sort_order integer not null default 0,
   version integer not null default 1,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+create table if not exists public.menu_analytics_events (
+  id uuid primary key default gen_random_uuid(),
+  restaurant_id uuid not null references public.restaurants(id) on delete cascade,
+  event_type text not null,
+  menu_item_id uuid references public.menu_items(id) on delete set null,
+  language text,
+  device_type text,
+  session_id text,
+  user_agent text,
+  referrer text,
+  created_at timestamptz not null default now(),
+  constraint menu_analytics_events_event_type_check
+    check (event_type in ('menu_open', 'dish_open', 'dish_close', 'language_change')),
+  constraint menu_analytics_events_device_type_check
+    check (device_type is null or device_type in ('mobile', 'tablet', 'desktop')),
+  constraint menu_analytics_events_language_check
+    check (language is null or language in ('ru', 'kk', 'kz', 'en')),
+  constraint menu_analytics_events_session_length_check
+    check (session_id is null or char_length(session_id) <= 120),
+  constraint menu_analytics_events_user_agent_length_check
+    check (user_agent is null or char_length(user_agent) <= 500),
+  constraint menu_analytics_events_referrer_length_check
+    check (referrer is null or char_length(referrer) <= 500)
+);
+
+alter table public.menu_analytics_events
+  drop constraint if exists menu_analytics_events_event_type_check;
+alter table public.menu_analytics_events
+  add constraint menu_analytics_events_event_type_check
+  check (event_type in ('menu_open', 'dish_open', 'dish_close', 'language_change'));
 
 alter table public.menu_items
   add column if not exists content_key text,
@@ -128,6 +163,10 @@ alter table public.menu_items
   add column if not exists is_stoplisted boolean not null default false,
   add column if not exists inactive_until timestamptz,
   add column if not exists image_path text,
+  add column if not exists old_price integer,
+  add column if not exists weight text,
+  add column if not exists calories integer,
+  add column if not exists spice_level text,
   add column if not exists title_ru text,
   add column if not exists title_kk text,
   add column if not exists title_en text,
@@ -172,6 +211,22 @@ create index if not exists menu_items_restaurant_stoplisted_idx
   on public.menu_items (restaurant_id, is_stoplisted);
 create index if not exists menu_items_restaurant_inactive_until_idx
   on public.menu_items (restaurant_id, inactive_until);
+create index if not exists menu_analytics_events_restaurant_id_idx
+  on public.menu_analytics_events (restaurant_id);
+create index if not exists menu_analytics_events_event_type_idx
+  on public.menu_analytics_events (event_type);
+create index if not exists menu_analytics_events_menu_item_id_idx
+  on public.menu_analytics_events (menu_item_id);
+create index if not exists menu_analytics_events_created_at_idx
+  on public.menu_analytics_events (created_at);
+create index if not exists menu_analytics_events_language_idx
+  on public.menu_analytics_events (language);
+create index if not exists menu_analytics_events_device_type_idx
+  on public.menu_analytics_events (device_type);
+create index if not exists menu_analytics_events_session_id_idx
+  on public.menu_analytics_events (session_id);
+create index if not exists menu_analytics_events_restaurant_created_idx
+  on public.menu_analytics_events (restaurant_id, created_at desc);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -310,6 +365,7 @@ alter table public.restaurants enable row level security;
 alter table public.restaurant_admin_access enable row level security;
 alter table public.menu_categories enable row level security;
 alter table public.menu_items enable row level security;
+alter table public.menu_analytics_events enable row level security;
 
 -- Replace all policies on the MVP tables so a previous Auth-based schema cannot
 -- accidentally preserve public or authenticated write access.
@@ -325,7 +381,8 @@ begin
         'restaurants',
         'restaurant_admin_access',
         'menu_categories',
-        'menu_items'
+        'menu_items',
+        'menu_analytics_events'
       )
   loop
     execute format(
@@ -342,15 +399,18 @@ revoke all on public.restaurant_admin_access from public, anon, authenticated;
 revoke insert, update, delete on public.restaurants from public, anon, authenticated;
 revoke insert, update, delete on public.menu_categories from public, anon, authenticated;
 revoke insert, update, delete on public.menu_items from public, anon, authenticated;
+revoke select, update, delete on public.menu_analytics_events from public, anon, authenticated;
 
 grant usage on schema public to anon, authenticated;
 grant select on public.restaurants to anon, authenticated;
 grant select on public.menu_categories to anon, authenticated;
 grant select on public.menu_items to anon, authenticated;
+grant insert on public.menu_analytics_events to anon, authenticated;
 grant all on public.restaurants to service_role;
 grant all on public.restaurant_admin_access to service_role;
 grant all on public.menu_categories to service_role;
 grant all on public.menu_items to service_role;
+grant all on public.menu_analytics_events to service_role;
 
 create policy "MVP public can read active restaurants"
 on public.restaurants
@@ -395,8 +455,23 @@ using (
   )
 );
 
+create policy "MVP public can insert analytics events"
+on public.menu_analytics_events
+for insert
+to anon, authenticated
+with check (
+  exists (
+    select 1
+    from public.restaurants restaurant
+    where restaurant.id = menu_analytics_events.restaurant_id
+      and restaurant.is_active
+  )
+);
+
 -- No SELECT policy is created for restaurant_admin_access. Only service_role /
 -- trusted backend operations can read or mutate PIN access records.
+-- No SELECT policy is created for menu_analytics_events. Admin analytics are
+-- returned through trusted backend aggregation only.
 
 insert into public.restaurants (slug, name, city, is_active)
 values ('exort-demo', 'Exort Demo Restaurant', 'Almaty', true)

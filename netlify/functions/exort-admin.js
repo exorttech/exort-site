@@ -9,7 +9,7 @@ const SESSION_TTL_SECONDS = 60 * 60 * 8;
 
 exports.handler = async (event) => {
   if (event.httpMethod === "OPTIONS") return response(204, {});
-  if (event.httpMethod !== "POST") return response(405, { error: "Method not allowed" });
+  if (event.httpMethod !== "POST") return response(405, { error: "????? ?? ??????????????" });
 
   const configError = getConfigError();
   if (configError) return response(500, { error: configError });
@@ -22,7 +22,7 @@ exports.handler = async (event) => {
     if (action === "login") return login(restaurantSlug, body.pin);
 
     const session = verifySession(body.sessionToken, restaurantSlug);
-    if (!session) return response(401, { error: "Admin session expired. Sign in again." });
+    if (!session) return response(401, { error: "?????? ?????????????? ???????. ??????? ?????." });
 
     if (action === "getData") return getData(restaurantSlug);
     if (action === "translate" || action === "translateMissing") return translate(action, body);
@@ -33,10 +33,10 @@ exports.handler = async (event) => {
     if (action === "saveCategory") return saveCategory(restaurantSlug, body.category);
     if (action === "sortCategories") return sortCategories(restaurantSlug, body.categories || []);
 
-    return response(400, { error: "Unknown admin action." });
+    return response(400, { error: "??????????? ???????? ???????." });
   } catch (error) {
     console.error("[exort-admin]", error);
-    return response(500, { error: error.message || "Unexpected admin backend error." });
+    return response(500, { error: error.message || "?????????????? ?????? ????????? ????? ???????." });
   }
 };
 
@@ -52,10 +52,10 @@ async function login(slug, pin) {
   });
 
   const access = accessRows[0];
-  if (!access) return response(403, { error: "PIN access is not configured for this restaurant." });
+  if (!access) return response(403, { error: "PIN-?????? ??? ????? ????????? ??? ?? ????????." });
 
   const valid = verifyPin(pin, access.pin_hash);
-  if (!valid) return response(401, { error: "Invalid PIN." });
+  if (!valid) return response(401, { error: "???????? PIN." });
 
   const token = signSession({ restaurant_id: restaurant.id, slug: restaurant.slug, exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS });
   const data = await buildAdminData(restaurant);
@@ -90,7 +90,7 @@ async function buildAdminData(restaurant) {
 
 async function saveItem(slug, item) {
   const restaurant = await getRestaurant(slug);
-  if (!item || !String(item.name_ru || "").trim()) throw new Error("RU dish name is required.");
+  if (!item || !String(item.name_ru || "").trim()) throw new Error("??????? ???????? ????? ???????????.");
 
   let imageData = {};
   const current = item.id ? await getOwnedRow("menu_items", restaurant.id, item.id) : null;
@@ -175,7 +175,7 @@ async function uploadItemPhoto(slug, itemId, imageData) {
 
 async function saveCategory(slug, category) {
   const restaurant = await getRestaurant(slug);
-  if (!category || !String(category.name_ru || category.name || "").trim()) throw new Error("RU category name is required.");
+  if (!category || !String(category.name_ru || category.name || "").trim()) throw new Error("??????? ???????? ????????? ???????????.");
   const current = category.id ? await getOwnedRow("menu_categories", restaurant.id, category.id) : null;
   const nameRu = clean(category.name_ru || category.name);
   const payload = {
@@ -214,7 +214,7 @@ async function sortCategories(slug, categories) {
 
 async function translate(action, body) {
   if (!process.env.EXORT_TRANSLATE_API_URL) {
-    return response(503, { error: "Translation backend is not configured yet. Add EXORT_TRANSLATE_API_URL to enable auto-translation." });
+    return response(503, { error: "?????? ???????????? ???? ?? ????????. ???????? EXORT_TRANSLATE_API_URL, ????? ???????? ???????????." });
   }
 
   const upstream = await fetch(process.env.EXORT_TRANSLATE_API_URL, {

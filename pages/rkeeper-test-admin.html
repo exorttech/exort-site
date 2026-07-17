@@ -4,16 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f7f8fb" />
-    <title>Exort Admin</title>
+    <title>Exort r_keeper Test Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="../css/demo-admin.css?v=20" />
+    <link rel="stylesheet" href="../css/demo-admin.css?v=13" />
     <link rel="stylesheet" href="../css/demo-admin-navigation.css?v=9" />
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script defer src="../js/admin-analytics.js?v=21"></script>
-    <script defer src="../js/admin-qr.js?v=20"></script>
-    <script defer src="../js/demo-admin.js?v=20"></script>
+    <script defer src="../js/rkeeper-test-admin.js?v=1"></script>
   </head>
   <body>
     <svg class="icon-sprite" aria-hidden="true">
@@ -23,7 +20,6 @@
       <symbol id="icon-stop" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m6.4 6.4 11.2 11.2"/></symbol>
       <symbol id="icon-photo" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 15-4.5-4.5L6 20"/></symbol>
       <symbol id="icon-analytics" viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/><path d="M20 16v-3"/></symbol>
-      <symbol id="icon-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM14 20h2M20 14h1"/></symbol>
       <symbol id="icon-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M19 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></symbol>
       <symbol id="icon-support" viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H9l-5 3v-7a9 9 0 1 1 17 0Z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/></symbol>
       <symbol id="icon-logout" viewBox="0 0 24 24"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M14 8l4 4-4 4M18 12H9"/></symbol>
@@ -35,13 +31,13 @@
       <div class="login-card">
         <div class="login-brand"><span>E</span><strong>Exort</strong></div>
         <div class="restaurant-identity">
-          <div class="restaurant-avatar" data-restaurant-initial>E</div>
-          <div><strong data-restaurant-name>Exort Demo Restaurant</strong><span><i></i> Система подключена</span></div>
+          <div class="restaurant-avatar" data-restaurant-initial>R</div>
+          <div><strong data-restaurant-name>r_keeper Test Restaurant</strong><span><i></i> Тестовая интеграция r_keeper</span></div>
         </div>
         <div class="login-copy">
-          <p class="kicker">Безопасный доступ</p>
-          <h1>Вход в административную панель</h1>
-          <p>Введите PIN ресторана, чтобы управлять меню.</p>
+          <p class="kicker">Тестовый контур</p>
+          <h1>Вход в r_keeper test admin</h1>
+          <p>Введите PIN тестового ресторана, чтобы проверить интеграцию r_keeper.</p>
         </div>
         <form class="pin-form" data-pin-form>
           <label for="pin">PIN / пароль</label>
@@ -52,7 +48,7 @@
           <p class="form-error" data-login-error aria-live="polite"></p>
           <button class="primary-button" type="submit"><span data-login-label>Войти</span></button>
         </form>
-        <p class="support-note">Если забыли PIN — обратитесь в поддержку Exort.</p>
+        <p class="support-note">Тестовая админка r_keeper не влияет на боевое меню Exort.</p>
       </div>
     </section>
 
@@ -70,10 +66,9 @@
           <button type="button" data-nav="categories"><svg><use href="#icon-categories"/></svg><span>Категории</span></button>
           <button type="button" data-nav="stoplist"><svg><use href="#icon-stop"/></svg><span>Стоп-лист</span></button>
           <button type="button" data-nav="analytics"><svg><use href="#icon-analytics"/></svg><span>Аналитика</span></button>
-          <button type="button" data-nav="qr"><svg><use href="#icon-qr"/></svg><span>QR-коды</span></button>
         </nav>
         <div class="side-footer">
-          <a data-menu-link href="/pages/menu-demo.html?restaurant=exort-demo" target="_blank" rel="noreferrer"><svg><use href="#icon-external"/></svg><span>Открыть меню</span></a>
+          <a data-menu-link href="/pages/rkeeper-test-menu.html?restaurant=rkeeper-test" target="_blank" rel="noreferrer"><svg><use href="#icon-external"/></svg><span>Открыть test menu</span></a>
           <a href="https://wa.me/77712033044" target="_blank" rel="noreferrer"><svg><use href="#icon-support"/></svg><span>Поддержка Exort</span></a>
           <button type="button" data-logout><svg><use href="#icon-logout"/></svg><span>Выйти</span></button>
         </div>
@@ -86,13 +81,26 @@
             <h1 data-view-title>Обзор</h1>
           </div>
           <div class="topbar-actions">
-            <span class="connection-status"><i></i><span>Меню онлайн</span></span>
-            <a class="secondary-button compact" data-menu-link href="/pages/menu-demo.html?restaurant=exort-demo" target="_blank" rel="noreferrer">Открыть меню</a>
+            <span class="connection-status"><i></i><span>Тестовый контур онлайн</span></span>
+            <a class="secondary-button compact" data-menu-link href="/pages/rkeeper-test-menu.html?restaurant=rkeeper-test" target="_blank" rel="noreferrer">Открыть test menu</a>
             <button class="icon-button" type="button" data-logout aria-label="Выйти">↗</button>
           </div>
         </header>
 
         <section class="view is-active" data-view="overview">
+          <article class="panel" data-rkeeper-panel>
+            <div class="panel-heading">
+              <div>
+                <p class="kicker">Тестовая интеграция</p>
+                <h2>Интеграция r_keeper</h2>
+              </div>
+            </div>
+            <div class="attention-list" data-rkeeper-status-list></div>
+            <div class="section-toolbar">
+              <p data-rkeeper-status-note>Статус синхронизации загружается.</p>
+              <button class="primary-button compact" type="button" data-rkeeper-sync-button>Запустить тестовую синхронизацию</button>
+            </div>
+          </article>
           <div class="metric-grid" data-metrics></div>
           <article class="menu-hero-manager" data-menu-hero-manager>
             <div class="menu-hero-manager__copy">
@@ -112,7 +120,7 @@
               <div class="quick-actions">
                 <button type="button" data-action="add-item"><span>+</span><strong>Добавить блюдо</strong><small>Название, цена и фото</small></button>
                 <button type="button" data-action="add-category"><span>+</span><strong>Добавить категорию</strong><small>Новый раздел меню</small></button>
-                <a data-menu-link href="/pages/menu-demo.html?restaurant=exort-demo" target="_blank" rel="noreferrer"><span>↗</span><strong>Открыть демо меню</strong><small>Посмотреть глазами гостя</small></a>
+                <a data-menu-link href="/pages/rkeeper-test-menu.html?restaurant=rkeeper-test" target="_blank" rel="noreferrer"><span>↗</span><strong>Открыть test menu</strong><small>Посмотреть тестовую витрину гостя</small></a>
               </div>
             </article>
             <article class="panel attention-panel">
@@ -236,12 +244,6 @@
             </div>
           </div>
         </section>
-
-        <section class="view" data-view="qr">
-          <div class="qr-page" data-qr-root>
-            <div class="analytics-loading">Загружаем QR-коды...</div>
-          </div>
-        </section>
       </main>
 
       <nav class="mobile-nav" aria-label="Мобильная навигация">
@@ -249,7 +251,7 @@
         <button type="button" data-nav="menu" aria-label="Меню"><svg><use href="#icon-menu"/></svg><span>Меню</span></button>
         <button type="button" data-nav="stoplist" aria-label="Стоп-лист"><svg><use href="#icon-stop"/></svg><span>Стоп</span></button>
         <button type="button" data-nav="analytics" aria-label="Аналитика"><svg><use href="#icon-analytics"/></svg><span>Аналитика</span></button>
-        <button type="button" data-nav="qr" aria-label="QR-коды"><svg><use href="#icon-qr"/></svg><span>QR</span></button>
+        <button type="button" data-nav="categories" aria-label="Категории"><svg><use href="#icon-categories"/></svg><span>Категории</span></button>
       </nav>
     </div>
 
@@ -305,6 +307,7 @@
                   <label>Цена<input name="price" type="number" min="0" required /></label>
                   <label>Категория<select name="category_id" required></select></label>
                 </div>
+                <p class="support-note" data-rkeeper-price-hint>Цена из r_keeper</p>
                 <div class="sales-status-row">
                   <div class="status-segment" data-status-segment>
                     <label data-status-choice>

@@ -1,19 +1,14 @@
 const SUPABASE_REST_URL = "https://jnxwbqcnpxezjvfgdabc.supabase.co/rest/v1/";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T2QhpE8LByMP8_uO_cBdPg_bbLkAbBv";
 const DEFAULT_RESTAURANT_SLUG = "exort-demo";
-const ADMIN_API_URL = "/.netlify/functions/exort-admin";
+const ADMIN_API_URL = getAdminApiUrl();
 const sessionKeyPrefix = "exort-admin-session:";
-const themeStorageKey = "exort_theme";
-
-// TEMP DEVELOPMENT MODE
-// Set to false before production launch
-const DEV_BYPASS_AUTH = false;
 
 const state = {
   restaurant: { slug: DEFAULT_RESTAURANT_SLUG, name: "Exort Demo Restaurant", city: "Almaty", brand: "#2563eb" },
   categories: [],
   items: [],
-  sessionToken: DEV_BYPASS_AUTH ? "dev-bypass" : sessionStorage.getItem(sessionKeyPrefix + getRestaurantSlug()) || "",
+  sessionToken: sessionStorage.getItem(sessionKeyPrefix + getRestaurantSlug()) || "",
   activeView: "overview",
   loading: false,
   dirty: false,
@@ -33,12 +28,17 @@ const el = {
   viewTitle: document.querySelector("[data-view-title]"),
   viewKicker: document.querySelector("[data-view-kicker]"),
   metrics: document.querySelector("[data-metrics]"),
+  menuHeroManager: document.querySelector("[data-menu-hero-manager]"),
+  menuHeroPreview: document.querySelector("[data-menu-hero-preview]"),
+  menuHeroFile: document.querySelector("[data-menu-hero-file]"),
+  menuHeroFileLabel: document.querySelector("[data-menu-hero-file-label]"),
   attentionList: document.querySelector("[data-attention-list]"),
   attentionCount: document.querySelector("[data-attention-count]"),
   dishGrid: document.querySelector("[data-dish-grid]"),
   categoryList: document.querySelector("[data-category-list]"),
   stopList: document.querySelector("[data-stop-list]"),
   photoGrid: document.querySelector("[data-photo-grid]"),
+  analyticsRoot: document.querySelector("[data-analytics-root]"),
   categoryFilter: document.querySelector("[data-category-filter]"),
   statusFilter: document.querySelector("[data-status-filter]"),
   menuSearch: document.querySelector("[data-menu-search]"),
@@ -67,18 +67,15 @@ const viewMeta = {
   menu: ["Меню", "Управление блюдами"],
   categories: ["Категории", "Структура меню"],
   stoplist: ["Стоп-лист", "Быстрая доступность"],
-  photos: ["Фотографии", "Медиатека"],
+  analytics: ["Аналитика", "Поведение гостей и эффективность меню"],
+  qr: ["QR-коды", "Источники переходов в меню"],
 };
 
-Object.assign(viewMeta, {
-  overview: ["Обзор", "Рабочее пространство"],
-  menu: ["Меню", "Управление блюдами"],
-  categories: ["Категории", "Структура меню"],
-  stoplist: ["Стоп-лист", "Быстрая доступность"],
-  photos: ["Фотографии", "Медиатека"],
-});
-
 init();
+window.ExortAdminBridge = {
+  api: (action, payload = {}) => adminApi(action, payload),
+  restaurantSlug: () => getRestaurantSlug(),
+};
 
 function getRestaurantSlug() {
   const querySlug = new URLSearchParams(window.location.search).get("restaurant");
@@ -90,168 +87,94 @@ function getRestaurantSlug() {
   return DEFAULT_RESTAURANT_SLUG;
 }
 
+
+function getSpiceLevelLabel(value) {
+  return {
+    mild: "Легкая острота",
+    medium: "Средняя острота",
+    hot: "Острая",
+  }[String(value || "").trim()] || "";
+}
+
+
+
+
+
+function buildOptionalItemPayload(data, existing) {
+  const payload = {
+    id: existing?.id || "",
+    category_id: data.category_id,
+    name_ru: data.name_ru.trim(),
+    name_kz: data.name_kz.trim(),
+    name_en: data.name_en.trim(),
+    description_ru: data.description_ru.trim(),
+    description_kz: data.description_kz.trim(),
+    description_en: data.description_en.trim(),
+    price: Number(data.price),
+    sort_order: Number(data.sort_order) || 0,
+    is_active: existing ? existing.is_active : true,
+    is_stoplisted: data.is_stoplisted === "true",
+    inactive_until: existing?.inactive_until || null,
+    image_url: el.itemForm.dataset.image || "",
+    imageData: el.itemForm.dataset.pendingImage || "",
+  };
+
+  const oldPrice = String(data.old_price || "").trim();
+  const weight = String(data.weight || "").trim();
+  const calories = String(data.calories || "").trim();
+  const spiceLevel = String(data.spice_level || "").trim();
+
+  if (oldPrice) payload.old_price = Number(oldPrice);
+  if (weight) payload.weight = weight;
+  if (calories) payload.calories = Number(calories);
+  if (spiceLevel) payload.spice_level = spiceLevel;
+
+  return payload;
+}
+
+
 function sanitizeSlug(value) {
   return String(value || DEFAULT_RESTAURANT_SLUG).toLowerCase().replace(/[^a-z0-9-]/g, "") || DEFAULT_RESTAURANT_SLUG;
 }
 
-function ensureAdminEnhancements() {
-  if (document.querySelector("[data-photo-filter]")) return;
-
-  const photoFilter = document.createElement("select");
-  photoFilter.dataset.photoFilter = "";
-  photoFilter.setAttribute("aria-label", "Фильтр фото");
-  photoFilter.innerHTML = `
-    <option value="all">Все фото</option>
-    <option value="with">С фото</option>
-    <option value="missing">Без фото</option>
-  `;
-  el.statusFilter?.insertAdjacentElement("afterend", photoFilter);
-  el.photoFilter = photoFilter;
-
-  const translationFilter = document.createElement("select");
-  translationFilter.dataset.translationFilter = "";
-  translationFilter.setAttribute("aria-label", "Фильтр переводов");
-  translationFilter.innerHTML = `
-    <option value="all">Все переводы</option>
-    <option value="complete">Перевод полный</option>
-    <option value="missing">Нет перевода</option>
-  `;
-  photoFilter.insertAdjacentElement("afterend", translationFilter);
-  el.translationFilter = translationFilter;
-
-  const translateMissing = document.createElement("button");
-  translateMissing.type = "button";
-  translateMissing.className = "secondary-button compact toolbar-action";
-  translateMissing.dataset.translateMissing = "";
-  translateMissing.textContent = "Заполнить переводы";
-  document.querySelector(".menu-toolbar")?.append(translateMissing);
-
-  const langTabs = document.querySelector(".language-tabs");
-  if (langTabs && !document.querySelector("[data-translate-current-item]")) {
-    const tools = document.createElement("div");
-    tools.className = "drawer-tools";
-    tools.innerHTML = `
-      <button class="secondary-button compact" type="button" data-translate-current-item>Перевести с RU</button>
-      <small>Перевод будет заполнен автоматически.</small>
-    `;
-    langTabs.insertAdjacentElement("afterend", tools);
+function getAdminApiUrl() {
+  const hostname = window.location.hostname.toLowerCase();
+  if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") {
+    return "https://exort.kz/api/exort-admin";
   }
-
-  const imageEditor = document.querySelector(".image-editor");
-  if (imageEditor && !document.querySelector("[data-remove-editor-image]")) {
-    imageEditor.insertAdjacentHTML("beforeend", `
-      <div class="media-actions">
-        <button class="secondary-button compact" type="button" data-remove-editor-image>Удалить фото</button>
-        <small>Фото будет оптимизировано перед загрузкой.</small>
-      </div>
-    `);
-  }
-
-  const categoryForm = el.categoryForm;
-  if (categoryForm && !categoryForm.elements.name_kz) {
-    const nameInput = categoryForm.elements.name;
-    nameInput.name = "name_ru";
-    nameInput.closest("label").childNodes[0].textContent = "Название RU";
-    nameInput.insertAdjacentHTML("afterend", `
-      <span class="field-hint">RU обязательно, KZ/EN можно добавить позже.</span>
-    `);
-    categoryForm.querySelector(".field-hint")?.closest("label")?.insertAdjacentHTML("afterend", `
-      <label>Название KZ<input name="name_kz" maxlength="80" autocomplete="off" /></label>
-      <label>Название EN<input name="name_en" maxlength="80" autocomplete="off" /></label>
-    `);
-  }
+  return "/api/exort-admin";
 }
+
 
 async function init() {
   ensureAdminEnhancements();
-  applyTheme(localStorage.getItem(themeStorageKey) || document.documentElement.dataset.theme || "light");
   bindEvents();
   await loadPublicRestaurantIdentity();
-
-  if (DEV_BYPASS_AUTH) {
-    await loadDevAdminData();
-    openApp(false);
-    navigate(location.hash.slice(1) || "overview");
-    return;
-  }
+  showLoginScreen();
+  const requestedView = getRequestedViewFromHash();
 
   if (state.sessionToken) {
     try {
       await loadAdminData();
       openApp(false);
+      navigate(requestedView || "overview");
+      return;
     } catch (error) {
+      console.warn("[exort-admin] Stored session is invalid or expired.", error);
       sessionStorage.removeItem(sessionKeyPrefix + getRestaurantSlug());
       state.sessionToken = "";
+      clearAdminHash("Unauthorized admin hash was cleared because there is no valid session.");
       showLoginError(error.message || "Сессия устарела. Введите PIN еще раз.");
+      showLoginScreen();
+      return;
     }
   }
 
-  navigate(location.hash.slice(1) || "overview");
+  if (requestedView) {
+    clearAdminHash("Login is required before opening admin views.");
+  }
 }
 
-function bindEvents() {
-  el.pinForm.addEventListener("submit", handleLogin);
-  el.pinVisibility.addEventListener("click", togglePinVisibility);
-
-  document.addEventListener("click", handleDocumentClick);
-  [el.menuSearch, el.categoryFilter, el.statusFilter, el.photoFilter, el.translationFilter]
-    .filter(Boolean)
-    .forEach((control) => control.addEventListener("input", renderDishes));
-
-  el.itemForm.addEventListener("input", (event) => {
-    if (event.target?.name === "sort_order") el.itemForm.dataset.sortMode = "manual";
-    renderDishPreview();
-    state.dirty = true;
-  });
-  el.itemForm.addEventListener("change", () => {
-    syncSortOrderForSelectedCategory();
-    updateEditorStatusFromForm();
-    renderDishPreview();
-    state.dirty = true;
-  });
-  el.itemForm.addEventListener("submit", handleItemSubmit);
-  el.deleteItem.addEventListener("click", handleDeleteItem);
-  el.editorFile.addEventListener("change", handleEditorFile);
-  el.photoInput.addEventListener("change", () => handleBulkUploads(el.photoInput.files));
-
-  ["dragenter", "dragover"].forEach((type) => {
-    el.uploadZone.addEventListener(type, (event) => {
-      event.preventDefault();
-      el.uploadZone.classList.add("is-dragging");
-    });
-  });
-
-  ["dragleave", "drop"].forEach((type) => {
-    el.uploadZone.addEventListener(type, (event) => {
-      event.preventDefault();
-      el.uploadZone.classList.remove("is-dragging");
-    });
-  });
-
-  el.uploadZone.addEventListener("drop", (event) => handleBulkUploads(event.dataTransfer.files));
-
-  el.confirmDialog.addEventListener("close", () => {
-    if (el.confirmDialog.returnValue === "confirm") state.pendingConfirm?.();
-    state.pendingConfirm = null;
-  });
-
-  el.categoryForm.addEventListener("submit", handleCategorySubmit);
-  document.querySelector("[data-close-category]").addEventListener("click", () => el.categoryDialog.close());
-
-  document.querySelectorAll("[data-lang-tab]").forEach((tab) => {
-    tab.addEventListener("click", () => {
-      document.querySelectorAll("[data-lang-tab]").forEach((node) => node.classList.toggle("is-active", node === tab));
-      document.querySelectorAll("[data-lang-pane]").forEach((node) => node.classList.toggle("is-active", node.dataset.langPane === tab.dataset.langTab));
-      renderDishPreview();
-    });
-  });
-
-  window.addEventListener("beforeunload", (event) => {
-    if (!state.dirty) return;
-    event.preventDefault();
-    event.returnValue = "";
-  });
-}
 
 async function requestPublicSupabase(table, query) {
   const url = new URL(table, SUPABASE_REST_URL);
@@ -318,35 +241,6 @@ async function loadDevAdminData() {
   }
 }
 
-async function adminApi(action, payload = {}) {
-  const response = await fetch(ADMIN_API_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      action,
-      restaurantSlug: getRestaurantSlug(),
-      sessionToken: state.sessionToken,
-      ...payload,
-    }),
-  });
-
-  const rawText = await response.text();
-  let data = null;
-  try {
-    data = rawText ? JSON.parse(rawText) : {};
-  } catch {
-    data = { error: rawText };
-  }
-
-  if (!response.ok || data?.error) {
-    const message = data?.error || `Admin API error ${response.status}`;
-    throw new Error(response.status === 502
-      ? "Сервис временно недоступен. Попробуйте обновить страницу или обратитесь в поддержку Exort."
-      : message);
-  }
-
-  return data;
-}
 
 async function handleLogin(event) {
   event.preventDefault();
@@ -359,6 +253,7 @@ async function handleLogin(event) {
     sessionStorage.setItem(sessionKeyPrefix + getRestaurantSlug(), state.sessionToken);
     applyAdminData(result);
     openApp(false);
+    navigate("overview");
     toast("Доступ открыт", "success");
   } catch (error) {
     showLoginError(error.message || "Не удалось проверить PIN.");
@@ -367,11 +262,6 @@ async function handleLogin(event) {
   }
 }
 
-function showLoginError(message) {
-  el.loginError.textContent = message.includes("Failed to fetch")
-    ? "Сервис временно недоступен. Попробуйте обновить страницу или обратитесь в поддержку Exort."
-    : message;
-}
 
 async function loadAdminData() {
   const result = await adminApi("getData");
@@ -435,6 +325,27 @@ function normalizeItem(item) {
   };
 }
 
+function isMenuHeroItem(item) {
+  const values = [
+    item?.content_key,
+    item?.id,
+    item?.name_ru,
+    item?.title_ru,
+    item?.name_en,
+    item?.title_en,
+  ].map((value) => String(value || "").trim().toLowerCase());
+
+  return values.some((value) => value === "menu-hero" || value === "menu_hero" || value === "menu hero");
+}
+
+function getMenuHeroItem() {
+  return state.items.find(isMenuHeroItem);
+}
+
+function getDishItems() {
+  return state.items.filter((item) => !isMenuHeroItem(item));
+}
+
 function openApp(render = true) {
   el.login.hidden = true;
   el.app.hidden = false;
@@ -442,17 +353,17 @@ function openApp(render = true) {
   if (render) renderAll();
 }
 
-function logout() {
-  if (DEV_BYPASS_AUTH) {
-    toast("Авторизация временно отключена для разработки.", "success");
-    return;
-  }
+function showLoginScreen() {
+  el.app.hidden = true;
+  el.login.hidden = false;
+}
 
+function logout() {
   const run = () => {
     sessionStorage.removeItem(sessionKeyPrefix + getRestaurantSlug());
     state.sessionToken = "";
-    el.app.hidden = true;
-    el.login.hidden = false;
+    clearAdminHash();
+    showLoginScreen();
     el.pinInput.value = "";
   };
   state.dirty ? confirmAction("Выйти без сохранения?", "Несохраненные изменения будут потеряны.", run) : run();
@@ -482,49 +393,98 @@ function navigate(view) {
   el.viewKicker.textContent = viewMeta[view][1];
   history.replaceState(null, "", `#${view}`);
   window.scrollTo({ top: 0, behavior: "smooth" });
+  if (view === "analytics") window.ExortAnalytics?.mount({ root: el.analyticsRoot });
+  if (view === "qr") window.ExortQr?.mount({ root: document.querySelector("[data-qr-root]") });
+}
+
+function getRequestedViewFromHash() {
+  const rawHash = window.location.hash.replace(/^#/, "");
+  return viewMeta[rawHash] ? rawHash : "";
+}
+
+function clearAdminHash(reason = "") {
+  if (!window.location.hash) return;
+  if (reason) {
+    console.warn("[exort-admin]", reason, window.location.hash);
+  }
+  history.replaceState(null, "", `${window.location.pathname}${window.location.search}`);
 }
 
 function renderAll() {
   syncRestaurantIdentity();
   renderMetrics();
+  renderMenuHeroManager();
   renderAttention();
   renderFilters();
   renderDishes();
   renderCategories();
   renderStopList();
-  renderPhotos();
 }
 
-function renderMetrics() {
-  const active = state.items.filter((item) => item.is_active && !item.is_stoplisted && !isTemporarilyUnavailable(item)).length;
-  const stopped = state.items.filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item)).length;
-  const values = [
-    ["Всего блюд", state.items.length],
-    ["В продаже", active],
-    ["Стоп-лист", stopped],
-    ["Требует внимания", state.items.filter((item) => !item.image || hasMissingTranslation(item) || item.is_stoplisted || isTemporarilyUnavailable(item)).length],
-  ];
-  el.metrics.innerHTML = values.map(([label, value]) => `<article class="metric-card"><span>${label}</span><strong>${value}</strong></article>`).join("");
+function renderMenuHeroManager() {
+  if (!el.menuHeroManager || !el.menuHeroPreview) return;
+
+  const heroItem = getMenuHeroItem();
+  const image = heroItem?.image || "";
+  el.menuHeroPreview.innerHTML = image
+    ? `<img src="${escapeHtml(image)}" alt="Главное фото меню" />`
+    : `<div class="menu-hero-manager__placeholder"><strong>Фото пока не загружено</strong><span>Добавьте главное изображение для публичного меню</span></div>`;
+  if (el.menuHeroFileLabel) {
+    el.menuHeroFileLabel.textContent = image ? "Заменить фото" : "Загрузить фото";
+  }
 }
 
-function renderAttention() {
-  const issues = [
-    { name: "Нет фото", count: state.items.filter((item) => !item.image).length, view: "photos", type: "issue" },
-    { name: "Нет перевода", count: state.items.filter((item) => hasMissingTranslation(item)).length, view: "menu", type: "issue" },
-    { name: "Временно недоступные", count: state.items.filter(isTemporarilyUnavailable).length, view: "menu", type: "neutral" },
-    { name: "Стоп-лист", count: state.items.filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item)).length, view: "stoplist", type: "neutral" },
-    { name: "Выключенные категории", count: state.categories.filter((category) => !category.active).length, view: "categories", type: "neutral" },
-  ];
-  el.attentionCount.textContent = `${issues.reduce((sum, issue) => sum + issue.count, 0)} замечаний`;
-  el.attentionList.innerHTML = issues.map((issue) => {
-    const status = getAttentionStatus(issue.count, issue.type);
-    return `<button class="attention-item attention-item--${status.className}" type="button" data-attention-view="${issue.view}">
-      <i></i>
-      <span class="attention-copy"><strong>${issue.name}</strong><small>${status.description}</small></span>
-      <span class="attention-result"><b>${formatPositionCount(issue.count)}</b><em>${status.label}</em></span>
-    </button>`;
-  }).join("");
+async function handleMenuHeroFile() {
+  const file = el.menuHeroFile?.files?.[0];
+  if (!file) return;
+
+  const heroItem = getMenuHeroItem();
+  if (!heroItem) {
+    toast("Запись Menu hero не найдена", "danger");
+    el.menuHeroFile.value = "";
+    return;
+  }
+
+  const label = el.menuHeroFileLabel;
+  const previousLabel = label?.textContent || "Заменить фото";
+  try {
+    if (label) label.textContent = "Загружаем...";
+    el.menuHeroFile.disabled = true;
+    const imageData = await prepareImage(file);
+    const result = await adminApi("saveItem", {
+      item: {
+        id: heroItem.id,
+        category_id: heroItem.category_id || null,
+        content_key: heroItem.content_key || "menu-hero",
+        name_ru: heroItem.name_ru || "Menu hero",
+        name_kz: heroItem.name_kz || heroItem.name_ru || "Menu hero",
+        name_en: heroItem.name_en || heroItem.name_ru || "Menu hero",
+        description_ru: heroItem.description_ru || "",
+        description_kz: heroItem.description_kz || "",
+        description_en: heroItem.description_en || "",
+        price: Number(heroItem.price || 0),
+        sort_order: Number(heroItem.sort_order || 0),
+        is_active: heroItem.is_active !== false,
+        is_stoplisted: heroItem.is_stoplisted === true,
+        inactive_until: heroItem.inactive_until || null,
+        image_url: heroItem.image || "",
+        imageData,
+      },
+    });
+    upsertLocalItem(result.item);
+    renderAll();
+    toast("Главное фото меню обновлено", "success");
+  } catch (error) {
+    toast(toFriendlyError(error.message) || "Не удалось обновить главное фото", "danger");
+  } finally {
+    el.menuHeroFile.disabled = false;
+    el.menuHeroFile.value = "";
+    if (label) label.textContent = previousLabel;
+    renderMenuHeroManager();
+  }
 }
+
+
 
 function getAttentionStatus(count, type) {
   if (count === 0) return { className: "success", label: "Успешно", description: type === "neutral" ? "Все в норме" : "Проблем не найдено" };
@@ -552,8 +512,8 @@ function filteredItems() {
   const photo = el.photoFilter?.value || "all";
   const translation = el.translationFilter?.value || "all";
 
-  return state.items.filter((item) => {
-    const matchesQuery = !query || [item.name_ru, item.name_kz, item.name_en, item.description_ru].join(" ").toLowerCase().includes(query);
+  return getDishItems().filter((item) => {
+    const matchesQuery = !query || [getItemDisplayName(item), getItemDisplayDescription(item), item.content_key].join(" ").toLowerCase().includes(query);
     const matchesCategory = category === "all" || item.category_id === category;
     const matchesStatus =
       status === "all" ||
@@ -567,36 +527,13 @@ function filteredItems() {
   });
 }
 
-function renderDishes() {
-  const items = filteredItems();
-  el.dishGrid.innerHTML = items.length ? items.map((item) => {
-    const [statusClass] = status(item);
-    const badges = getDishBadges(item);
-    const isSale = !item.is_stoplisted && !isTemporarilyUnavailable(item) && item.is_active;
-    return `<article class="dish-card ${statusClass !== "active" ? "is-muted" : ""}">
-      <div class="dish-visual">${visual(item)}</div>
-      <div class="dish-body">
-        <div class="dish-title-row"><h3>${escapeHtml(item.name_ru || "Без названия")}</h3><button type="button" data-edit-item="${item.id}">Изменить</button></div>
-        <div class="dish-meta">
-          <span>${escapeHtml(categoryName(item.category_id))}</span>
-          <button class="stock-control ${isSale ? "is-on" : ""}" type="button" data-toggle-stock="${item.id}" aria-label="${isSale ? "Перевести блюдо в стоп-лист" : "Вернуть блюдо в продажу"}">
-            <span>${isSale ? "В продаже" : "На стопе"}</span>
-            <i aria-hidden="true"></i>
-          </button>
-        </div>
-        <div class="dish-badge-row">${badges.map((badge) => `<span class="exort-badge exort-badge--${badge.type}">${badge.label}</span>`).join("")}</div>
-        <div class="dish-price">${formatPrice(item.price, item.currency)}</div>
-      </div>
-    </article>`;
-  }).join("") : `<div class="empty-state"><h2>Ничего не найдено</h2><p>Измените фильтр или добавьте новое блюдо.</p></div>`;
-}
 
 function renderCategories() {
   el.categoryList.innerHTML = [...state.categories].sort((a, b) => a.sort - b.sort).map((category) => {
-    const count = state.items.filter((item) => item.category_id === category.id).length;
+    const count = getDishItems().filter((item) => item.category_id === category.id).length;
     return `<article class="category-row">
       <span class="drag-handle">⋮⋮</span>
-      <div><strong>${escapeHtml(category.name)}</strong><small>${count} блюд</small></div>
+      <div><strong>${escapeHtml(getCategoryDisplayName(category))}</strong><small>${count} блюд</small></div>
       <button class="stop-switch ${category.active ? "is-on" : ""}" type="button" data-toggle-category="${category.id}" aria-label="Активность категории"></button>
       <div class="row-actions">
         <button type="button" data-move-category="${category.id}" data-direction="-1">↑</button>
@@ -608,9 +545,9 @@ function renderCategories() {
 }
 
 function renderStopList() {
-  const stoppedItems = state.items.filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item));
+  const stoppedItems = getDishItems().filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item));
   el.stopList.innerHTML = stoppedItems.length ? stoppedItems.map((item) => `<article class="stop-row">
-    <div class="dish-placeholder">${escapeHtml((item.name_ru || "?").charAt(0))}</div>
+    <div class="dish-placeholder">${escapeHtml((getItemDisplayName(item) || "?").charAt(0))}</div>
     <div><strong>${escapeHtml(item.name_ru || "Без названия")}</strong><small>${escapeHtml(categoryName(item.category_id))} · ${formatPrice(item.price, item.currency)}</small></div>
     <span class="stop-state">На стопе</span>
     <button class="large-switch" type="button" data-toggle-stock="${item.id}" aria-label="Вернуть блюдо в продажу"></button>
@@ -621,23 +558,11 @@ function renderStopList() {
   </div>`;
 }
 
-function renderPhotos() {
-  const noPhoto = state.items.filter((item) => !item.image);
-  el.photoGrid.innerHTML = noPhoto.length
-    ? noPhoto.map((item) => `<article class="photo-card"><div>${visual(item)}</div><footer><strong>${escapeHtml(item.name_ru || "Без названия")}</strong><span>Нет фотографии</span></footer></article>`).join("")
-    : `<div class="empty-state"><h2>Все блюда с фото</h2><p>Медиатека заполнена.</p></div>`;
-}
 
 function visual(item) {
-  return item.image ? `<img src="${escapeHtml(item.image)}" alt="" />` : `<div class="dish-placeholder">${escapeHtml((item.name_ru || "?").charAt(0))}</div>`;
+  return item.image ? `<img src="${escapeHtml(item.image)}" alt="" />` : `<div class="dish-placeholder">${escapeHtml((getItemDisplayName(item) || "?").charAt(0))}</div>`;
 }
 
-function status(item) {
-  if (!item.is_active) return ["inactive", "неактивно"];
-  if (isTemporarilyUnavailable(item)) return ["temp", "временно недоступно"];
-  if (item.is_stoplisted) return ["stop", "стоп"];
-  return ["active", "в продаже"];
-}
 
 function isTemporarilyUnavailable(item) {
   return Boolean(item.inactive_until && new Date(item.inactive_until).getTime() > Date.now());
@@ -648,21 +573,10 @@ function hasMissingTranslation(item) {
 }
 
 function categoryName(id) {
-  return state.categories.find((category) => category.id === id)?.name || "Без категории";
+  const category = state.categories.find((entry) => entry.id === id);
+  return getCategoryDisplayName(category);
 }
 
-function formatPrice(value, currency = "KZT") {
-  const symbol = currency === "KZT" ? "₸" : currency;
-  return `${new Intl.NumberFormat("ru-KZ").format(Number(value) || 0)} ${symbol}`;
-}
-
-function formatPositionCount(count) {
-  const mod10 = count % 10;
-  const mod100 = count % 100;
-  if (mod10 === 1 && mod100 !== 11) return `${count} позиция`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} позиции`;
-  return `${count} позиций`;
-}
 
 function renderEditorImage(image = "") {
   if (!el.editorImage) return;
@@ -701,12 +615,6 @@ function getActiveEditorLanguage() {
   return document.querySelector("[data-lang-tab].is-active")?.dataset.langTab || "ru";
 }
 
-function getLocalizedEditorValue(field) {
-  const language = getActiveEditorLanguage();
-  const direct = el.itemForm?.elements[`${field}_${language}`]?.value?.trim();
-  const fallback = el.itemForm?.elements[`${field}_ru`]?.value?.trim();
-  return direct || fallback || "";
-}
 
 function getNextSortOrder(categoryId) {
   const used = state.items
@@ -723,72 +631,9 @@ function syncSortOrderForSelectedCategory(force = false) {
   el.itemForm.dataset.sortMode = "auto";
 }
 
-function getEditorPreviewItem() {
-  const isStoplisted = el.itemForm?.querySelector('input[name="is_stoplisted"]:checked')?.value === "true";
-  return {
-    image: el.itemForm?.dataset.image || "",
-    name: getLocalizedEditorValue("name") || "Название блюда",
-    description: getLocalizedEditorValue("description") || "Описание появится здесь",
-    price: Number(el.itemForm?.elements.price.value || 0),
-    currency: "KZT",
-    category_id: el.itemForm?.elements.category_id.value || "",
-    is_active: true,
-    is_stoplisted: isStoplisted,
-    inactive_until: null,
-    missingPhoto: !el.itemForm?.dataset.image,
-    missingTranslation: ["name_kz", "name_en", "description_kz", "description_en"].some((name) => !String(el.itemForm?.elements[name]?.value || "").trim()),
-  };
-}
 
-function renderDishPreview() {
-  if (!el.dishPreview || !el.itemForm) return;
-  const item = getEditorPreviewItem();
-  const statusType = item.is_stoplisted ? "danger" : "success";
-  const statusText = item.is_stoplisted ? "Временно недоступно" : "В продаже";
-  const badges = [
-    { label: statusText, type: statusType },
-    ...(item.missingPhoto ? [{ label: "Нет фото", type: "warning" }] : []),
-    ...(item.missingTranslation ? [{ label: "Нет перевода", type: "attention" }] : []),
-  ];
-  el.dishPreview.innerHTML = `
-    <div class="preview-kicker">Предпросмотр</div>
-    <article class="preview-dish-card ${item.is_stoplisted ? "is-muted" : ""}">
-      <div class="preview-dish-visual">${visual({ image: item.image, name_ru: item.name })}</div>
-      <div class="preview-dish-body">
-        <span class="preview-category">${escapeHtml(categoryName(item.category_id))}</span>
-        <h3>${escapeHtml(item.name)}</h3>
-        <p>${escapeHtml(item.description)}</p>
-        <div class="dish-badge-row">${badges.map((badge) => `<span class="exort-badge exort-badge--${badge.type}">${badge.label}</span>`).join("")}</div>
-        <strong>${formatPrice(item.price, item.currency)}</strong>
-      </div>
-    </article>
-  `;
-}
 
-function openItemDrawer(id = "") {
-  const item = state.items.find((entry) => entry.id === id);
-  el.itemForm.reset();
-  el.itemForm.dataset.sortMode = item ? "manual" : "auto";
-  el.itemForm.elements.id.value = item?.id || "";
-  el.itemForm.elements.name_ru.value = item?.name_ru || "";
-  el.itemForm.elements.name_kz.value = item?.name_kz || "";
-  el.itemForm.elements.name_en.value = item?.name_en || "";
-  el.itemForm.elements.description_ru.value = item?.description_ru || "";
-  el.itemForm.elements.description_kz.value = item?.description_kz || "";
-  el.itemForm.elements.description_en.value = item?.description_en || "";
-  el.itemForm.elements.price.value = item?.price || "";
-  el.itemForm.elements.category_id.value = item?.category_id || state.categories[0]?.id || "";
-  el.itemForm.elements.sort_order.value = item ? item.sort_order || 0 : "";
-  syncSortOrderForSelectedCategory(true);
-  el.itemForm.dataset.image = item?.image || "";
-  delete el.itemForm.dataset.pendingImage;
-  renderEditorImage(item?.image || "");
-  setEditorStatus(item?.is_stoplisted === true);
-  el.drawerTitle.textContent = item ? "Редактирование блюда" : "Новое блюдо";
-  el.deleteItem.hidden = !item;
-  el.drawer.setAttribute("aria-hidden", "false");
-  state.dirty = false;
-}
+
 
 function closeDrawer(force = false) {
   if (state.dirty && !force) return confirmAction("Закрыть без сохранения?", "Изменения в карточке блюда будут потеряны.", () => closeDrawer(true));
@@ -796,75 +641,8 @@ function closeDrawer(force = false) {
   state.dirty = false;
 }
 
-function closeDrawer(force = false) {
-  if (state.dirty && !force) return confirmAction("Закрыть без сохранения?", "Изменения в карточке блюда будут потеряны.", () => closeDrawer(true));
-  el.drawer.setAttribute("aria-hidden", "true");
-  state.dirty = false;
-}
 
-async function handleItemSubmit(event) {
-  event.preventDefault();
-  const data = Object.fromEntries(new FormData(el.itemForm));
-  const existing = state.items.find((entry) => entry.id === data.id);
-  const payload = {
-    id: existing?.id || "",
-    category_id: data.category_id,
-    name_ru: data.name_ru.trim(),
-    name_kz: data.name_kz.trim(),
-    name_en: data.name_en.trim(),
-    description_ru: data.description_ru.trim(),
-    description_kz: data.description_kz.trim(),
-    description_en: data.description_en.trim(),
-    price: Number(data.price),
-    sort_order: Number(data.sort_order) || 0,
-    is_active: existing ? existing.is_active : true,
-    is_stoplisted: data.is_stoplisted === "true",
-    inactive_until: existing?.inactive_until || null,
-    image_url: el.itemForm.dataset.image || "",
-    imageData: el.itemForm.dataset.pendingImage || "",
-  };
 
-  try {
-    const result = await adminApi("saveItem", { item: payload });
-    upsertLocalItem(result.item);
-    state.dirty = false;
-    toast(existing ? "Блюдо обновлено" : "Блюдо добавлено", "success");
-    closeDrawer(true);
-    renderAll();
-  } catch (error) {
-    toast(error.message || "Не удалось сохранить блюдо", "danger");
-  }
-}
-
-async function toggleStock(id) {
-  const item = state.items.find((entry) => entry.id === id);
-  if (!item) return;
-  try {
-    const result = await adminApi("toggleStock", { itemId: id, is_stoplisted: !item.is_stoplisted });
-    upsertLocalItem(result.item);
-    toast(result.item.is_stoplisted ? "Блюдо добавлено в стоп-лист" : "Блюдо возвращено в продажу", "success");
-    renderAll();
-  } catch (error) {
-    toast(error.message || "Не удалось изменить стоп-лист", "danger");
-  }
-}
-
-function handleDeleteItem() {
-  const id = el.itemForm.elements.id.value;
-  if (!id) return;
-  confirmAction("Удалить блюдо?", "Это действие нельзя отменить.", async () => {
-    try {
-      await adminApi("deleteItem", { itemId: id });
-      state.items = state.items.filter((item) => item.id !== id);
-      state.dirty = false;
-      toast("Блюдо удалено", "success");
-      closeDrawer(true);
-      renderAll();
-    } catch (error) {
-      toast(error.message || "Не удалось удалить блюдо", "danger");
-    }
-  });
-}
 
 function addCategory() {
   el.categoryForm.reset();
@@ -943,7 +721,7 @@ async function moveCategory(id, direction) {
 }
 
 async function handleBulkUploads(files) {
-  const targets = state.items.filter((item) => !item.image).slice(0, files.length);
+  const targets = getDishItems().filter((item) => !item.image).slice(0, files.length);
   if (!targets.length) {
     toast("Нет блюд без фото", "success");
     return;
@@ -954,7 +732,7 @@ async function handleBulkUploads(files) {
       const imageData = await prepareImage(file);
       const result = await adminApi("uploadItemPhoto", { itemId: targets[index].id, imageData });
       upsertLocalItem(result.item);
-      toast(`Фото добавлено: ${result.item.name_ru || targets[index].name_ru}`, "success");
+      toast(`Фото добавлено: ${getItemDisplayName(result.item || targets[index])}`, "success");
     } catch (error) {
       toast(error.message || "Не удалось загрузить фото", "danger");
     }
@@ -981,49 +759,7 @@ function removeEditorImage() {
   state.dirty = true;
 }
 
-async function translateCurrentItem() {
-  const ruTitle = el.itemForm.elements.name_ru.value.trim();
-  const ruDescription = el.itemForm.elements.description_ru.value.trim();
-  if (!ruTitle && !ruDescription) {
-    toast("Заполните RU название или описание", "danger");
-    return;
-  }
 
-  try {
-    const result = await adminApi("translate", {
-      source: {
-        name_ru: ruTitle,
-        description_ru: ruDescription,
-      },
-    });
-    if (result.name_kz && !el.itemForm.elements.name_kz.value) el.itemForm.elements.name_kz.value = result.name_kz;
-    if (result.name_en && !el.itemForm.elements.name_en.value) el.itemForm.elements.name_en.value = result.name_en;
-    if (result.description_kz && !el.itemForm.elements.description_kz.value) el.itemForm.elements.description_kz.value = result.description_kz;
-    if (result.description_en && !el.itemForm.elements.description_en.value) el.itemForm.elements.description_en.value = result.description_en;
-    state.dirty = true;
-    renderDishPreview();
-    toast("Перевод заполнен", "success");
-  } catch (error) {
-    toast(error.message || "Переводчик временно недоступен", "danger");
-  }
-}
-
-async function translateMissingItems() {
-  const ids = state.items.filter(hasMissingTranslation).map((item) => item.id);
-  if (!ids.length) {
-    toast("Все переводы заполнены", "success");
-    return;
-  }
-
-  try {
-    const result = await adminApi("translateMissing", { itemIds: ids });
-    state.items = (result.items || state.items).map(normalizeItem);
-    toast("Отсутствующие переводы заполнены", "success");
-    renderAll();
-  } catch (error) {
-    toast(error.message || "Автоперевод пока недоступен", "danger");
-  }
-}
 
 function handleDocumentClick(event) {
   const nav = event.target.closest("[data-nav]");
@@ -1050,6 +786,7 @@ function handleDocumentClick(event) {
   if (event.target.closest("[data-remove-editor-image]")) removeEditorImage();
   if (event.target.closest("[data-translate-current-item]")) translateCurrentItem();
   if (event.target.closest("[data-translate-missing]")) translateMissingItems();
+  if (event.target.closest("[data-toggle-preview]")) toggleMobilePreview();
 }
 
 function openStopFilter() {
@@ -1076,10 +813,6 @@ function upsertLocalCategory(rawCategory) {
   state.categories.sort((a, b) => a.sort - b.sort);
 }
 
-function togglePinVisibility() {
-  el.pinInput.type = el.pinInput.type === "password" ? "text" : "password";
-  el.pinVisibility.textContent = el.pinInput.type === "password" ? "Показать" : "Скрыть";
-}
 
 function confirmAction(title, text, action) {
   state.pendingConfirm = action;
@@ -1088,13 +821,6 @@ function confirmAction(title, text, action) {
   el.confirmDialog.showModal();
 }
 
-function toast(message, type = "") {
-  const node = document.createElement("div");
-  node.className = `toast ${type}`;
-  node.textContent = message;
-  el.toasts.append(node);
-  setTimeout(() => node.remove(), 3200);
-}
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -1103,6 +829,64 @@ function escapeHtml(value) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function firstFilledValue(...values) {
+  return values.find((value) => String(value || "").trim()) || "";
+}
+
+function getItemDisplayName(item) {
+  return firstFilledValue(
+    item?.name_ru,
+    item?.title_ru,
+    item?.name_kz,
+    item?.title_kk,
+    item?.name_en,
+    item?.title_en,
+    item?.content_key,
+    item?.id,
+    "Без названия"
+  );
+}
+
+function getItemDisplayDescription(item) {
+  return firstFilledValue(
+    item?.description_ru,
+    item?.description_kz,
+    item?.description_kk,
+    item?.description_en
+  );
+}
+
+function getCategoryDisplayName(category) {
+  return firstFilledValue(
+    category?.name_ru,
+    category?.title_ru,
+    category?.name_kz,
+    category?.title_kk,
+    category?.name_en,
+    category?.title_en,
+    category?.name,
+    category?.section_key,
+    category?.id,
+    "Без категории"
+  );
+}
+
+function getAnalyticsDishDisplayName(item) {
+  return firstFilledValue(
+    item?.title_ru,
+    item?.name_ru,
+    item?.title_kk,
+    item?.name_kz,
+    item?.title_en,
+    item?.name_en,
+    item?.title,
+    item?.name,
+    item?.content_key,
+    item?.id,
+    "Блюдо"
+  );
 }
 
 function getNextMidnightIso() {
@@ -1117,13 +901,6 @@ function toDatetimeLocal(value) {
   if (Number.isNaN(date.getTime())) return "";
   const pad = (number) => String(number).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-function applyTheme(theme) {
-  const nextTheme = theme === "dark" ? "dark" : "light";
-  document.documentElement.dataset.theme = nextTheme;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", nextTheme === "dark" ? "#0b1120" : "#f7f8fb");
-  localStorage.setItem(themeStorageKey, nextTheme);
 }
 
 function prepareImage(file) {
@@ -1207,26 +984,24 @@ function ensureAdminEnhancements() {
     const nameInput = categoryForm.elements.name;
     if (nameInput) {
       nameInput.name = "name_ru";
-      nameInput.closest("label").childNodes[0].textContent = "Название RU";
-      nameInput.insertAdjacentHTML("afterend", `<span class="field-hint">RU обязательно, KZ/EN можно добавить позже.</span>`);
+      nameInput.closest("label").childNodes[0].textContent = "Название (рус.)";
+      nameInput.insertAdjacentHTML("afterend", `<span class="field-hint">Русское название обязательно, переводы можно добавить позже.</span>`);
       categoryForm.querySelector(".field-hint")?.closest("label")?.insertAdjacentHTML("afterend", `
-        <label>Название KZ<input name="name_kz" maxlength="80" autocomplete="off" /></label>
-        <label>Название EN<input name="name_en" maxlength="80" autocomplete="off" /></label>
+        <label>Название (каз.)<input name="name_kz" maxlength="80" autocomplete="off" /></label>
+        <label>Название (англ.)<input name="name_en" maxlength="80" autocomplete="off" /></label>
       `);
     }
   }
 }
 
-function showLoginError(message) {
-  el.loginError.textContent = toFriendlyError(message);
-}
 
 function renderMetrics() {
-  const active = state.items.filter((item) => item.is_active && !item.is_stoplisted && !isTemporarilyUnavailable(item)).length;
-  const stopped = state.items.filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item)).length;
-  const needsAttention = state.items.filter((item) => !item.image || hasMissingTranslation(item) || item.is_stoplisted || isTemporarilyUnavailable(item)).length;
+  const dishItems = getDishItems();
+  const active = dishItems.filter((item) => item.is_active && !item.is_stoplisted && !isTemporarilyUnavailable(item)).length;
+  const stopped = dishItems.filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item)).length;
+  const needsAttention = dishItems.filter((item) => !item.image || hasMissingTranslation(item) || item.is_stoplisted || isTemporarilyUnavailable(item)).length;
   const values = [
-    ["Всего блюд", state.items.length],
+    ["Всего блюд", dishItems.length],
     ["В продаже", active],
     ["Стоп-лист", stopped],
     ["Требует внимания", needsAttention],
@@ -1235,10 +1010,11 @@ function renderMetrics() {
 }
 
 function renderAttention() {
+  const dishItems = getDishItems();
   const issues = [
-    { name: "Нет фото", count: state.items.filter((item) => !item.image).length, view: "photos", type: "issue" },
-    { name: "Нет перевода", count: state.items.filter((item) => hasMissingTranslation(item)).length, view: "menu", type: "issue" },
-    { name: "Стоп-лист", count: state.items.filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item)).length, view: "stoplist", type: "neutral" },
+    { name: "Нет фото", count: dishItems.filter((item) => !item.image).length, view: "menu", type: "issue" },
+    { name: "Нет перевода", count: dishItems.filter((item) => hasMissingTranslation(item)).length, view: "menu", type: "issue" },
+    { name: "Стоп-лист", count: dishItems.filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item)).length, view: "stoplist", type: "neutral" },
   ];
   const total = issues.reduce((sum, issue) => sum + issue.count, 0);
   el.attentionCount.textContent = total ? `${formatPositionCount(total)}` : "Все хорошо";
@@ -1261,7 +1037,7 @@ function renderDishes() {
     return `<article class="dish-card ${statusClass !== "active" ? "is-muted" : ""}">
       <div class="dish-visual">${visual(item)}</div>
       <div class="dish-body">
-        <div class="dish-title-row"><h3>${escapeHtml(item.name_ru || "Без названия")}</h3><button type="button" data-edit-item="${item.id}">Изменить</button></div>
+        <div class="dish-title-row"><h3>${escapeHtml(getItemDisplayName(item))}</h3><button type="button" data-edit-item="${item.id}">Изменить</button></div>
         <div class="dish-meta">
           <span>${escapeHtml(categoryName(item.category_id))}</span>
           <button class="stock-control ${isSale ? "is-on" : ""}" type="button" data-toggle-stock="${item.id}" aria-label="${isSale ? "Перевести блюдо в стоп-лист" : "Вернуть блюдо в продажу"}">
@@ -1306,63 +1082,73 @@ function formatPositionCount(count) {
   return `${count} позиций`;
 }
 
-function openItemDrawer(id = "") {
-  const item = state.items.find((entry) => entry.id === id);
-  el.itemForm.reset();
-  el.itemForm.dataset.sortMode = item ? "manual" : "auto";
-  el.itemForm.elements.id.value = item?.id || "";
-  el.itemForm.elements.name_ru.value = item?.name_ru || "";
-  el.itemForm.elements.name_kz.value = item?.name_kz || "";
-  el.itemForm.elements.name_en.value = item?.name_en || "";
-  el.itemForm.elements.description_ru.value = item?.description_ru || "";
-  el.itemForm.elements.description_kz.value = item?.description_kz || "";
-  el.itemForm.elements.description_en.value = item?.description_en || "";
-  el.itemForm.elements.price.value = item?.price || "";
-  el.itemForm.elements.category_id.value = item?.category_id || state.categories[0]?.id || "";
-  el.itemForm.elements.sort_order.value = item ? item.sort_order || 0 : "";
-  syncSortOrderForSelectedCategory(true);
-  el.itemForm.dataset.image = item?.image || "";
-  delete el.itemForm.dataset.pendingImage;
-  renderEditorImage(item?.image || "");
-  setEditorStatus(item?.is_stoplisted === true);
-  el.drawerTitle.textContent = item ? "Редактирование блюда" : "Новое блюдо";
-  el.deleteItem.hidden = !item;
-  el.drawer.setAttribute("aria-hidden", "false");
-  state.dirty = false;
-}
 
-async function handleItemSubmit(event) {
-  event.preventDefault();
-  const data = Object.fromEntries(new FormData(el.itemForm));
-  const existing = state.items.find((entry) => entry.id === data.id);
-  const payload = {
-    id: existing?.id || "",
-    category_id: data.category_id,
-    name_ru: data.name_ru.trim(),
-    name_kz: data.name_kz.trim(),
-    name_en: data.name_en.trim(),
-    description_ru: data.description_ru.trim(),
-    description_kz: data.description_kz.trim(),
-    description_en: data.description_en.trim(),
-    price: Number(data.price),
-    sort_order: Number(data.sort_order) || 0,
-    is_active: existing ? existing.is_active : true,
-    is_stoplisted: data.is_stoplisted === "true",
-    inactive_until: existing?.inactive_until || null,
-    image_url: el.itemForm.dataset.image || "",
-    imageData: el.itemForm.dataset.pendingImage || "",
+
+async function adminApi(action, payload = {}) {
+  const requestPayload = {
+    action,
+    restaurantSlug: getRestaurantSlug(),
+    sessionToken: state.sessionToken,
+    ...payload,
   };
 
+  let response;
   try {
-    const result = await adminApi("saveItem", { item: payload });
-    upsertLocalItem(result.item);
-    state.dirty = false;
-    toast(existing ? "Блюдо обновлено" : "Блюдо добавлено", "success");
-    closeDrawer(true);
-    renderAll();
+    response = await fetch(ADMIN_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(requestPayload),
+    });
   } catch (error) {
-    toast(toFriendlyError(error.message) || "Не удалось сохранить блюдо", "danger");
+    console.error("[exort-admin] API request failed.", {
+      action,
+      url: ADMIN_API_URL,
+      method: "POST",
+      error: error?.message || String(error),
+      payload: requestPayload,
+    });
+    throw new Error("Сервис временно недоступен. Попробуйте обновить страницу или обратитесь в поддержку Exort.");
   }
+
+  const rawText = await response.text();
+  let data = null;
+  try {
+    data = rawText ? JSON.parse(rawText) : {};
+  } catch {
+    data = { error: rawText };
+  }
+
+  if (!response.ok || data?.error) {
+    const message = data?.error || `Admin API error ${response.status}`;
+    console.error("[exort-admin] API rejected request.", {
+      action,
+      url: ADMIN_API_URL,
+      method: "POST",
+      status: response.status,
+      statusText: response.statusText,
+      responseText: rawText,
+      data,
+    });
+
+    if ([404, 405, 500, 502, 503].includes(response.status)) {
+      console.error("[exort-admin] API endpoint is unavailable.", {
+        action,
+        url: ADMIN_API_URL,
+        method: "POST",
+        status: response.status,
+        statusText: response.statusText,
+        responseText: rawText,
+        data,
+      });
+      throw new Error("Сервис временно недоступен. Попробуйте обновить страницу или обратитесь в поддержку Exort.");
+    }
+
+    throw new Error(response.status === 502
+      ? "Сервис временно недоступен. Попробуйте обновить страницу или обратитесь в поддержку Exort."
+      : message);
+  }
+
+  return data;
 }
 
 async function toggleStock(id) {
@@ -1395,35 +1181,9 @@ function handleDeleteItem() {
   });
 }
 
-async function translateCurrentItem() {
-  const ruTitle = el.itemForm.elements.name_ru.value.trim();
-  const ruDescription = el.itemForm.elements.description_ru.value.trim();
-  if (!ruTitle && !ruDescription) {
-    toast("Заполните RU название или описание", "danger");
-    return;
-  }
-
-  try {
-    const result = await adminApi("translate", {
-      source: {
-        name_ru: ruTitle,
-        description_ru: ruDescription,
-      },
-    });
-    if (result.name_kz && !el.itemForm.elements.name_kz.value) el.itemForm.elements.name_kz.value = result.name_kz;
-    if (result.name_en && !el.itemForm.elements.name_en.value) el.itemForm.elements.name_en.value = result.name_en;
-    if (result.description_kz && !el.itemForm.elements.description_kz.value) el.itemForm.elements.description_kz.value = result.description_kz;
-    if (result.description_en && !el.itemForm.elements.description_en.value) el.itemForm.elements.description_en.value = result.description_en;
-    state.dirty = true;
-    renderDishPreview();
-    toast("Перевод заполнен", "success");
-  } catch {
-    toast("Автоперевод пока недоступен. Заполните перевод вручную.", "danger");
-  }
-}
 
 async function translateMissingItems() {
-  const ids = state.items.filter(hasMissingTranslation).map((item) => item.id);
+  const ids = getDishItems().filter(hasMissingTranslation).map((item) => item.id);
   if (!ids.length) {
     toast("Все переводы заполнены", "success");
     return;
@@ -1439,10 +1199,6 @@ async function translateMissingItems() {
   }
 }
 
-function togglePinVisibility() {
-  el.pinInput.type = el.pinInput.type === "password" ? "text" : "password";
-  el.pinVisibility.textContent = el.pinInput.type === "password" ? "Показать" : "Скрыть";
-}
 
 function toast(message, type = "") {
   const node = document.createElement("div");
@@ -1455,6 +1211,451 @@ function toast(message, type = "") {
   }, 3200);
 }
 
+
+function bindEvents() {
+  el.pinForm.addEventListener("submit", handleLogin);
+  el.pinVisibility.addEventListener("click", togglePinVisibility);
+
+  document.addEventListener("click", handleDocumentClick);
+  [el.menuSearch, el.categoryFilter, el.statusFilter, el.photoFilter, el.translationFilter]
+    .filter(Boolean)
+    .forEach((control) => control.addEventListener("input", renderDishes));
+
+  el.itemForm.addEventListener("input", (event) => {
+    if (event.target?.name === "sort_order") el.itemForm.dataset.sortMode = "manual";
+    handleItemFormInput(event);
+    renderDishPreview();
+    state.dirty = true;
+  });
+
+  el.itemForm.addEventListener("change", (event) => {
+    if (event.target?.matches("[data-auto-translate-toggle]")) {
+      renderDishPreview();
+      return;
+    }
+    if (event.target?.name === "category_id") syncSortOrderForSelectedCategory();
+    updateEditorStatusFromForm();
+    renderDishPreview();
+    state.dirty = true;
+  });
+
+  document.querySelector("[data-auto-translate-toggle]")?.addEventListener("change", (event) => {
+    setAutoTranslateEnabled(event.target.checked);
+  });
+
+  el.dishPreview?.addEventListener("click", (event) => {
+    const tab = event.target.closest("[data-preview-lang-tab]");
+    if (!tab) return;
+    setPreviewLanguage(tab.dataset.previewLangTab);
+  });
+
+  el.itemForm.addEventListener("submit", handleItemSubmit);
+  el.deleteItem.addEventListener("click", handleDeleteItem);
+  el.editorFile.addEventListener("change", handleEditorFile);
+  el.photoInput?.addEventListener("change", () => handleBulkUploads(el.photoInput.files));
+
+  ["dragenter", "dragover"].forEach((type) => {
+    el.uploadZone?.addEventListener(type, (event) => {
+      event.preventDefault();
+      el.uploadZone.classList.add("is-dragging");
+    });
+  });
+
+  ["dragleave", "drop"].forEach((type) => {
+    el.uploadZone?.addEventListener(type, (event) => {
+      event.preventDefault();
+      el.uploadZone.classList.remove("is-dragging");
+    });
+  });
+
+  el.uploadZone?.addEventListener("drop", (event) => handleBulkUploads(event.dataTransfer.files));
+
+  el.confirmDialog.addEventListener("close", () => {
+    if (el.confirmDialog.returnValue === "confirm") state.pendingConfirm?.();
+    state.pendingConfirm = null;
+  });
+
+  el.categoryForm.addEventListener("submit", handleCategorySubmit);
+  document.querySelector("[data-close-category]").addEventListener("click", () => el.categoryDialog.close());
+
+  document.querySelectorAll("[data-lang-tab]").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      setEditorLanguage(tab.dataset.langTab);
+      renderDishPreview();
+    });
+  });
+
+  syncAutoTranslateControl();
+  setTranslateStatus(getAutoTranslateEnabled() ? "idle" : "off");
+
+  window.addEventListener("beforeunload", (event) => {
+    if (!state.dirty) return;
+    event.preventDefault();
+    event.returnValue = "";
+  });
+}
+
+function getEditorTranslationMeta() {
+  if (!state.editorTranslationMeta) {
+    state.editorTranslationMeta = {
+      manual: {
+        name_en: false,
+        name_kz: false,
+        description_en: false,
+        description_kz: false,
+      },
+      previewLang: "ru",
+      debounceTimer: 0,
+      statusTimer: 0,
+      requestId: 0,
+      activePromise: null,
+    };
+  }
+  return state.editorTranslationMeta;
+}
+
+function resetEditorTranslationMeta() {
+  const meta = getEditorTranslationMeta();
+  clearTimeout(meta.debounceTimer);
+  clearTimeout(meta.statusTimer);
+  meta.manual = {
+    name_en: false,
+    name_kz: false,
+    description_en: false,
+    description_kz: false,
+  };
+  meta.previewLang = "ru";
+  meta.requestId = 0;
+  meta.activePromise = null;
+  syncAutoTranslateControl();
+  setTranslateStatus(getAutoTranslateEnabled() ? "idle" : "off");
+}
+
+function getAutoTranslateEnabled() {
+  return sessionStorage.getItem("exort.admin.autoTranslate") !== "false";
+}
+
+function setAutoTranslateEnabled(enabled) {
+  sessionStorage.setItem("exort.admin.autoTranslate", enabled ? "true" : "false");
+  syncAutoTranslateControl();
+  if (!enabled) clearPendingAutoTranslate();
+  setTranslateStatus(enabled ? "idle" : "off");
+}
+
+function syncAutoTranslateControl() {
+  const toggle = document.querySelector("[data-auto-translate-toggle]");
+  if (toggle) toggle.checked = getAutoTranslateEnabled();
+}
+
+function setTranslateStatus(mode = "idle") {
+  const node = document.querySelector("[data-translate-status]");
+  if (!node) return;
+
+  const meta = getEditorTranslationMeta();
+  clearTimeout(meta.statusTimer);
+
+  const textByMode = {
+    idle: "Автоперевод включен",
+    off: "Автоперевод выключен",
+    loading: "Переводим...",
+    success: "Перевод выполнен",
+    error: "Ошибка перевода",
+  };
+
+  node.textContent = textByMode[mode] || textByMode.idle;
+  node.className = `translate-status${mode === "idle" ? "" : ` is-${mode}`}`;
+
+  if (mode === "success" || mode === "error") {
+    meta.statusTimer = setTimeout(() => {
+      setTranslateStatus(getAutoTranslateEnabled() ? "idle" : "off");
+    }, 1800);
+  }
+}
+
+function clearPendingAutoTranslate() {
+  const meta = getEditorTranslationMeta();
+  clearTimeout(meta.debounceTimer);
+  meta.debounceTimer = 0;
+}
+
+function setEditorLanguage(language = "ru") {
+  const normalizedLanguage = ["ru", "kz", "en"].includes(language) ? language : "ru";
+  if (el.itemForm) el.itemForm.dataset.editorLanguage = normalizedLanguage;
+  document.querySelectorAll("[data-lang-tab]").forEach((node) => {
+    node.classList.toggle("is-active", node.dataset.langTab === normalizedLanguage);
+  });
+  document.querySelectorAll("[data-lang-pane]").forEach((node) => {
+    node.classList.toggle("is-active", node.dataset.langPane === normalizedLanguage);
+  });
+}
+
+function getPreviewLanguage() {
+  return getEditorTranslationMeta().previewLang || "ru";
+}
+
+function setPreviewLanguage(language = "ru") {
+  getEditorTranslationMeta().previewLang = ["ru", "en", "kz"].includes(language) ? language : "ru";
+  renderDishPreview();
+}
+
+function toggleMobilePreview() {
+  if (!el.itemForm) return;
+  const isOpen = el.itemForm.classList.toggle("is-preview-open");
+  const button = document.querySelector("[data-toggle-preview]");
+  if (button) button.textContent = isOpen ? "Скрыть превью" : "Показать превью";
+}
+
+function handleItemFormInput(event) {
+  const field = event.target?.name;
+  if (!field) return;
+
+  const meta = getEditorTranslationMeta();
+  const translatableFields = ["name_en", "name_kz", "description_en", "description_kz"];
+
+  if (translatableFields.includes(field)) {
+    meta.manual[field] = true;
+    return;
+  }
+
+  if (field === "name_ru" || field === "description_ru") {
+    if (!getAutoTranslateEnabled()) {
+      setTranslateStatus("off");
+      return;
+    }
+    scheduleAutoTranslateFromRu();
+  }
+}
+
+function scheduleAutoTranslateFromRu() {
+  clearPendingAutoTranslate();
+
+  const hasRuSource = Boolean(
+    el.itemForm?.elements.name_ru.value.trim() ||
+    el.itemForm?.elements.description_ru.value.trim()
+  );
+
+  if (!hasRuSource) {
+    setTranslateStatus(getAutoTranslateEnabled() ? "idle" : "off");
+    return;
+  }
+
+  const meta = getEditorTranslationMeta();
+  meta.debounceTimer = setTimeout(() => {
+    translateCurrentItem({ showToast: false, quietOnEmpty: true });
+  }, 900);
+}
+
+function getLocalizedEditorValue(field, language = getPreviewLanguage()) {
+  const direct = el.itemForm?.elements[`${field}_${language}`]?.value?.trim();
+  const fallback = el.itemForm?.elements[`${field}_ru`]?.value?.trim();
+  return direct || fallback || "";
+}
+
+function getEditorPreviewItem() {
+  const isStoplisted = el.itemForm?.querySelector('input[name="is_stoplisted"]:checked')?.value === "true";
+  const oldPriceValue = String(el.itemForm?.elements.old_price?.value || "").trim();
+  const caloriesValue = String(el.itemForm?.elements.calories?.value || "").trim();
+  return {
+    previewLang: getPreviewLanguage(),
+    image: el.itemForm?.dataset.image || "",
+    name: getLocalizedEditorValue("name") || "Название блюда",
+    description: getLocalizedEditorValue("description") || "Описание появится здесь",
+    price: Number(el.itemForm?.elements.price.value || 0),
+    old_price: oldPriceValue ? Number(oldPriceValue) : null,
+    weight: String(el.itemForm?.elements.weight?.value || "").trim(),
+    calories: caloriesValue ? Number(caloriesValue) : null,
+    spice_level: String(el.itemForm?.elements.spice_level?.value || "").trim(),
+    currency: "KZT",
+    category_id: el.itemForm?.elements.category_id.value || "",
+    is_active: true,
+    is_stoplisted: isStoplisted,
+    inactive_until: null,
+    missingPhoto: !el.itemForm?.dataset.image,
+    missingTranslation: ["name_kz", "name_en", "description_kz", "description_en"]
+      .some((name) => !String(el.itemForm?.elements[name]?.value || "").trim()),
+  };
+}
+
+
+
+async function requestGoogleTranslation(text, targetLanguage) {
+  if (!text) return "";
+
+  const url = new URL("https://translate.googleapis.com/translate_a/single");
+  url.searchParams.set("client", "gtx");
+  url.searchParams.set("sl", "ru");
+  url.searchParams.set("tl", targetLanguage);
+  url.searchParams.set("dt", "t");
+  url.searchParams.set("q", text);
+
+  const response = await fetch(url.toString());
+  if (!response.ok) throw new Error(`Translate request failed: ${response.status}`);
+
+  const payload = await response.json();
+  if (!Array.isArray(payload?.[0])) return "";
+  return payload[0]
+    .map((part) => Array.isArray(part) ? (part[0] || "") : "")
+    .join("")
+    .trim();
+}
+
+async function translateRuSource(source) {
+  const tasks = [];
+
+  if (source.name_ru) {
+    tasks.push(requestGoogleTranslation(source.name_ru, "en").then((value) => ["name_en", value]));
+    tasks.push(requestGoogleTranslation(source.name_ru, "kk").then((value) => ["name_kz", value]));
+  }
+
+  if (source.description_ru) {
+    tasks.push(requestGoogleTranslation(source.description_ru, "en").then((value) => ["description_en", value]));
+    tasks.push(requestGoogleTranslation(source.description_ru, "kk").then((value) => ["description_kz", value]));
+  }
+
+  const translatedEntries = await Promise.all(tasks);
+  return Object.fromEntries(translatedEntries.filter(([, value]) => value));
+}
+
+function applyTranslatedFields(translations) {
+  const meta = getEditorTranslationMeta();
+  let applied = false;
+
+  ["name_en", "name_kz", "description_en", "description_kz"].forEach((field) => {
+    if (!translations[field]) return;
+    if (meta.manual[field]) return;
+    if (!el.itemForm?.elements[field]) return;
+    el.itemForm.elements[field].value = translations[field];
+    applied = true;
+  });
+
+  return applied;
+}
+
+async function translateCurrentItem(options = {}) {
+  const ruTitle = el.itemForm.elements.name_ru.value.trim();
+  const ruDescription = el.itemForm.elements.description_ru.value.trim();
+  const showToast = options.showToast !== false;
+
+  clearPendingAutoTranslate();
+
+  if (!ruTitle && !ruDescription) {
+    if (!options.quietOnEmpty) toast("Заполните RU название или описание", "danger");
+    setTranslateStatus(getAutoTranslateEnabled() ? "idle" : "off");
+    return null;
+  }
+
+  const meta = getEditorTranslationMeta();
+  meta.requestId += 1;
+  const requestId = meta.requestId;
+  setTranslateStatus("loading");
+
+  const translationPromise = (async () => {
+    try {
+      const translations = await translateRuSource({
+        name_ru: ruTitle,
+        description_ru: ruDescription,
+      });
+
+      if (requestId !== getEditorTranslationMeta().requestId) return null;
+
+      const changed = applyTranslatedFields(translations);
+      if (changed) state.dirty = true;
+      renderDishPreview();
+      setTranslateStatus("success");
+      if (showToast) toast("Перевод выполнен", "success");
+      return translations;
+    } catch (error) {
+      console.warn("[exort-admin] auto-translate failed", error);
+      if (requestId !== getEditorTranslationMeta().requestId) return null;
+      setTranslateStatus("error");
+      if (showToast) toast("Автоперевод пока недоступен. Заполните перевод вручную.", "danger");
+      return null;
+    }
+  })();
+
+  meta.activePromise = translationPromise.finally(() => {
+    if (getEditorTranslationMeta().activePromise === translationPromise) {
+      getEditorTranslationMeta().activePromise = null;
+    }
+  });
+
+  return meta.activePromise;
+}
+
+async function flushPendingAutoTranslateBeforeSave() {
+  const meta = getEditorTranslationMeta();
+
+  if (meta.debounceTimer && getAutoTranslateEnabled()) {
+    clearPendingAutoTranslate();
+    await translateCurrentItem({ showToast: false, quietOnEmpty: true });
+    return;
+  }
+
+  if (meta.activePromise) {
+    try {
+      await meta.activePromise;
+    } catch {
+      // Saving should still continue even if translation failed.
+    }
+  }
+}
+
+async function handleItemSubmit(event) {
+  event.preventDefault();
+
+  await flushPendingAutoTranslateBeforeSave();
+
+  const data = Object.fromEntries(new FormData(el.itemForm));
+  const existing = state.items.find((entry) => entry.id === data.id);
+  const payload = {
+    id: existing?.id || "",
+    category_id: data.category_id,
+    name_ru: data.name_ru.trim(),
+    name_kz: data.name_kz.trim(),
+    name_en: data.name_en.trim(),
+    description_ru: data.description_ru.trim(),
+    description_kz: data.description_kz.trim(),
+    description_en: data.description_en.trim(),
+    price: Number(data.price),
+    old_price: String(data.old_price || "").trim() ? Number(data.old_price) : null,
+    weight: String(data.weight || "").trim(),
+    calories: String(data.calories || "").trim() ? Number(data.calories) : null,
+    spice_level: String(data.spice_level || "").trim(),
+    sort_order: Number(data.sort_order) || 0,
+    is_active: existing ? existing.is_active : true,
+    is_stoplisted: data.is_stoplisted === "true",
+    inactive_until: existing?.inactive_until || null,
+    image_url: el.itemForm.dataset.image || "",
+    imageData: el.itemForm.dataset.pendingImage || "",
+  };
+
+  try {
+    const result = await adminApi("saveItem", { item: payload });
+    upsertLocalItem(result.item);
+    state.dirty = false;
+    toast(existing ? "Блюдо обновлено" : "Блюдо добавлено", "success");
+    closeDrawer(true);
+    renderAll();
+  } catch (error) {
+    toast(toFriendlyError(error.message) || "Не удалось сохранить блюдо", "danger");
+  }
+}
+if (el.viewTitle && viewMeta[state.activeView]) {
+  el.viewTitle.textContent = viewMeta[state.activeView][0];
+  el.viewKicker.textContent = viewMeta[state.activeView][1];
+}
+
+function showLoginError(message) {
+  el.loginError.textContent = String(message || "").includes("Failed to fetch")
+    ? "Сервис временно недоступен. Попробуйте обновить страницу или обратитесь в поддержку Exort."
+    : message;
+}
+
+function togglePinVisibility() {
+  el.pinInput.type = el.pinInput.type === "password" ? "text" : "password";
+  el.pinVisibility.textContent = el.pinInput.type === "password" ? "Показать" : "Скрыть";
+}
+
 function toFriendlyError(message = "") {
   const text = String(message || "");
   if (/Translation backend|EXORT_TRANSLATE_API_URL|translate/i.test(text)) {
@@ -1464,4 +1665,88 @@ function toFriendlyError(message = "") {
     return "Сервис временно недоступен. Попробуйте обновить страницу или обратитесь в поддержку Exort.";
   }
   return text;
+}
+function renderDishPreview() {
+  if (!el.dishPreview || !el.itemForm) return;
+
+  const item = getEditorPreviewItem();
+  const previewLang = item.previewLang || "ru";
+  const badges = [
+    { label: item.is_stoplisted ? "Временно недоступно" : "В продаже", type: item.is_stoplisted ? "danger" : "success" },
+    ...(item.missingPhoto ? [{ label: "Нет фото", type: "warning" }] : []),
+    ...(item.missingTranslation ? [{ label: "Нет перевода", type: "attention" }] : []),
+  ];
+  const traits = [
+    item.weight ? `<span class="preview-trait">${escapeHtml(item.weight)}</span>` : "",
+    item.calories ? `<span class="preview-trait">${escapeHtml(`${item.calories} ккал`)}</span>` : "",
+    item.spice_level ? `<span class="preview-trait preview-trait--spice">${escapeHtml(getSpiceLevelLabel(item.spice_level))}</span>` : "",
+  ].filter(Boolean).join("");
+  const hasOldPrice = Number(item.old_price) > 0;
+
+  el.dishPreview.innerHTML = `
+    <div class="preview-header">
+      <div class="preview-kicker">Живое превью</div>
+      <div class="preview-lang-switch" aria-label="Язык превью">
+        ${["ru", "kz", "en"].map((lang) => `
+          <button
+            type="button"
+            class="${previewLang === lang ? "is-active" : ""}"
+            data-preview-lang-tab="${lang}"
+          >${lang.toUpperCase()}</button>
+        `).join("")}
+      </div>
+    </div>
+    <article class="preview-dish-card ${item.is_stoplisted ? "is-muted" : ""}">
+      <div class="preview-dish-visual">${visual({ image: item.image, name_ru: item.name })}</div>
+      <div class="preview-dish-body">
+        <span class="preview-category">${escapeHtml(categoryName(item.category_id))}</span>
+        <h3>${escapeHtml(item.name)}</h3>
+        ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ""}
+        ${traits ? `<div class="preview-traits">${traits}</div>` : ""}
+        <div class="dish-badge-row">${badges.map((badge) => `<span class="exort-badge exort-badge--${badge.type}">${badge.label}</span>`).join("")}</div>
+        <div class="preview-price-stack">
+          ${hasOldPrice ? `<span class="preview-old-price">${escapeHtml(formatPrice(item.old_price, item.currency))}</span>` : ""}
+          <strong>${escapeHtml(formatPrice(item.price, item.currency))}</strong>
+        </div>
+      </div>
+    </article>
+  `;
+}
+
+function openItemDrawer(id = "") {
+  const item = state.items.find((entry) => entry.id === id);
+  el.itemForm.reset();
+  el.itemForm.classList.remove("is-preview-open");
+  el.itemForm.dataset.editorLanguage = "ru";
+  el.itemForm.dataset.sortMode = item ? "manual" : "auto";
+  el.itemForm.elements.id.value = item?.id || "";
+  el.itemForm.elements.name_ru.value = item?.name_ru || "";
+  el.itemForm.elements.name_kz.value = item?.name_kz || "";
+  el.itemForm.elements.name_en.value = item?.name_en || "";
+  el.itemForm.elements.description_ru.value = item?.description_ru || "";
+  el.itemForm.elements.description_kz.value = item?.description_kz || "";
+  el.itemForm.elements.description_en.value = item?.description_en || "";
+  el.itemForm.elements.price.value = item?.price || "";
+  if (el.itemForm.elements.old_price) el.itemForm.elements.old_price.value = item?.old_price || "";
+  if (el.itemForm.elements.weight) el.itemForm.elements.weight.value = item?.weight || "";
+  if (el.itemForm.elements.calories) el.itemForm.elements.calories.value = item?.calories || "";
+  if (el.itemForm.elements.spice_level) el.itemForm.elements.spice_level.value = item?.spice_level || "";
+  el.itemForm.elements.category_id.value = item?.category_id || state.categories[0]?.id || "";
+  el.itemForm.elements.sort_order.value = item ? item.sort_order || 0 : "";
+  syncSortOrderForSelectedCategory(true);
+  el.itemForm.dataset.image = item?.image || "";
+  delete el.itemForm.dataset.pendingImage;
+  renderEditorImage(item?.image || "");
+  setEditorStatus(item?.is_stoplisted === true);
+  setEditorLanguage("ru");
+  resetEditorTranslationMeta();
+  const extraDetails = document.querySelector("[data-extra-details]");
+  if (extraDetails) extraDetails.open = false;
+  const previewButton = document.querySelector("[data-toggle-preview]");
+  if (previewButton) previewButton.textContent = "Показать превью";
+  el.drawerTitle.textContent = item ? "Редактирование блюда" : "Новое блюдо";
+  el.deleteItem.hidden = !item;
+  el.drawer.setAttribute("aria-hidden", "false");
+  state.dirty = false;
+  renderDishPreview();
 }

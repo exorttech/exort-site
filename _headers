@@ -1,0 +1,5 @@
+/pages/*
+  Content-Type: text/html; charset=utf-8
+
+/js/*
+  Content-Type: application/javascript; charset=utf-8

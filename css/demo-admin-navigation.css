@@ -414,44 +414,19 @@
   --status-border: #cbd5e1;
 }
 
-:root[data-theme="dark"] {
-  --surface: #111827;
-  --bg: #0b1120;
-  --text: #f1f5f9;
-  --muted: #94a3b8;
-  --border: #263244;
-  --shadow: 0 20px 60px rgba(0, 0, 0, .3);
-}
 
-:root[data-theme="dark"] .login-screen {
-  background: linear-gradient(145deg, #0b1120, #111b2e);
-}
 
-:root[data-theme="dark"] .login-card {
-  background: rgba(17, 24, 39, .9);
-  border-color: rgba(148, 163, 184, .14);
-}
 
-:root[data-theme="dark"] .topbar {
-  background: rgba(11, 17, 32, .88);
-}
 
-:root[data-theme="dark"] .pin-form label,
-:root[data-theme="dark"] .drawer label,
-:root[data-theme="dark"] .settings-form label {
-  color: #cbd5e1;
-}
 
-:root[data-theme="dark"] .attention-item {
-  --status-bg: color-mix(in srgb, var(--status) 10%, #111827);
-  --status-border: color-mix(in srgb, var(--status) 25%, #263244);
-}
 
-:root[data-theme="dark"] .drawer-panel,
-:root[data-theme="dark"] .confirm-dialog {
-  background: var(--surface);
-  color: var(--text);
-}
+
+
+
+
+
+
+
 
 @media (max-width: 620px) {
   .attention-item {
