@@ -301,6 +301,60 @@
 .admin-showcase-live .system-state-card .secondary-button { width: fit-content; margin-top: auto; }
 .admin-showcase-live .system-state-card.is-disabled { background: #f8f5ee; }
 
+/* QR tools use the same warm product palette; Wi-Fi credentials never leave the browser. */
+.admin-showcase-live .qr-help-card {
+  background: linear-gradient(145deg, #fff0e7, #fffdf8 64%);
+  border-color: #efd6c9;
+}
+.admin-showcase-live .qr-list-heading > span,
+.admin-showcase-live .qr-source-url button { color: #d94122; background: #fff0e7; }
+.admin-showcase-live .qr-source-card { background: #fffdf8; border-color: #ddd8cd; }
+.admin-showcase-live .qr-wifi-layout { align-items: stretch; }
+.admin-showcase-live .wifi-qr-form { background: linear-gradient(155deg, #fffdf8, #fff8f0); }
+.admin-showcase-live .wifi-hidden-line {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: #f7f3eb;
+  border: 1px solid #e1dacf;
+  border-radius: 11px;
+}
+.admin-showcase-live .wifi-hidden-line input { width: 18px; height: 18px; margin: 0; accent-color: var(--brand); }
+.admin-showcase-live .wifi-qr-preview {
+  display: grid;
+  grid-template-columns: 196px minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+  min-height: 276px;
+  padding: 26px;
+  background: #1d211e;
+  border: 1px solid #303630;
+  border-radius: 20px;
+  color: #fffdf8;
+  box-shadow: 0 20px 55px rgba(29, 33, 30, 0.16);
+}
+.admin-showcase-live .wifi-qr-preview [data-wifi-qr-preview] {
+  display: grid;
+  width: 196px;
+  height: 196px;
+  place-items: center;
+  overflow: hidden;
+  background: rgba(255, 253, 248, 0.06);
+  border: 1px dashed rgba(255, 253, 248, 0.28);
+  border-radius: 16px;
+}
+.admin-showcase-live .wifi-qr-preview.is-ready [data-wifi-qr-preview] { padding: 8px; background: #fffdf8; border-style: solid; }
+.admin-showcase-live .wifi-qr-preview h3 { margin: 5px 0 8px; color: #fffdf8; font-size: 22px; }
+.admin-showcase-live .wifi-qr-preview p:not(.kicker) { color: #b9c0ba; font-size: 13px; }
+.admin-showcase-live .wifi-qr-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.admin-showcase-live .wifi-qr-actions .secondary-button { color: #1d211e; }
+
+@media (max-width: 760px) {
+  .admin-showcase-live .wifi-qr-preview { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 1366px) {
   .admin-showcase-live .app-shell { grid-template-columns: 244px minmax(0, 1fr); }
   .admin-showcase-live .sidebar { width: 244px; }

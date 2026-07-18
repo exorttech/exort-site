@@ -4,8 +4,6 @@
   const l = (ru, kk, en, tr) => ({ ru, kk, en, tr });
   const money = (value) => value == null ? null : `${new Intl.NumberFormat("ru-RU").format(value)} ₸`;
   const imagePath = (name) => `../assets/demo-menu/${name}.webp`;
-  const SUPABASE_REST_URL = "https://jnxwbqcnpxezjvfgdabc.supabase.co/rest/v1/";
-  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_T2QhpE8LByMP8_uO_cBdPg_bbLkAbBv";
   const DEFAULT_RESTAURANT_SLUG = "exort-demo";
   const LOCAL_IMAGE_BY_CONTENT_KEY = Object.freeze({
     "chicken-caesar": "salad",
@@ -160,59 +158,8 @@
     }
   };
 
-  let categories = [
-    { id: "popular", name: l("Популярное", "Танымал", "Popular", "Popüler") },
-    { id: "breakfast", name: l("Завтраки", "Таңғы ас", "Breakfast", "Kahvaltı") },
-    { id: "coffee", name: l("Кофе", "Кофе", "Coffee", "Kahve") },
-    { id: "signature", name: l("Авторские", "Авторлық", "Signatures", "Özel içecekler") },
-    { id: "mains", name: l("Основные блюда", "Негізгі тағамдар", "Main plates", "Ana yemekler") },
-    { id: "desserts", name: l("Десерты", "Десерттер", "Desserts", "Tatlılar") },
-    { id: "cold", name: l("Холодные напитки", "Салқын сусындар", "Cold drinks", "Soğuk içecekler") },
-    { id: "seasonal", name: l("Сезонное", "Маусымдық", "Seasonal", "Mevsimlik") }
-  ];
-
-  const dish = (id, category, name, description, price, weight, image, options = {}) => ({
-    id, category, name, description, price, weight, image, featured: false, available: true,
-    badge: null, calories: null, ingredients: description, allergens: null, pairings: [], tags: [], ...options
-  });
-
-  let dishes = [
-    dish("syrniki", "breakfast", l("Сырники с ягодами", "Жидек қосылған сырниктер", "Berry syrniki", "Orman meyveli syrniki"), l("Творог, сметанный крем, свежие ягоды и фисташка.", "Сүзбе, қаймақ кремі, балғын жидектер мен пісте.", "Cottage cheese pancakes, sour cream, berries and pistachio.", "Lor pankeki, ekşi krema, taze meyveler ve Antep fıstığı."), 3200, "220 г", imagePath("pancakes"), { featured: true, badge: l("Хит", "Хит", "Favourite", "Favori"), calories: 540, allergens: l("Молоко, яйца, глютен, орехи", "Сүт, жұмыртқа, глютен, жаңғақ", "Milk, eggs, gluten, nuts", "Süt, yumurta, gluten, kuruyemiş"), pairings: ["cappuccino", "berry-matcha"] }),
-    dish("salmon-croissant", "breakfast", l("Круассан с лососем", "Албырт қосылған круассан", "Salmon croissant", "Somonlu kruvasan"), l("Слабосолёный лосось, яйцо, огурец и крем с укропом.", "Аз тұздалған албырт, жұмыртқа, қияр және аскөк кремі.", "Cured salmon, egg, cucumber and dill cream.", "Marine somon, yumurta, salatalık ve dereotlu krema."), 4200, "260 г", imagePath("sandwich"), { featured: true, badge: l("Выбор шефа", "Шеф таңдауы", "Chef’s pick", "Şefin seçimi"), allergens: l("Рыба, яйца, молоко, глютен", "Балық, жұмыртқа, сүт, глютен", "Fish, eggs, milk, gluten", "Balık, yumurta, süt, gluten"), pairings: ["filter", "citrus-soda"] }),
-    dish("shakshuka", "breakfast", l("Шакшука с печёным перцем", "Пісірілген бұрыш қосылған шакшука", "Roasted pepper shakshuka", "Köz biberli shakshuka"), l("Два яйца, томаты, сладкий перец, лабне и хрустящий тартин.", "Екі жұмыртқа, қызанақ, тәтті бұрыш, лабне және қытырлақ тартин.", "Two eggs, tomato, sweet pepper, labneh and crisp tartine.", "İki yumurta, domates, tatlı biber, labne ve çıtır ekşi maya ekmeği."), 3600, "330 г", imagePath("eggs"), { allergens: l("Яйца, молоко, глютен", "Жұмыртқа, сүт, глютен", "Eggs, milk, gluten", "Yumurta, süt, gluten"), pairings: ["americano-iced", "granola"] }),
-    dish("granola", "breakfast", l("Гранола с печёной сливой", "Пісірілген алхоры қосылған гранола", "Granola with roasted plum", "Fırınlanmış erikli granola"), l("Греческий йогурт, домашняя гранола, слива и мёд.", "Грек йогурты, үй граноласы, алхоры және бал.", "Greek yoghurt, house granola, plum and honey.", "Süzme yoğurt, ev yapımı granola, erik ve bal."), 2900, "250 г", "", { badge: l("Без фото", "Фотосыз", "No photo", "Fotoğrafsız"), allergens: l("Молоко, орехи", "Сүт, жаңғақ", "Milk, nuts", "Süt, kuruyemiş"), pairings: ["filter", "peach-oolong"] }),
-
-    dish("espresso", "coffee", l("Эспрессо", "Эспрессо", "Espresso", "Espresso"), l("", "", "", ""), 1100, "30 мл", "", { ingredients: l("Зерно недели, вода.", "Апта дәні, су.", "Bean of the week, water.", "Haftanın çekirdeği, su."), pairings: ["tiramisu", "lemon-tart"] }),
-    dish("cappuccino", "coffee", l("Капучино", "Капучино", "Cappuccino", "Cappuccino"), l("Двойной эспрессо и молоко с шелковистой текстурой.", "Қос эспрессо және жібектей сүт.", "Double espresso with silky textured milk.", "Çift espresso ve ipeksi dokulu süt."), 1600, "250 мл", imagePath("coffee"), { allergens: l("Молоко", "Сүт", "Milk", "Süt"), pairings: ["syrniki", "basque"] }),
-    dish("filter", "coffee", l("Фильтр-кофе", "Фильтр-кофе", "Filter coffee", "Filtre kahve"), l("Чистая чашка с ягодным профилем. Зерно меняется каждую неделю.", "Жидек дәмі бар таза кесе. Дән апта сайын өзгереді.", "A clean, berry-led cup. The bean changes weekly.", "Meyvemsi, temiz bir fincan. Çekirdek her hafta değişir."), 1800, "300 мл", "", { badge: l("Зерно недели", "Апта дәні", "Weekly bean", "Haftanın çekirdeği"), pairings: ["salmon-croissant", "chocolate"] }),
-    dish("pistachio-raf", "coffee", l("Фисташковый раф", "Пістелі раф", "Pistachio raf", "Antep fıstıklı raf"), l("Эспрессо, сливки, фисташковая паста и щепотка соли.", "Эспрессо, кілегей, пісте пастасы және бір шымшым тұз.", "Espresso, cream, pistachio paste and a pinch of salt.", "Espresso, krema, Antep fıstığı ezmesi ve bir tutam tuz."), 2400, "300 мл", imagePath("coffee"), { badge: l("Новое", "Жаңа", "New", "Yeni"), allergens: l("Молоко, орехи", "Сүт, жаңғақ", "Milk, nuts", "Süt, kuruyemiş"), pairings: ["tiramisu", "plum-pancakes"] }),
-
-    dish("berry-matcha", "signature", l("Айс-матча с клубникой", "Құлпынайлы айс-матча", "Strawberry iced matcha", "Çilekli buzlu matcha"), l("Церемониальная матча, клубничное пюре и молоко на выбор.", "Салтанатты матча, құлпынай пюресі және таңдауыңыздағы сүт.", "Ceremonial matcha, strawberry purée and your choice of milk.", "Seremoni sınıfı matcha, çilek püresi ve seçtiğiniz süt."), 2600, "400 мл", imagePath("matcha"), { featured: true, badge: l("Сезон", "Маусым", "Seasonal", "Mevsimlik"), allergens: l("Молоко", "Сүт", "Milk", "Süt"), pairings: ["syrniki", "berry-cloud"] }),
-    dish("yuzu-tonic", "signature", l("Эспрессо-тоник юдзу", "Юдзу эспрессо-тонигі", "Yuzu espresso tonic", "Yuzulu espresso tonik"), l("Яркий эспрессо, сухой тоник и цитрусовый юдзу.", "Жарқын эспрессо, құрғақ тоник және цитрусты юдзу.", "Bright espresso, dry tonic and citrusy yuzu.", "Canlı espresso, sek tonik ve narenciye karakterli yuzu."), 2500, "350 мл", imagePath("mocktail"), { pairings: ["salmon-croissant", "lemon-tart"] }),
-    dish("peach-oolong", "signature", l("Персиковый улун с шалфеем", "Шалфейлі шабдалы улун", "Peach oolong & sage", "Şeftalili adaçaylı oolong"), l("Холодный улун, белый персик, шалфей и содовая.", "Салқын улун, ақ шабдалы, шалфей және газды су.", "Cold oolong, white peach, sage and soda.", "Soğuk oolong, beyaz şeftali, adaçayı ve soda."), 2300, "400 мл", imagePath("mocktail"), { pairings: ["granola", "cauliflower"] }),
-    dish("salt-cocoa", "signature", l("Какао с морской солью", "Теңіз тұзы қосылған какао", "Sea-salt cocoa", "Deniz tuzlu kakao"), l("Горький шоколад, какао и молоко без лишней сладости.", "Ащы шоколад, какао және аса тәтті емес сүт.", "Dark chocolate, cocoa and milk, deliberately not too sweet.", "Bitter çikolata, kakao ve dengeli tatlılıkta süt."), 2200, "300 мл", "", { allergens: l("Молоко", "Сүт", "Milk", "Süt"), pairings: ["basque", "chocolate"] }),
-
-    dish("tom-yum", "mains", l("Том-ям с креветкой", "Асшаян қосылған том-ям", "Prawn tom yum", "Karidesli tom yum"), l("Насыщенный бульон, креветки, грибы, томаты и кокосовое молоко.", "Қанық сорпа, асшаян, саңырауқұлақ, қызанақ және кокос сүті.", "Aromatic broth, prawns, mushrooms, tomato and coconut milk.", "Aromatik et suyu, karides, mantar, domates ve Hindistan cevizi sütü."), 4900, "430 г", imagePath("main"), { featured: true, badge: l("Острое", "Ащы", "Spicy", "Acılı"), allergens: l("Ракообразные, рыба", "Шаянтәрізділер, балық", "Crustaceans, fish", "Kabuklu deniz ürünleri, balık"), pairings: ["citrus-soda", "cherry-kombucha"] }),
-    dish("herb-chicken", "mains", l("Цыплёнок с зелёным маслом", "Жасыл май қосылған балапан", "Chicken with green butter", "Yeşil tereyağlı tavuk"), l("Цыплёнок, молодой картофель, сезонная зелень и лимонный жу.", "Балапан, жас картоп, маусымдық көк және лимон жу.", "Chicken, baby potatoes, seasonal herbs and lemon jus.", "Tavuk, bebek patates, mevsim otları ve limonlu jus."), 4700, "390 г", imagePath("salad"), { pairings: ["peach-oolong", "sparkling"] }),
-    dish("beef-noodles", "mains", l("Лапша с томлёной говядиной", "Баяу піскен сиыр еті қосылған кеспе", "Slow beef noodles", "Ağır pişmiş dana etli erişte"), l("Пшеничная лапша, томлёная говядина, пак-чой и пряный соус.", "Бидай кеспесі, баяу піскен сиыр еті, пак-чой және дәмді тұздық.", "Wheat noodles, slow-cooked beef, pak choi and spiced sauce.", "Buğday eriştesi, ağır pişmiş dana eti, pak choi ve baharatlı sos."), 5200, "410 г", imagePath("main"), { allergens: l("Глютен, соя, кунжут", "Глютен, соя, күнжіт", "Gluten, soy, sesame", "Gluten, soya, susam"), pairings: ["cherry-kombucha", "citrus-soda"] }),
-    dish("cauliflower", "mains", l("Запечённая цветная капуста с тахини и гранатовым демигласом", "Тахини және анар демигласы қосылған пісірілген гүлді қырыққабат", "Roasted cauliflower with tahini and pomegranate demi-glace", "Tahinli ve nar demi-glace soslu fırın karnabahar"), l("Цветная капуста, тахини, гранат, нут и пряные травы.", "Гүлді қырыққабат, тахини, анар, ноқат және хош иісті шөптер.", "Cauliflower, tahini, pomegranate, chickpeas and aromatic herbs.", "Karnabahar, tahin, nar, nohut ve aromatik otlar."), 3900, "360 г", "", { badge: l("Plant-based", "Өсімдік негізді", "Plant-based", "Bitki bazlı"), allergens: l("Кунжут", "Күнжіт", "Sesame", "Susam"), pairings: ["peach-oolong", "sparkling"] }),
-
-    dish("tiramisu", "desserts", l("Тирамису Exort Demo", "Exort Demo тирамисуы", "Exort Demo tiramisu", "Exort Demo tiramisu"), l("Маскарпоне, эспрессо, савоярди и тёмное какао.", "Маскарпоне, эспрессо, савоярди және қара какао.", "Mascarpone, espresso, savoiardi and dark cocoa.", "Mascarpone, espresso, savoiardi ve bitter kakao."), 2700, "170 г", imagePath("tiramisu"), { featured: true, badge: l("Фирменное", "Фирмалық", "Signature", "İmza tatlı"), allergens: l("Молоко, яйца, глютен", "Сүт, жұмыртқа, глютен", "Milk, eggs, gluten", "Süt, yumurta, gluten"), pairings: ["espresso", "pistachio-raf"] }),
-    dish("basque", "desserts", l("Баскский чизкейк", "Баск чизкейкі", "Basque cheesecake", "San Sebastian cheesecake"), l("Карамельная корочка, сливочная середина и морская соль.", "Карамельді қабық, кілегейлі орта және теңіз тұзы.", "Caramelised top, creamy centre and sea salt.", "Karamelize üst, kremamsı iç ve deniz tuzu."), 2900, "180 г", imagePath("cake"), { allergens: l("Молоко, яйца", "Сүт, жұмыртқа", "Milk, eggs", "Süt, yumurta"), pairings: ["cappuccino", "salt-cocoa"] }),
-    dish("lemon-tart", "desserts", l("Лимонный тарт с меренгой", "Меренгалы лимон тарты", "Lemon meringue tart", "Limonlu mereng tart"), l("Яркий лимонный курд, песочное тесто и обожжённая меренга.", "Қанық лимон курды, үгілмелі қамыр және күйдірілген меренга.", "Bright lemon curd, shortcrust and torched meringue.", "Canlı limon kreması, gevrek taban ve yakılmış mereng."), 2500, "160 г", imagePath("tart"), { available: false, allergens: l("Яйца, молоко, глютен", "Жұмыртқа, сүт, глютен", "Eggs, milk, gluten", "Yumurta, süt, gluten"), pairings: ["espresso", "yuzu-tonic"] }),
-    dish("chocolate", "desserts", l("Тёплый шоколадный фондан", "Жылы шоколад фондан", "Warm chocolate fondant", "Sıcak çikolatalı fondan"), l("Тёмный шоколад, жидкий центр и ванильный крем.", "Қара шоколад, сұйық ортасы және ваниль кремі.", "Dark chocolate, molten centre and vanilla cream.", "Bitter çikolata, akışkan merkez ve vanilyalı krema."), 3100, "190 г", imagePath("chocolate"), { calories: 610, allergens: l("Молоко, яйца, глютен", "Сүт, жұмыртқа, глютен", "Milk, eggs, gluten", "Süt, yumurta, gluten"), pairings: ["filter", "salt-cocoa"] }),
-
-    dish("citrus-soda", "cold", l("Цитрусовая сода", "Цитрусты сода", "Citrus soda", "Narenciye sodası"), l("Грейпфрут, лимон, розмарин и содовая.", "Грейпфрут, лимон, розмарин және газды су.", "Grapefruit, lemon, rosemary and soda.", "Greyfurt, limon, biberiye ve soda."), 1900, "400 мл", imagePath("mocktail"), { pairings: ["tom-yum", "salmon-croissant"] }),
-    dish("americano-iced", "cold", l("Айс-американо", "Айс-американо", "Iced Americano", "Buzlu Americano"), l("Двойной эспрессо, холодная вода и крупный лёд.", "Қос эспрессо, салқын су және ірі мұз.", "Double espresso, chilled water and large ice.", "Çift espresso, soğuk su ve büyük buz."), 1500, "350 мл", imagePath("coffee"), { pairings: ["shakshuka", "tiramisu"] }),
-    dish("cherry-kombucha", "cold", l("Вишнёвая комбуча", "Шиелі комбуча", "Cherry kombucha", "Vişneli kombucha"), l("Ферментированный чай, вишня и гибискус.", "Ферменттелген шай, шие және гибискус.", "Fermented tea, cherry and hibiscus.", "Fermente çay, vişne ve hibiskus."), 2100, "330 мл", "", { badge: l("Домашняя", "Үйде жасалған", "House-made", "Ev yapımı"), pairings: ["beef-noodles", "tom-yum"] }),
-    dish("sparkling", "cold", l("Газированная вода", "Газдалған су", "Sparkling water", "Maden suyu"), l("Минеральная вода без вкусовых добавок.", "Дәм қоспалары жоқ минералды су.", "Mineral water with no added flavour.", "Aromasız maden suyu."), 1200, "500 мл", "", { pairings: ["herb-chicken", "cauliflower"] }),
-
-    dish("corn-brioche", "seasonal", l("Бриошь с кукурузным кремом", "Жүгері кремі қосылған бриошь", "Brioche with corn cream", "Mısır kremalı brioche"), l("Тёплая бриошь, сладкая кукуруза, чили-масло и пармезан.", "Жылы бриошь, тәтті жүгері, чили майы және пармезан.", "Warm brioche, sweet corn, chilli oil and parmesan.", "Sıcak brioche, tatlı mısır, acı yağ ve parmesan."), 3400, "230 г", imagePath("sandwich"), { badge: l("Только летом", "Тек жазда", "Summer only", "Sadece yazın"), allergens: l("Глютен, молоко, яйца", "Глютен, сүт, жұмыртқа", "Gluten, milk, eggs", "Gluten, süt, yumurta"), pairings: ["yuzu-tonic", "citrus-soda"] }),
-    dish("plum-pancakes", "seasonal", l("Панкейки со сливой и пряной карамелью", "Алхоры және дәмдеуіш карамель қосылған панкейктер", "Plum pancakes with spiced caramel", "Erikli ve baharatlı karamelli pankek"), l("Воздушные панкейки, печёная слива, карамель и сметана.", "Үлпілдек панкейк, пісірілген алхоры, карамель және қаймақ.", "Fluffy pancakes, roasted plum, caramel and sour cream.", "Yumuşak pankek, fırınlanmış erik, karamel ve ekşi krema."), 3500, "280 г", imagePath("pancakes"), { allergens: l("Глютен, молоко, яйца", "Глютен, сүт, жұмыртқа", "Gluten, milk, eggs", "Gluten, süt, yumurta"), pairings: ["pistachio-raf", "filter"] }),
-    dish("berry-cloud", "seasonal", l("Ягодное облако", "Жидек бұлты", "Berry cloud", "Orman meyveli bulut"), l("Лёгкий мусс, сезонные ягоды и хрустящий миндаль.", "Жеңіл мусс, маусымдық жидектер және қытырлақ бадам.", "Light mousse, seasonal berries and crisp almond.", "Hafif mus, mevsim meyveleri ve çıtır badem."), 2800, "150 г", imagePath("tart"), { allergens: l("Молоко, орехи", "Сүт, жаңғақ", "Milk, nuts", "Süt, kuruyemiş"), pairings: ["berry-matcha", "espresso"] }),
-    dish("weekly-bean", "seasonal", l("Зерно недели для дома", "Үйге арналған апта дәні", "Weekly coffee beans", "Haftanın kahve çekirdeği"), l("Пачка 250 г. Профиль и сорт меняются каждую неделю.", "250 г қаптама. Дәм профилі мен сорт апта сайын өзгереді.", "A 250 g bag. Origin and flavour profile change every week.", "250 g paket. Menşei ve tat profili her hafta değişir."), null, "250 г", "", { badge: l("Спросите бариста", "Баристадан сұраңыз", "Ask the barista", "Baristaya sorun"), pairings: ["filter", "espresso"] })
-  ];
-
+  let categories = [];
+  let dishes = [];
   const state = {
     language: "ru",
     query: "",
@@ -294,21 +241,25 @@
     }
   }
 
-  async function requestSupabase(table, query = {}) {
-    const url = new URL(table, SUPABASE_REST_URL);
-    Object.entries(query).forEach(([key, value]) => url.searchParams.set(key, value));
+  async function requestPublicMenuData() {
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 6500);
     try {
-      const response = await fetch(url, {
+      const response = await fetch("/api/exort-admin", {
+        method: "POST",
         headers: {
-          apikey: SUPABASE_PUBLISHABLE_KEY,
+          "Content-Type": "application/json",
           Accept: "application/json"
         },
+        body: JSON.stringify({
+          action: "getPublicMenuData",
+          restaurantSlug: getRequestedRestaurantSlug()
+        }),
         signal: controller.signal
       });
-      if (!response.ok) throw new Error(`Supabase ${table}: ${response.status}`);
-      return response.json();
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error || `Menu API: ${response.status}`);
+      return payload;
     } finally {
       window.clearTimeout(timeout);
     }
@@ -342,29 +293,11 @@
 
   async function hydrateLiveMenu() {
     const slug = getRequestedRestaurantSlug();
-    const restaurants = await requestSupabase("restaurants", {
-      select: "*",
-      slug: `eq.${slug}`,
-      is_active: "eq.true",
-      limit: "1"
-    });
-    const restaurant = restaurants[0];
+    const payload = await requestPublicMenuData();
+    const restaurant = payload.restaurant;
     if (!restaurant) throw new Error(`Restaurant ${slug} not found`);
-
-    const [categoryRows, itemRows] = await Promise.all([
-      requestSupabase("menu_categories", {
-        select: "*",
-        restaurant_id: `eq.${restaurant.id}`,
-        is_active: "eq.true",
-        order: "sort_order.asc"
-      }),
-      requestSupabase("menu_items", {
-        select: "*",
-        restaurant_id: `eq.${restaurant.id}`,
-        is_active: "eq.true",
-        order: "sort_order.asc,created_at.asc"
-      })
-    ]);
+    const categoryRows = Array.isArray(payload.categories) ? payload.categories : [];
+    const itemRows = Array.isArray(payload.items) ? payload.items : [];
 
     const liveCategories = categoryRows.map((category) => ({
       id: category.id,
@@ -387,7 +320,7 @@
           weight: safeText(item.weight, "", 40),
           image: safePublicImage(item.image_url) || localImageForItem(item),
           featured: false,
-          available: !item.is_stoplisted && !(inactiveUntil > now),
+          available: item.is_active !== false && !item.is_stoplisted && !(inactiveUntil > now),
           badge: Object.values(badge).some(Boolean) ? badge : null,
           calories: Number.isFinite(Number(item.calories)) ? Number(item.calories) : null,
           ingredients: localizedFromRecord(item, "description"),
@@ -800,7 +733,10 @@
 
   function bindEvents() {
     document.addEventListener("click", (event) => {
-      if (event.target.closest("[data-loader-accept]")) return acceptLoader();
+      if (event.target.closest("[data-loader-accept]")) {
+        if (elements.loaderAccept.dataset.loaderRetry === "true") return location.reload();
+        return acceptLoader();
+      }
 
       const languageButton = event.target.closest("[data-language]");
       if (languageButton) return setLanguage(languageButton.dataset.language);
@@ -891,8 +827,6 @@
     initObservers();
     applyVenue();
     applyCopy();
-    renderCategoryNav();
-    renderMenu();
     bindEvents();
     try {
       await hydrateLiveMenu();
@@ -900,12 +834,17 @@
       applyCopy();
       renderCategoryNav();
       renderMenu();
+      elements.loaderAccept.disabled = false;
+      requestAnimationFrame(() => elements.loaderAccept.focus());
     } catch (error) {
-      console.warn("[exort-showcase] Supabase недоступен, показано резервное меню", error);
+      console.error("[exort-demo-menu] Не удалось загрузить актуальное меню", error);
+      elements.loaderAccept.dataset.loaderRetry = "true";
+      elements.loaderAccept.disabled = false;
+      elements.loaderAccept.textContent = "Повторить загрузку";
+      const loaderTitle = document.querySelector("#loader-title");
+      if (loaderTitle) loaderTitle.textContent = "Меню временно не загрузилось";
     }
     setupEditor(editorEnabled);
-    elements.loaderAccept.disabled = false;
-    requestAnimationFrame(() => elements.loaderAccept.focus());
   }
 
   init();

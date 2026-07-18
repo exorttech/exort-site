@@ -38,6 +38,10 @@ export default {
         return await trackAnalyticsEvent(env, restaurantSlug, body);
       }
 
+      if (action === "getPublicMenuData") {
+        return await getPublicMenuData(env, restaurantSlug);
+      }
+
       const session = await verifySession(env, body.sessionToken, restaurantSlug);
       if (!session) {
         return jsonResponse(401, { error: "Admin session expired. Sign in again." });
@@ -95,6 +99,24 @@ async function login(env, slug, pin) {
 async function getData(env, slug) {
   const restaurant = await getRestaurant(env, slug);
   return jsonResponse(200, await buildAdminData(env, restaurant));
+}
+
+async function getPublicMenuData(env, slug) {
+  const restaurant = await getRestaurant(env, slug);
+  const data = await buildAdminData(env, restaurant);
+  const categories = data.categories.filter((category) => category.is_active !== false);
+  const categoryIds = new Set(categories.map((category) => category.id));
+  const items = data.items.filter((item) => item.content_key !== "menu-hero" && categoryIds.has(item.category_id));
+
+  return jsonResponse(200, {
+    restaurant: {
+      id: restaurant.id,
+      slug: restaurant.slug,
+      name: restaurant.name,
+    },
+    categories,
+    items,
+  });
 }
 
 async function buildAdminData(env, restaurant) {
