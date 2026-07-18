@@ -10,16 +10,6 @@
   status = 200
 
 [[redirects]]
-  from = "/admin-showcase"
-  to = "/pages/admin-showcase.html"
-  status = 200
-
-[[redirects]]
-  from = "/admin-legacy"
-  to = "/pages/demo-admin.html"
-  status = 200
-
-[[redirects]]
   from = "/demo-menu"
   to = "/pages/demo-menu.html"
   status = 200
@@ -31,7 +21,7 @@
 
 [[redirects]]
   from = "/demo-admin"
-  to = "/pages/admin-showcase.html"
+  to = "/pages/demo-admin.html"
   status = 200
 
 [[redirects]]
