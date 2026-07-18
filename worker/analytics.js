@@ -242,7 +242,11 @@ function dayDetails(events, period) {
     const day = events.filter((event) => event.localDateKey === date);
     return [date, { label: shortDate(date), hours: Array.from({ length: 24 }, (_, hour) => {
       const slice = day.filter((event) => event.localHour === hour);
-      return { hour, sessions: sessionIds(slice).size, dishOpens: slice.filter((event) => event.event_type === "dish_open").length };
+      const completedSessions = slice.filter((event) => event.event_type === "menu_exit" && Number.isFinite(Number(event.duration_ms)));
+      const averageSessionMs = completedSessions.length
+        ? Math.round(completedSessions.reduce((sum, event) => sum + Number(event.duration_ms), 0) / completedSessions.length)
+        : null;
+      return { hour, sessions: sessionIds(slice).size, dishOpens: slice.filter((event) => event.event_type === "dish_open").length, averageSessionMs };
     }) }];
   }));
 }

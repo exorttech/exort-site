@@ -1,5 +1,5 @@
 (function () {
-  const state = { root: null, data: null, range: "7d", sourceId: "all", metric: "sessions", dishTab: "leaders", customStart: "", customEnd: "", loading: false, error: "", mounted: false, requestId: 0 };
+  const state = { root: null, data: null, range: "today", sourceId: "all", metric: "sessions", dishTab: "leaders", customStart: "", customEnd: "", loading: false, error: "", mounted: false, requestId: 0 };
 
   async function mount(options = {}) {
     state.root = options.root || document.querySelector("[data-analytics-root]");
@@ -119,16 +119,19 @@
 
   function activityCard(days) {
     const points = days.map((day) => day[state.metric] || { current: 0, previous: 0 });
-    const max = Math.max(...points.flatMap((point) => [Number(point.current || 0), Number(point.previous || 0)]), 1);
+    const max = Math.max(...points.map((point) => Number(point.current || 0)), 1);
     return `<section class="analytics-v2-card analytics-activity-card">
       <div class="analytics-v2-card-head"><div><p class="kicker">Главный график</p><h3>Активность гостей за ${state.range === "7d" ? "неделю" : "период"}</h3></div>
         <div class="analytics-metric-switch">${metricSwitch("sessions", "Сессии")}${metricSwitch("dishOpens", "Открытия блюд")}${metricSwitch("engagement", "Вовлечённость")}</div>
       </div>
-      <div class="activity-legend"><span><i></i>Текущий период</span><span><i></i>Предыдущий период</span></div>
+      <div class="activity-legend activity-legend--intensity"><span><i></i>Чем больше активности, тем насыщеннее оранжевый</span></div>
       <div class="activity-chart" style="--columns:${Math.min(days.length, 30)}">${days.map((day) => {
         const point = day[state.metric] || { current: 0, previous: 0, change: 0 };
-        const title = `${day.fullLabel}\nТекущий период: ${formatChartValue(point.current)}\nПредыдущий период: ${formatChartValue(point.previous)}\nИзменение: ${point.change === null ? "новый показатель" : `${point.change}%`}\nПиковый час: ${day.busiestHour}`;
-        return `<button class="activity-day" type="button" data-analytics-day="${day.date}" title="${escapeHtml(title)}"><span class="activity-bars"><i class="is-previous" style="height:${barHeight(point.previous, max)}%"></i><i class="is-current" style="height:${barHeight(point.current, max)}%"></i></span><strong>${escapeHtml(day.label)}</strong><small>${formatChartValue(point.current)}</small></button>`;
+        const ratio = Math.min(1, Number(point.current || 0) / max);
+        const height = Number(point.current) ? Math.max(12, Math.round(ratio * 100)) : 0;
+        const opacity = Number(point.current) ? (0.24 + ratio * 0.76).toFixed(2) : 0;
+        const title = `${day.fullLabel}\n${state.metric === "sessions" ? "Входы" : state.metric === "dishOpens" ? "Открытия блюд" : "Вовлечённость"}: ${formatChartValue(point.current)}\nСреднее время сессии: ${day.averageStudyMs?.current ? duration(day.averageStudyMs.current) : "нет данных"}\nПиковый час: ${day.busiestHour}`;
+        return `<button class="activity-day" type="button" data-analytics-day="${day.date}" data-activity-tooltip="${escapeHtml(title)}" aria-label="${escapeHtml(title)}"><span class="activity-day__date">${escapeHtml(day.fullLabel)}</span><span class="activity-column" aria-hidden="true"><i style="height:${height}%;--activity-opacity:${opacity}"></i></span><strong>${escapeHtml(day.label)}</strong><small>${formatChartValue(point.current)}</small></button>`;
       }).join("")}</div>
       <div data-day-detail></div>
     </section>`;
@@ -136,9 +139,15 @@
 
   function hourlyActivityCard(details) {
     const detail = Object.values(details)[0];
-    const hours = detail?.hours || Array.from({ length: 24 }, (_, hour) => ({ hour, sessions: 0, dishOpens: 0 }));
+    const hours = detail?.hours || Array.from({ length: 24 }, (_, hour) => ({ hour, sessions: 0, dishOpens: 0, averageSessionMs: null }));
     const max = Math.max(...hours.map((hour) => Number(hour.sessions || 0)), 1);
-    return `<section class="analytics-v2-card analytics-activity-card"><div class="analytics-v2-card-head"><div><p class="kicker">Сегодня · локальное время</p><h3>Сессии по часам</h3></div></div><div class="day-detail day-detail--always"><div class="day-detail-chart">${hours.map((hour) => `<span title="${hour.hour}:00 · ${hour.sessions} сессий · ${hour.dishOpens} открытий"><i style="height:${barHeight(hour.sessions, max)}%"></i><small>${String(hour.hour).padStart(2, "0")}</small></span>`).join("")}</div></div></section>`;
+    return `<section class="analytics-v2-card analytics-activity-card"><div class="analytics-v2-card-head"><div><p class="kicker">Сегодня · ${escapeHtml(detail?.label || "локальное время")}</p><h3>Активность гостей сегодня</h3><p class="analytics-card-description">Наведите на колонку, чтобы увидеть входы и среднее время сессии.</p></div></div><div class="hourly-activity-scroll"><div class="hourly-activity-chart">${hours.map((hour) => {
+      const ratio = Math.min(1, Number(hour.sessions || 0) / max);
+      const height = Number(hour.sessions) ? Math.max(10, Math.round(ratio * 100)) : 0;
+      const opacity = Number(hour.sessions) ? (0.24 + ratio * 0.76).toFixed(2) : 0;
+      const tooltip = `${String(hour.hour).padStart(2, "0")}:00\nВходы: ${hour.sessions}\nСреднее время сессии: ${hour.averageSessionMs ? duration(hour.averageSessionMs) : "нет данных"}`;
+      return `<button class="hour-activity-column" type="button" data-activity-tooltip="${escapeHtml(tooltip)}" aria-label="${escapeHtml(tooltip)}"><span class="hour-activity-track" aria-hidden="true"><i style="height:${height}%;--activity-opacity:${opacity}"></i></span><small>${String(hour.hour).padStart(2, "0")}</small></button>`;
+    }).join("")}</div></div></section>`;
   }
 
   function metricSwitch(value, label) { return `<button class="${state.metric === value ? "is-active" : ""}" type="button" data-analytics-metric="${value}">${label}</button>`; }
@@ -197,7 +206,7 @@
     const root = state.root.querySelector("[data-day-detail]");
     if (!root || !detail) return;
     const max = Math.max(...detail.hours.map((hour) => hour.sessions), 1);
-    root.innerHTML = `<div class="day-detail"><div><h4>${escapeHtml(detail.label)} · по часам</h4><button type="button" data-close-day>Закрыть</button></div><div class="day-detail-chart">${detail.hours.map((hour) => `<span title="${hour.hour}:00 · ${hour.sessions} сессий · ${hour.dishOpens} открытий"><i style="height:${barHeight(hour.sessions, max)}%"></i><small>${String(hour.hour).padStart(2, "0")}</small></span>`).join("")}</div></div>`;
+    root.innerHTML = `<div class="day-detail"><div><h4>${escapeHtml(detail.label)} · по часам</h4><button type="button" data-close-day>Закрыть</button></div><div class="day-detail-chart">${detail.hours.map((hour) => `<span title="${hour.hour}:00 · ${hour.sessions} сессий · среднее время ${hour.averageSessionMs ? duration(hour.averageSessionMs) : "нет данных"}"><i style="height:${barHeight(hour.sessions, max)}%"></i><small>${String(hour.hour).padStart(2, "0")}</small></span>`).join("")}</div></div>`;
     root.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
