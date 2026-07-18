@@ -3,34 +3,42 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f4f1ea" />
+    <meta name="theme-color" content="#f3f1eb" />
     <title>Exort Admin — новая рабочая панель</title>
     <style>
       :root {
-        --brand: #ff5a36 !important;
-        --brand-hover: #e84a27 !important;
-        --bg: #f4f1ea !important;
+        --brand: #176b62 !important;
+        --brand-hover: #10584f !important;
+        --accent-coral: #ff6b3d !important;
+        --bg: #f3f1eb !important;
         --surface: #fffdf8 !important;
-        --text: #1d211e !important;
-        --muted: #69716b !important;
-        --border: #ddd8cd !important;
+        --text: #202722 !important;
+        --muted: #69736d !important;
+        --border: #d8d6cc !important;
       }
-      html, body { background: #f4f1ea; }
+      html, body { color: #202722; background: #f3f1eb; }
       .login-screen {
-        background: radial-gradient(circle at 16% 18%, rgba(255, 90, 54, 0.16), transparent 28%), radial-gradient(circle at 88% 82%, rgba(36, 122, 75, 0.11), transparent 28%), #f4f1ea !important;
+        background: radial-gradient(circle at 14% 16%, rgba(255, 107, 61, 0.17), transparent 27%), radial-gradient(circle at 86% 78%, rgba(23, 107, 98, 0.15), transparent 30%), radial-gradient(circle at 70% 12%, rgba(114, 84, 111, 0.08), transparent 24%), #f3f1eb !important;
       }
       .login-orb { display: none !important; }
-      .login-card { box-shadow: 0 32px 100px rgba(29, 33, 30, 0.14) !important; }
-      .restaurant-avatar, .primary-button { background: #ff5a36 !important; }
-      .pin-field:focus-within { border-color: #ff5a36 !important; box-shadow: 0 0 0 4px rgba(255, 90, 54, 0.12) !important; }
-      .pin-field button, .kicker { color: #d94122 !important; }
+      .login-card { box-shadow: 0 32px 100px rgba(32, 39, 34, 0.14) !important; }
+      .restaurant-avatar { background: linear-gradient(135deg, #ff7b50, #dd4f2d) !important; }
+      .primary-button { background: #176b62 !important; box-shadow: 0 12px 28px rgba(23, 107, 98, 0.22) !important; }
+      .pin-field:focus-within { border-color: #176b62 !important; box-shadow: 0 0 0 4px rgba(23, 107, 98, 0.13) !important; }
+      .pin-field button { color: #176b62 !important; }
+      .kicker { color: #d84b29 !important; }
+      button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible {
+        outline: 3px solid rgba(255, 107, 61, 0.32) !important;
+        outline-offset: 2px !important;
+      }
+      input { accent-color: #176b62; }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../css/demo-admin.css?v=21" />
-    <link rel="stylesheet" href="../css/demo-admin-navigation.css?v=10" />
-    <link rel="stylesheet" href="../css/admin-showcase.css?v=33" />
+    <link rel="stylesheet" href="../css/demo-admin-navigation.css?v=11" />
+    <link rel="stylesheet" href="../css/admin-showcase.css?v=34" />
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script defer src="../js/admin-analytics.js?v=24"></script>
     <script defer src="../js/admin-qr.js?v=21"></script>
