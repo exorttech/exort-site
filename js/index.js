@@ -522,6 +522,8 @@
       "Тирамису MORI": "MORI tiramisu",
       "уже учтена в итоговой сумме.": "nihai tutara zaten dahil edilmiştir.",
       "УПРАВЛЕНИЕ ДЛЯ ВЛАДЕЛЬЦА": "İŞLETME SAHİBİ İÇİN YÖNETİM",
+      "МЕНЮ ДЛЯ ГОСТЯ": "MİSAFİR MENÜSÜ",
+      "АНАЛИТИКА ИНТЕРЕСА": "İLGİ ANALİZİ",
       "Фильтры, описания вкуса и оперативное управление стоп-листом.": "Filtreler, lezzet açıklamaları ve stok dışı listesinin hızlı yönetimi.",
       "Функции остаются одинаковыми. Годовой вариант снижает ежемесячную стоимость и даёт дополнительную скидку.": "Özellikler aynıdır. Yıllık seçenek aylık maliyeti düşürür ve ek indirim sağlar.",
       "Цифровое меню для гостей": "Misafirler için dijital menü",
