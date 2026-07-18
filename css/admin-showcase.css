@@ -8,6 +8,11 @@
   --border: #ddd8cd;
   --danger: #b63c35;
   --success: #247a4b;
+  --coral: #e2543d;
+  --amber: #e7a72f;
+  --wine: #934552;
+  --sage: #4f7d61;
+  --sand: #ead7b7;
   --shadow: 0 22px 70px rgba(29, 33, 30, 0.12);
   --radius: 16px;
   color: var(--text);
@@ -451,6 +456,42 @@
 .admin-showcase-live .hour-activity-column small { font-size: 10px; font-weight: 800; }
 .admin-showcase-live .hour-activity-column:hover .hour-activity-track,
 .admin-showcase-live .hour-activity-column:focus-visible .hour-activity-track { border-color: rgba(255, 90, 54, .55); }
+
+/* Warm analytics palette: no blue placeholders or blue loading flash. */
+.admin-showcase-live .analytics-period-switch,
+.admin-showcase-live .analytics-metric-switch,
+.admin-showcase-live .dish-tabs { background: #eee7dc; }
+.admin-showcase-live .analytics-period-switch button,
+.admin-showcase-live .analytics-metric-switch button,
+.admin-showcase-live .dish-tabs button { color: #6e665d; }
+.admin-showcase-live .analytics-period-switch button.is-active,
+.admin-showcase-live .analytics-metric-switch button.is-active,
+.admin-showcase-live .dish-tabs button.is-active { color: #fff; background: var(--brand); }
+.admin-showcase-live .analytics-v2-metric { border-top: 4px solid var(--brand); }
+.admin-showcase-live .analytics-v2-metric:nth-child(1) { background: linear-gradient(155deg, #fffdf8 72%, #fff0ea); border-top-color: var(--brand); }
+.admin-showcase-live .analytics-v2-metric:nth-child(2) { background: linear-gradient(155deg, #fffdf8 72%, #fff5dc); border-top-color: var(--amber); }
+.admin-showcase-live .analytics-v2-metric:nth-child(3) { background: linear-gradient(155deg, #fffdf8 72%, #f8eaec); border-top-color: var(--wine); }
+.admin-showcase-live .analytics-v2-metric:nth-child(4) { background: linear-gradient(155deg, #fffdf8 72%, #eaf3ed); border-top-color: var(--sage); }
+.admin-showcase-live .analytics-v2-metric:nth-child(1) .metric-sparkline i { background: #ff9a82; }
+.admin-showcase-live .analytics-v2-metric:nth-child(2) .metric-sparkline i { background: #efc66a; }
+.admin-showcase-live .analytics-v2-metric:nth-child(3) .metric-sparkline i { background: #c98b94; }
+.admin-showcase-live .analytics-v2-metric:nth-child(4) .metric-sparkline i { background: #88ab94; }
+.admin-showcase-live .day-detail { background: #fff8ec; border-color: #ead7b7; }
+.admin-showcase-live .heatmap-grid > i { background: rgba(255, 90, 54, var(--intensity)); }
+.admin-showcase-live .insights-card { background: linear-gradient(145deg, #fffdf8, #fff4e4); }
+.admin-showcase-live .insights-card li { border-color: #eadfce; }
+.admin-showcase-live .insights-card li span { color: var(--wine); background: #f8eaec; }
+.admin-showcase-live .engagement-funnel > div { background: #faf6ee; border-color: #e7dfd2; }
+.admin-showcase-live .engagement-funnel > div > span { color: var(--wine); background: #fffaf2; }
+.admin-showcase-live .audience-row > i { background: #eee7dc; }
+.admin-showcase-live .audience-row > i b { background: var(--sage); }
+.admin-showcase-live .analytics-loading span { border-color: #ead7b7; border-top-color: var(--brand); }
+.admin-showcase-live .analytics-chart-shell,
+.admin-showcase-live .analytics-chart-grid span { background: #faf6ee; border-color: #e7dfd2; }
+.admin-showcase-live .qr-create-card,
+.admin-showcase-live .qr-help-card,
+.admin-showcase-live .qr-list-section { border-color: #ded6c9; }
+.admin-showcase-live .change-badge.is-neutral { color: #6e665d; background: #eee7dc; }
 
 @media (max-width: 720px) {
   .admin-showcase-live .activity-chart { grid-template-columns: repeat(var(--columns), 68px); }
