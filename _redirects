@@ -1,5 +1,6 @@
-/demo-admin /pages/demo-admin.html 200
+/demo-admin /pages/admin-showcase.html 200
 /admin-showcase /pages/admin-showcase.html 200
+/admin-legacy /pages/demo-admin.html 200
 /demo-menu /pages/demo-menu.html 200
 /coffee-menu-demo /pages/coffee-menu-demo.html 200
 /bdayvideo /pages/bdayvideo.html 200

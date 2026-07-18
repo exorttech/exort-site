@@ -66,7 +66,7 @@
     if (!data) return;
     state.root.innerHTML = `
       <header class="analytics-v2-header">
-        <div><p class="kicker">Результаты меню</p><h2>Аналитика меню</h2><p>${escapeHtml(data.period.label)} · сравнение с ${escapeHtml(data.period.comparisonLabel)}</p></div>
+        <div><p class="kicker">Результаты меню</p><h2>Аналитика меню</h2><p>${state.range === "all" ? `${escapeHtml(data.period.label)} · без сравнения` : `${escapeHtml(data.period.label)} · сравнение с ${escapeHtml(data.period.comparisonLabel)}`}</p></div>
         <div class="analytics-v2-actions">
           <div class="analytics-period-switch" role="group" aria-label="Период аналитики">
             ${periodButton("today", "Сегодня")}${periodButton("7d", "7 дней")}${periodButton("30d", "30 дней")}${periodButton("all", "Всё время")}
@@ -104,12 +104,14 @@
   function metricCard(label, item, hint) {
     const hasValue = item?.value !== null && item?.value !== undefined;
     const changeValue = item?.change;
-    const direction = item?.sentiment === "neutral" || changeValue === null || changeValue === 0 ? "neutral" : changeValue > 0 ? "positive" : "negative";
-    const changeText = changeValue === null ? "Новый показатель" : changeValue === 0 ? "Без изменений" : `${changeValue > 0 ? "+" : ""}${changeValue}%`;
+    const comparisonUnavailable = state.range === "all";
+    const direction = comparisonUnavailable || item?.sentiment === "neutral" || changeValue === null || changeValue === 0 ? "neutral" : changeValue > 0 ? "positive" : "negative";
+    const changeText = comparisonUnavailable ? "За весь период" : changeValue === null ? "Новый показатель" : changeValue === 0 ? "Без изменений" : `${changeValue > 0 ? "+" : ""}${changeValue}%`;
+    const changeHint = comparisonUnavailable ? "без сравнения" : "к предыдущему периоду";
     const max = Math.max(...(item?.sparkline || []).map(Number), 1);
     return `<article class="analytics-v2-metric">
       <span>${label}</span><strong>${hasValue ? formatMetric(item.value, item.format) : "Нет данных"}</strong>
-      <div class="metric-change is-${direction}"><b>${changeText}</b><small>к предыдущему периоду</small></div>
+      <div class="metric-change is-${direction}"><b>${changeText}</b><small>${changeHint}</small></div>
       <div class="metric-sparkline" aria-hidden="true">${(item?.sparkline || []).slice(-14).map((value) => `<i style="height:${Math.max(8, Math.round((Number(value || 0) / max) * 100))}%"></i>`).join("")}</div>
       <p>${hint}</p>
     </article>`;
