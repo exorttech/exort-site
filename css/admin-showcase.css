@@ -1,832 +1,359 @@
-.exort-admin-showcase {
-  --asa-ink: #1d211e;
-  --asa-ink-soft: #303630;
-  --asa-muted: #707771;
-  --asa-muted-2: #929891;
-  --asa-bg: #f4f1ea;
-  --asa-sidebar: #ebe7de;
-  --asa-surface: #fffdf8;
-  --asa-surface-2: #f8f5ee;
-  --asa-line: #ddd9cf;
-  --asa-line-strong: #cbc6ba;
-  --asa-accent: #ff5a36;
-  --asa-accent-dark: #d94122;
-  --asa-accent-soft: #fff0ea;
-  --asa-green: #247a4b;
-  --asa-green-soft: #eaf6ef;
-  --asa-amber: #a86712;
-  --asa-amber-soft: #fff4dc;
-  --asa-red: #b63c35;
-  --asa-red-soft: #fff0ee;
-  --asa-blue: #365f9d;
-  --asa-blue-soft: #edf3fb;
-  --asa-display: "Unbounded", Arial, sans-serif;
-  --asa-body: "Manrope", Arial, sans-serif;
-  min-width: 320px;
-  min-height: 100vh;
-  margin: 0;
-  color: var(--asa-ink);
-  background: var(--asa-bg);
-  font-family: var(--asa-body);
-  font-size: 14px;
-  line-height: 1.5;
+.admin-showcase-live {
+  --brand: #ff5a36;
+  --brand-hover: #e84a27;
+  --surface: #fffdf8;
+  --bg: #f4f1ea;
+  --text: #1d211e;
+  --muted: #69716b;
+  --border: #ddd8cd;
+  --danger: #b63c35;
+  --success: #247a4b;
+  --shadow: 0 22px 70px rgba(29, 33, 30, 0.12);
+  --radius: 16px;
+  color: var(--text);
+  background: var(--bg);
+  font-family: "Manrope", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.55;
   -webkit-font-smoothing: antialiased;
-  overflow-x: clip;
 }
 
-.exort-admin-showcase *,
-.exort-admin-showcase *::before,
-.exort-admin-showcase *::after { box-sizing: border-box; }
-.exort-admin-showcase a { color: inherit; text-decoration: none; }
-.exort-admin-showcase button,
-.exort-admin-showcase input,
-.exort-admin-showcase select,
-.exort-admin-showcase textarea { color: inherit; font: inherit; }
-.exort-admin-showcase button { cursor: pointer; }
-.exort-admin-showcase img { display: block; max-width: 100%; }
-.exort-admin-showcase h1,
-.exort-admin-showcase h2,
-.exort-admin-showcase h3,
-.exort-admin-showcase h4,
-.exort-admin-showcase p { margin: 0; }
-.exort-admin-showcase [hidden] { display: none !important; }
-.exort-admin-showcase :focus-visible { outline: 3px solid rgba(255, 90, 54, 0.34); outline-offset: 3px; }
-.exort-admin-showcase.is-modal-open { overflow: hidden; }
+.admin-showcase-live button,
+.admin-showcase-live input,
+.admin-showcase-live select,
+.admin-showcase-live textarea { font-size: 16px; }
 
-.exort-admin-showcase .asa-visually-hidden {
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-  clip: rect(0, 0, 0, 0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
+.admin-showcase-live button:focus-visible,
+.admin-showcase-live input:focus-visible,
+.admin-showcase-live select:focus-visible,
+.admin-showcase-live textarea:focus-visible,
+.admin-showcase-live a:focus-visible { outline-color: rgba(255, 90, 54, 0.38); }
+
+.admin-showcase-live .kicker { color: #d94122; font-size: 13px; letter-spacing: 0.08em; }
+.admin-showcase-live h1,
+.admin-showcase-live h2,
+.admin-showcase-live h3 { color: var(--text); }
+.admin-showcase-live .topbar h1,
+.admin-showcase-live .login-copy h1 { font-family: "Unbounded", "Manrope", sans-serif; }
+
+.admin-showcase-live .primary-button,
+.admin-showcase-live .secondary-button,
+.admin-showcase-live .danger-button { min-height: 48px; padding-inline: 20px; border-radius: 12px; font-size: 15px; }
+.admin-showcase-live .primary-button { background: var(--brand); box-shadow: 0 12px 28px rgba(255, 90, 54, 0.22); }
+.admin-showcase-live .primary-button:hover { background: var(--brand-hover); }
+.admin-showcase-live .secondary-button { background: var(--surface); }
+.admin-showcase-live .compact { min-height: 44px; padding-inline: 16px; font-size: 15px; }
+
+/* Authentication remains the existing server-backed PIN session. */
+.admin-showcase-live .login-screen {
+  background:
+    radial-gradient(circle at 16% 18%, rgba(255, 90, 54, 0.16), transparent 28%),
+    radial-gradient(circle at 88% 82%, rgba(36, 122, 75, 0.11), transparent 28%),
+    #f4f1ea;
 }
+.admin-showcase-live .login-orb { display: none; }
+.admin-showcase-live .login-card {
+  width: min(100%, 520px);
+  padding: 40px;
+  background: rgba(255, 253, 248, 0.95);
+  border: 1px solid #ddd8cd;
+  border-radius: 24px;
+  box-shadow: 0 32px 100px rgba(29, 33, 30, 0.14);
+}
+.admin-showcase-live .login-brand { font-size: 22px; }
+.admin-showcase-live .login-brand span { background: var(--text); }
+.admin-showcase-live .restaurant-identity { margin-block: 32px; padding: 16px; background: #f7f3eb; }
+.admin-showcase-live .restaurant-identity strong { font-size: 16px; }
+.admin-showcase-live .restaurant-identity span,
+.admin-showcase-live .support-note { font-size: 14px; }
+.admin-showcase-live .login-copy h1 { margin: 11px 0 14px; font-size: clamp(28px, 4vw, 36px); line-height: 1.15; }
+.admin-showcase-live .login-copy > p:last-child { font-size: 15px; }
+.admin-showcase-live .pin-form label { font-size: 14px; }
+.admin-showcase-live .pin-field { border-radius: 12px; }
+.admin-showcase-live .pin-field:focus-within { border-color: var(--brand); box-shadow: 0 0 0 4px rgba(255, 90, 54, 0.12); }
+.admin-showcase-live .pin-field input { height: 52px; font-size: 18px; }
+.admin-showcase-live .pin-field button,
+.admin-showcase-live .form-error { font-size: 14px; }
 
-.exort-admin-showcase .asa-skip-link {
-  position: fixed;
-  z-index: 500;
-  top: 10px;
-  left: 50%;
-  padding: 11px 16px;
+/* Compact light sidebar from the showcase, with larger readable labels. */
+.admin-showcase-live .app-shell { grid-template-columns: 260px minmax(0, 1fr); }
+.admin-showcase-live .sidebar {
+  width: 260px;
+  padding: 22px 14px 18px;
+  color: var(--text);
+  background: #ebe7de;
+  border-right: 1px solid #d8d2c7;
+}
+.admin-showcase-live .sidebar::before { display: none; }
+.admin-showcase-live .sidebar-product { grid-template-columns: 40px 1fr; grid-template-rows: 21px 17px; padding: 0 9px 20px; color: var(--text); }
+.admin-showcase-live .sidebar-product .exort-mark {
+  width: 40px;
+  height: 40px;
   color: #fff;
-  background: var(--asa-ink);
-  border-radius: 8px;
-  transform: translate(-50%, -160%);
-  transition: transform 180ms ease;
-}
-.exort-admin-showcase .asa-skip-link:focus { transform: translate(-50%, 0); }
-
-.exort-admin-showcase .asa-app { min-height: 100vh; }
-.exort-admin-showcase .asa-sidebar {
-  position: fixed;
-  z-index: 80;
-  inset: 0 auto 0 0;
-  display: flex;
-  width: 248px;
-  flex-direction: column;
-  padding: 20px 14px 16px;
-  background: var(--asa-sidebar);
-  border-right: 1px solid var(--asa-line);
-}
-.exort-admin-showcase .asa-brand-row { display: flex; align-items: center; gap: 10px; padding: 0 7px; }
-.exort-admin-showcase .asa-brand { display: inline-flex; align-items: center; min-height: 44px; }
-.exort-admin-showcase .asa-brand > span { position: relative; font-family: var(--asa-display); font-size: 20px; font-weight: 700; letter-spacing: -0.07em; }
-.exort-admin-showcase .asa-brand i { position: absolute; top: -1px; right: -10px; width: 6px; height: 6px; background: var(--asa-accent); border-radius: 50%; }
-.exort-admin-showcase .asa-demo-chip { margin-left: auto; padding: 4px 7px; color: var(--asa-accent-dark); background: var(--asa-accent-soft); border: 1px solid #ffd1c5; border-radius: 999px; font-size: 8px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
-.exort-admin-showcase .asa-sidebar-close { display: none; width: 40px; height: 40px; background: transparent; border: 0; font-size: 23px; }
-
-.exort-admin-showcase .asa-venue-switch {
-  display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-  width: 100%;
-  margin: 24px 0 18px;
-  padding: 11px;
-  background: rgba(255, 253, 248, 0.72);
-  border: 1px solid var(--asa-line);
+  background: var(--brand);
   border-radius: 12px;
-  text-align: left;
-  transition: border-color 180ms ease, background 180ms ease;
+  box-shadow: 0 10px 24px rgba(255, 90, 54, 0.22);
+  font-size: 17px;
 }
-.exort-admin-showcase .asa-venue-switch:hover { background: var(--asa-surface); border-color: var(--asa-line-strong); }
-.exort-admin-showcase .asa-venue-avatar,
-.exort-admin-showcase .asa-profile-avatar { display: grid; place-items: center; color: #fff; background: var(--asa-ink); border-radius: 9px; font-size: 11px; font-weight: 800; }
-.exort-admin-showcase .asa-venue-avatar { width: 38px; height: 38px; }
-.exort-admin-showcase .asa-venue-switch > span:nth-child(2) { display: grid; min-width: 0; gap: 2px; }
-.exort-admin-showcase .asa-venue-switch strong { overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.exort-admin-showcase .asa-venue-switch small { color: var(--asa-muted); font-size: 9px; font-weight: 700; }
-.exort-admin-showcase .asa-venue-switch small i { display: inline-block; width: 6px; height: 6px; margin-right: 4px; background: var(--asa-green); border-radius: 50%; }
-.exort-admin-showcase .asa-venue-switch > b { color: var(--asa-muted); font-size: 12px; }
-
-.exort-admin-showcase .asa-nav { display: grid; gap: 3px; }
-.exort-admin-showcase .asa-nav > p { margin: 16px 10px 7px; color: var(--asa-muted-2); font-size: 8px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
-.exort-admin-showcase .asa-nav > p:first-child { margin-top: 0; }
-.exort-admin-showcase .asa-nav button {
-  position: relative;
-  display: grid;
-  grid-template-columns: 28px minmax(0, 1fr) auto;
-  gap: 7px;
-  align-items: center;
-  min-height: 42px;
-  padding: 0 10px;
-  color: #596059;
-  background: transparent;
-  border: 0;
-  border-radius: 9px;
-  text-align: left;
-  font-size: 11px;
-  font-weight: 750;
-  transition: color 160ms ease, background 160ms ease;
+.admin-showcase-live .sidebar-product strong { font-size: 17px; }
+.admin-showcase-live .sidebar-product small { color: #7c837d; font-size: 11px; }
+.admin-showcase-live .sidebar-restaurant {
+  margin: 0 0 22px;
+  padding: 14px 11px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 8px 28px rgba(29, 33, 30, 0.04);
 }
-.exort-admin-showcase .asa-nav button::before { position: absolute; top: 9px; bottom: 9px; left: -4px; width: 3px; background: var(--asa-accent); border-radius: 3px; content: ""; opacity: 0; transform: scaleY(0.3); transition: 160ms ease; }
-.exort-admin-showcase .asa-nav button:hover { color: var(--asa-ink); background: rgba(255, 253, 248, 0.58); }
-.exort-admin-showcase .asa-nav button.is-active { color: var(--asa-ink); background: var(--asa-surface); box-shadow: inset 0 0 0 1px var(--asa-line); }
-.exort-admin-showcase .asa-nav button.is-active::before { opacity: 1; transform: scaleY(1); }
-.exort-admin-showcase .asa-nav-icon { display: grid; width: 28px; height: 28px; place-items: center; color: var(--asa-muted); background: rgba(255, 255, 255, 0.46); border-radius: 7px; font-size: 15px; }
-.exort-admin-showcase .asa-nav button.is-active .asa-nav-icon { color: var(--asa-accent-dark); background: var(--asa-accent-soft); }
-.exort-admin-showcase .asa-nav button > b { min-width: 21px; padding: 3px 6px; color: var(--asa-muted); background: rgba(255, 255, 255, 0.66); border-radius: 999px; text-align: center; font-size: 8px; }
-.exort-admin-showcase .asa-nav button > em { color: var(--asa-accent-dark); font-size: 8px; font-style: normal; font-weight: 800; text-transform: uppercase; }
-
-.exort-admin-showcase .asa-sidebar-footer { display: grid; gap: 7px; margin-top: auto; padding-top: 16px; border-top: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-sidebar-footer > a,
-.exort-admin-showcase .asa-sidebar-footer > button { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 8px; align-items: center; min-height: 44px; padding: 5px 9px; background: transparent; border: 0; border-radius: 9px; text-align: left; }
-.exort-admin-showcase .asa-sidebar-footer > a:hover,
-.exort-admin-showcase .asa-sidebar-footer > button:hover { background: rgba(255, 253, 248, 0.7); }
-.exort-admin-showcase .asa-sidebar-footer > a > span:first-child { display: grid; width: 32px; height: 32px; place-items: center; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 8px; }
-.exort-admin-showcase .asa-profile-avatar { width: 32px; height: 32px; background: var(--asa-accent); }
-.exort-admin-showcase .asa-sidebar-footer button > span:nth-child(2) { display: grid; }
-.exort-admin-showcase .asa-sidebar-footer strong { font-size: 10px; }
-.exort-admin-showcase .asa-sidebar-footer small { color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-sidebar-footer b { color: var(--asa-muted); font-size: 9px; }
-
-.exort-admin-showcase .asa-sidebar-backdrop { display: none; }
-.exort-admin-showcase .asa-workspace { min-height: 100vh; margin-left: 248px; }
-.exort-admin-showcase .asa-mobile-header { display: none; }
-.exort-admin-showcase .asa-demo-banner {
-  display: flex;
-  min-height: 34px;
-  align-items: center;
-  justify-content: center;
-  gap: 18px;
-  padding: 7px 20px;
-  color: #7d351f;
-  background: #fff0e8;
-  border-bottom: 1px solid #ffd6c8;
-  font-size: 10px;
-  font-weight: 750;
+.admin-showcase-live .sidebar-restaurant .restaurant-avatar { width: 42px; height: 42px; color: #fff; border: 0; font-size: 14px; }
+.admin-showcase-live .sidebar-restaurant strong { color: var(--text); font-size: 14px; }
+.admin-showcase-live .sidebar-restaurant span { color: var(--muted); font-size: 12px; }
+.admin-showcase-live .side-nav { gap: 5px; }
+.admin-showcase-live .side-nav > p { margin: 0 10px 8px; color: #8b918c; font-size: 11px; }
+.admin-showcase-live .side-nav button {
+  min-height: 48px;
+  padding: 0 12px;
+  color: #5d655f;
+  border-radius: 11px;
+  font-size: 15px;
 }
-.exort-admin-showcase .asa-demo-banner span { display: flex; align-items: center; gap: 7px; }
-.exort-admin-showcase .asa-demo-banner i { width: 7px; height: 7px; background: var(--asa-accent); border-radius: 50%; }
-.exort-admin-showcase .asa-demo-banner button { padding: 0; color: var(--asa-accent-dark); background: transparent; border: 0; border-bottom: 1px solid currentColor; font-size: 9px; font-weight: 800; }
+.admin-showcase-live .side-nav button span { font-size: 15px; }
+.admin-showcase-live .side-nav button svg { width: 20px; height: 20px; }
+.admin-showcase-live .side-nav button:hover { color: var(--text); background: rgba(255, 253, 248, 0.72); }
+.admin-showcase-live .side-nav button.is-active {
+  color: #d94122;
+  background: var(--surface);
+  box-shadow: inset 3px 0 var(--brand), 0 8px 24px rgba(29, 33, 30, 0.05);
+}
+.admin-showcase-live .side-nav button::before { display: none; }
+.admin-showcase-live .side-footer { gap: 8px; padding: 14px 8px 0; color: #646b65; font-size: 14px; border-top: 1px solid #d8d2c7; }
+.admin-showcase-live .side-footer a,
+.admin-showcase-live .side-footer button { min-height: 42px; color: #535a54; font-size: 14px; }
+.admin-showcase-live .side-footer button { width: 100%; text-align: left; }
+.admin-showcase-live .side-footer svg { width: 19px; height: 19px; }
 
-.exort-admin-showcase .asa-topbar {
-  position: sticky;
-  z-index: 50;
-  top: 0;
-  display: flex;
-  min-height: 104px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 20px clamp(24px, 3.4vw, 52px);
+.admin-showcase-live .workspace { grid-column: 2; width: 100%; max-width: none; padding: 0 clamp(24px, 3vw, 48px) 72px; }
+.admin-showcase-live .topbar {
+  min-height: 112px;
   background: rgba(244, 241, 234, 0.92);
-  border-bottom: 1px solid var(--asa-line);
-  backdrop-filter: blur(16px);
+  border-color: var(--border);
 }
-.exort-admin-showcase .asa-page-heading { min-width: 0; }
-.exort-admin-showcase .asa-page-heading p { color: var(--asa-accent-dark); font-size: 8px; font-weight: 800; letter-spacing: 0.11em; text-transform: uppercase; }
-.exort-admin-showcase .asa-page-heading h1 { margin-top: 4px; font-family: var(--asa-display); font-size: clamp(21px, 2.3vw, 30px); line-height: 1.05; letter-spacing: -0.055em; }
-.exort-admin-showcase .asa-page-heading > span { display: block; margin-top: 6px; color: var(--asa-muted); font-size: 10px; }
-.exort-admin-showcase .asa-topbar-actions { display: flex; align-items: center; gap: 8px; }
+.admin-showcase-live .topbar h1 { margin-top: 7px; font-size: clamp(28px, 2.4vw, 34px); letter-spacing: -0.05em; }
+.admin-showcase-live .topbar-actions { gap: 10px; }
+.admin-showcase-live .connection-status { padding: 10px 13px; color: #1e6840; background: #eaf6ef; border-color: #cce8d7; font-size: 13px; }
+.admin-showcase-live .icon-button { width: 44px; height: 44px; }
+.admin-showcase-live .view { padding-top: 28px; }
 
-.exort-admin-showcase .asa-button,
-.exort-admin-showcase .asa-command-button,
-.exort-admin-showcase .asa-filter-button { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 9px; padding: 0 14px; border-radius: 9px; font-size: 10px; font-weight: 800; transition: transform 160ms ease, background 160ms ease, border-color 160ms ease; }
-.exort-admin-showcase .asa-button:active,
-.exort-admin-showcase .asa-command-button:active,
-.exort-admin-showcase .asa-filter-button:active { transform: scale(0.98); }
-.exort-admin-showcase .asa-button--primary { color: #fff; background: var(--asa-accent); border: 1px solid var(--asa-accent); box-shadow: 0 10px 24px rgba(255, 90, 54, 0.16); }
-.exort-admin-showcase .asa-button--primary:hover { background: var(--asa-accent-dark); border-color: var(--asa-accent-dark); }
-.exort-admin-showcase .asa-button--secondary { background: var(--asa-surface); border: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-button--secondary:hover { border-color: var(--asa-line-strong); background: #fff; }
-.exort-admin-showcase .asa-button--danger { color: #fff; background: var(--asa-red); border: 1px solid var(--asa-red); }
-.exort-admin-showcase .asa-button[disabled] { opacity: 0.55; cursor: wait; }
-.exort-admin-showcase .asa-command-button { min-width: 174px; justify-content: flex-start; color: var(--asa-muted); background: var(--asa-surface); border: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-command-button kbd { margin-left: auto; padding: 2px 5px; color: var(--asa-muted-2); background: var(--asa-surface-2); border: 1px solid var(--asa-line); border-radius: 5px; font-size: 8px; }
+/* Surfaces and overview. */
+.admin-showcase-live .metric-grid { gap: 14px; }
+.admin-showcase-live .metric-card,
+.admin-showcase-live .panel,
+.admin-showcase-live .dish-card,
+.admin-showcase-live .category-row,
+.admin-showcase-live .stop-row,
+.admin-showcase-live .settings-form,
+.admin-showcase-live .menu-hero-manager,
+.admin-showcase-live .analytics-v2-card,
+.admin-showcase-live .qr-create-card,
+.admin-showcase-live .qr-help-card,
+.admin-showcase-live .qr-list-section { background: var(--surface); border-color: var(--border); box-shadow: 0 10px 34px rgba(29, 33, 30, 0.035); }
+.admin-showcase-live .metric-card { min-height: 150px; padding: 24px; }
+.admin-showcase-live .metric-card span { color: var(--muted); font-size: 14px; }
+.admin-showcase-live .metric-card strong { margin-top: 15px; font-family: "Unbounded", "Manrope", sans-serif; font-size: clamp(28px, 3vw, 38px); }
+.admin-showcase-live .metric-card small { margin-top: 9px; font-size: 13px; }
+.admin-showcase-live .overview-grid { gap: 16px; margin-top: 16px; }
+.admin-showcase-live .panel { padding: 25px; }
+.admin-showcase-live .panel-heading h2 { margin-top: 6px; font-size: 21px; }
+.admin-showcase-live .panel-heading > span { font-size: 13px; }
+.admin-showcase-live .quick-actions { gap: 12px; margin-top: 22px; }
+.admin-showcase-live .quick-actions button,
+.admin-showcase-live .quick-actions a { min-height: 142px; padding: 19px; background: #f8f5ee; border-color: var(--border); }
+.admin-showcase-live .quick-actions span { width: 34px; height: 34px; background: var(--brand); font-size: 17px; }
+.admin-showcase-live .quick-actions strong { font-size: 15px; }
+.admin-showcase-live .quick-actions small { font-size: 13px; line-height: 1.4; }
+.admin-showcase-live .attention-list { gap: 10px; margin-top: 22px; }
+.admin-showcase-live .attention-item { min-height: 65px; padding: 14px; background: #f8f5ee; }
+.admin-showcase-live .attention-item strong { font-size: 15px; }
+.admin-showcase-live .attention-item span,
+.admin-showcase-live .attention-copy small { font-size: 13px; }
+.admin-showcase-live .attention-result em { font-size: 12px; }
+.admin-showcase-live .menu-hero-manager { grid-template-columns: minmax(0, 1fr) minmax(290px, 390px) auto; gap: 22px; padding: 24px; background: var(--surface); }
+.admin-showcase-live .menu-hero-manager__copy h2 { font-size: 21px; }
+.admin-showcase-live .menu-hero-manager__copy p:last-child { font-size: 14px; }
 
-.exort-admin-showcase .asa-main { width: min(100%, 1540px); margin: 0 auto; padding: 30px clamp(24px, 3.4vw, 52px) 72px; }
-.exort-admin-showcase .asa-view { display: none; animation: asa-view-in 240ms cubic-bezier(0.22, 1, 0.36, 1); }
-.exort-admin-showcase .asa-view.is-active { display: block; }
+/* Menu, categories and stop list. */
+.admin-showcase-live .menu-toolbar { grid-template-columns: minmax(260px, 1.4fr) minmax(180px, .75fr) minmax(170px, .7fr) auto auto; gap: 10px; }
+.admin-showcase-live .search-control,
+.admin-showcase-live .search-control input,
+.admin-showcase-live .menu-toolbar select { min-height: 48px; border-color: var(--border); border-radius: 12px; font-size: 15px; }
+.admin-showcase-live .search-control { background: var(--surface); }
+.admin-showcase-live .search-control input { height: 48px; }
+.admin-showcase-live .dish-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.admin-showcase-live .dish-card { border-radius: 15px; }
+.admin-showcase-live .dish-visual { height: 188px; background: #f3eee5; }
+.admin-showcase-live .dish-body { padding: 18px; }
+.admin-showcase-live .dish-title-row h3 { font-size: 18px; line-height: 1.3; }
+.admin-showcase-live .dish-title-row button { min-width: 64px; min-height: 36px; color: #d94122; font-size: 14px; }
+.admin-showcase-live .dish-meta { margin-top: 9px; font-size: 13px; }
+.admin-showcase-live .dish-price { margin-top: 18px; font-size: 22px; }
+.admin-showcase-live .exort-badge { min-height: 28px; padding-inline: 10px; font-size: 12px; }
+.admin-showcase-live .stock-control { min-height: 38px; font-size: 13px; }
+.admin-showcase-live .section-toolbar { min-height: 52px; }
+.admin-showcase-live .section-toolbar p,
+.admin-showcase-live .autosave-status { font-size: 14px; }
+.admin-showcase-live .category-list,
+.admin-showcase-live .stop-list { gap: 11px; margin-top: 20px; }
+.admin-showcase-live .category-row,
+.admin-showcase-live .stop-row { min-height: 78px; padding: 16px 18px; }
+.admin-showcase-live .category-row strong,
+.admin-showcase-live .stop-row strong { font-size: 16px; }
+.admin-showcase-live .category-row small,
+.admin-showcase-live .stop-row small,
+.admin-showcase-live .stop-state { font-size: 13px; }
+.admin-showcase-live .row-actions button { min-height: 40px; padding-inline: 12px; font-size: 13px; }
 
-.exort-admin-showcase .asa-overview-status { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 16px; padding: 15px 18px; background: var(--asa-green-soft); border: 1px solid #cce8d7; border-radius: 12px; }
-.exort-admin-showcase .asa-overview-status > div { display: flex; align-items: center; gap: 12px; }
-.exort-admin-showcase .asa-overview-status i { display: grid; width: 30px; height: 30px; place-items: center; color: #fff; background: var(--asa-green); border-radius: 50%; font-style: normal; font-weight: 800; }
-.exort-admin-showcase .asa-overview-status strong { display: block; font-size: 12px; }
-.exort-admin-showcase .asa-overview-status span { color: #4c6857; font-size: 9px; }
-.exort-admin-showcase .asa-overview-status button { padding: 0; color: var(--asa-green); background: transparent; border: 0; font-size: 9px; font-weight: 800; }
+/* Real analytics and QR modules inherit the same readable scale. */
+.admin-showcase-live .analytics-v2-header h2,
+.admin-showcase-live .qr-page-header h2 { font-size: 24px; }
+.admin-showcase-live .analytics-v2-header p,
+.admin-showcase-live .analytics-filter-row label,
+.admin-showcase-live .analytics-note,
+.admin-showcase-live .qr-page-header p { font-size: 14px; }
+.admin-showcase-live .analytics-period-switch button,
+.admin-showcase-live .analytics-metric-switch button,
+.admin-showcase-live .dish-tabs button { min-height: 42px; padding-inline: 13px; font-size: 13px; }
+.admin-showcase-live .analytics-filter-row select { min-height: 44px; font-size: 14px; }
+.admin-showcase-live .analytics-v2-metric { min-height: 142px; padding: 22px; }
+.admin-showcase-live .analytics-v2-metric span { font-size: 14px; }
+.admin-showcase-live .analytics-v2-metric strong { font-size: 34px; }
+.admin-showcase-live .analytics-v2-metric small { font-size: 13px; }
+.admin-showcase-live .analytics-v2-card-head h3 { font-size: 19px; }
+.admin-showcase-live .activity-day strong,
+.admin-showcase-live .activity-day small,
+.admin-showcase-live .heatmap-grid span,
+.admin-showcase-live .heatmap-grid strong { font-size: 13px; }
+.admin-showcase-live .analytics-dish-table { font-size: 14px; }
+.admin-showcase-live .analytics-dish-table th,
+.admin-showcase-live .analytics-dish-table td { padding: 14px 12px; }
+.admin-showcase-live .recent-events-card ol { display: grid; max-height: 430px; margin: 0; padding: 0 22px 20px; overflow-y: auto; list-style: none; }
+.admin-showcase-live .recent-events-card li { display: grid; grid-template-columns: 118px minmax(0, 1fr); gap: 16px; align-items: center; min-height: 66px; border-top: 1px solid var(--border); }
+.admin-showcase-live .recent-events-card time { color: var(--muted); font-size: 13px; }
+.admin-showcase-live .recent-events-card li div { display: grid; gap: 4px; }
+.admin-showcase-live .recent-events-card strong { font-size: 15px; }
+.admin-showcase-live .recent-events-card small { color: var(--muted); font-size: 13px; }
+.admin-showcase-live .analytics-empty strong,
+.admin-showcase-live .analytics-loading strong,
+.admin-showcase-live .analytics-error strong { font-size: 17px; }
+.admin-showcase-live .analytics-empty p,
+.admin-showcase-live .analytics-loading small,
+.admin-showcase-live .analytics-error p { font-size: 14px; }
+.admin-showcase-live .qr-create-card,
+.admin-showcase-live .qr-help-card,
+.admin-showcase-live .qr-list-section { padding: 22px; }
+.admin-showcase-live .qr-create-card label,
+.admin-showcase-live .qr-form-status,
+.admin-showcase-live .qr-source-main,
+.admin-showcase-live .qr-source-stats { font-size: 14px; }
+.admin-showcase-live .qr-create-card input,
+.admin-showcase-live .qr-create-card select,
+.admin-showcase-live .qr-source-url input { min-height: 46px; font-size: 15px; }
+.admin-showcase-live .qr-source-title h4 { font-size: 17px; }
 
-.exort-admin-showcase .asa-metric-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 14px; }
-.exort-admin-showcase .asa-metric { position: relative; min-height: 126px; padding: 20px; border-right: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-metric:last-child { border-right: 0; }
-.exort-admin-showcase .asa-metric > span { color: var(--asa-muted); font-size: 9px; font-weight: 750; }
-.exort-admin-showcase .asa-metric strong { display: block; margin-top: 12px; font-family: var(--asa-display); font-size: clamp(23px, 2.4vw, 34px); line-height: 1; letter-spacing: -0.06em; }
-.exort-admin-showcase .asa-metric small { display: flex; align-items: center; gap: 5px; margin-top: 9px; color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-metric small b { color: var(--asa-green); font-weight: 800; }
-.exort-admin-showcase .asa-metric > i { position: absolute; right: 18px; bottom: 18px; width: 30px; height: 18px; border-bottom: 2px solid var(--asa-accent); opacity: 0.44; transform: skewY(-18deg); }
+/* Existing model-backed editor, only supported fields are retained. */
+.admin-showcase-live .drawer-backdrop { background: rgba(29, 33, 30, 0.44); }
+.admin-showcase-live .drawer-panel { width: min(100%, 920px); background: var(--surface); }
+.admin-showcase-live .drawer-panel > header,
+.admin-showcase-live .drawer-panel > footer { padding: 20px 24px; border-color: var(--border); }
+.admin-showcase-live .drawer-panel > header h2 { font-size: 23px; }
+.admin-showcase-live .drawer-body { grid-template-columns: minmax(0, 1fr) 300px; gap: 22px; padding: 24px; }
+.admin-showcase-live .drawer label,
+.admin-showcase-live .settings-form label { font-size: 14px; }
+.admin-showcase-live .drawer input,
+.admin-showcase-live .drawer select,
+.admin-showcase-live .drawer textarea,
+.admin-showcase-live .settings-form input { min-height: 48px; padding: 11px 13px; border-color: var(--border); border-radius: 11px; font-size: 16px; }
+.admin-showcase-live .drawer textarea { min-height: 120px; }
+.admin-showcase-live .drawer-section-heading span { font-size: 15px; }
+.admin-showcase-live .editor-status-badge { min-height: 30px; font-size: 13px; }
+.admin-showcase-live .status-segment label,
+.admin-showcase-live .drawer-body .language-tabs button { min-height: 46px; font-size: 14px; }
+.admin-showcase-live .drawer-body .language-tabs button.is-active { background: var(--brand); box-shadow: 0 10px 24px rgba(255, 90, 54, 0.2); }
+.admin-showcase-live .dish-live-preview { background: #f8f5ee; border-color: var(--border); }
+.admin-showcase-live .preview-kicker { color: #d94122; font-size: 12px; }
+.admin-showcase-live .preview-category { font-size: 13px; }
+.admin-showcase-live .preview-dish-body h3 { font-size: 19px; }
+.admin-showcase-live .preview-dish-body p { font-size: 14px; }
+.admin-showcase-live .preview-dish-body strong { font-size: 22px; }
+.admin-showcase-live .confirm-dialog { background: var(--surface); }
+.admin-showcase-live .confirm-dialog h2 { font-size: 21px; }
+.admin-showcase-live .confirm-dialog p { font-size: 15px; }
+.admin-showcase-live .toast { font-size: 14px; }
+.admin-showcase-live .system-state-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.admin-showcase-live .system-state-card { display: grid; align-content: start; gap: 14px; min-height: 240px; padding: 26px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.admin-showcase-live .system-state-card h2 { font-size: 21px; }
+.admin-showcase-live .system-state-card p { max-width: 640px; color: var(--muted); font-size: 15px; }
+.admin-showcase-live .system-state-card > span { width: fit-content; padding: 6px 10px; color: #76521a; background: #fff4dc; border-radius: 999px; font-size: 13px; font-weight: 800; }
+.admin-showcase-live .system-state-card .secondary-button { width: fit-content; margin-top: auto; }
+.admin-showcase-live .system-state-card.is-disabled { background: #f8f5ee; }
 
-.exort-admin-showcase .asa-dashboard-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(290px, 0.85fr); gap: 14px; margin-top: 14px; }
-.exort-admin-showcase .asa-surface { background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 14px; }
-.exort-admin-showcase .asa-surface-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 19px 20px 15px; }
-.exort-admin-showcase .asa-surface-head p { color: var(--asa-accent-dark); font-size: 8px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
-.exort-admin-showcase .asa-surface-head h3 { margin-top: 5px; font-size: 15px; letter-spacing: -0.025em; }
-.exort-admin-showcase .asa-surface-head button { padding: 5px 0; color: var(--asa-muted); background: transparent; border: 0; font-size: 8px; font-weight: 800; }
-.exort-admin-showcase .asa-surface-head > span,
-.exort-admin-showcase .asa-surface-head > small { color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-activity-card { min-height: 320px; }
-.exort-admin-showcase .asa-attention-card { min-height: 320px; }
-.exort-admin-showcase .asa-mini-chart { position: relative; display: grid; grid-template-columns: repeat(17, minmax(20px, 1fr)); gap: 5px; align-items: end; min-height: 235px; padding: 22px 20px 18px; overflow-x: auto; border-top: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-mini-chart::before { position: absolute; inset: 22px 20px 42px; content: ""; background: repeating-linear-gradient(to bottom, transparent 0, transparent calc(25% - 1px), var(--asa-line) 25%); opacity: 0.7; }
-.exort-admin-showcase .asa-chart-column { position: relative; z-index: 1; display: grid; grid-template-rows: 1fr auto; gap: 7px; align-items: end; height: 190px; text-align: center; }
-.exort-admin-showcase .asa-chart-column i { display: block; width: min(100%, 18px); height: var(--value); min-height: 3px; margin: 0 auto; background: var(--asa-ink); border-radius: 4px 4px 1px 1px; transform-origin: bottom; animation: asa-grow 650ms var(--delay) both cubic-bezier(0.22, 1, 0.36, 1); }
-.exort-admin-showcase .asa-chart-column.is-peak i { background: var(--asa-accent); }
-.exort-admin-showcase .asa-chart-column span { color: var(--asa-muted-2); font-size: 7px; }
-
-.exort-admin-showcase .asa-attention-list { display: grid; padding: 0 12px 12px; }
-.exort-admin-showcase .asa-attention-item { display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; gap: 10px; align-items: center; min-height: 50px; padding: 8px; background: transparent; border: 0; border-top: 1px solid var(--asa-line); text-align: left; }
-.exort-admin-showcase .asa-attention-item > i { width: 8px; height: 8px; background: var(--asa-amber); border-radius: 50%; }
-.exort-admin-showcase .asa-attention-item.is-critical > i { background: var(--asa-red); }
-.exort-admin-showcase .asa-attention-item.is-good > i { background: var(--asa-green); }
-.exort-admin-showcase .asa-attention-item > span { display: grid; }
-.exort-admin-showcase .asa-attention-item strong { font-size: 9px; }
-.exort-admin-showcase .asa-attention-item small { color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-attention-item b { display: grid; min-width: 24px; height: 24px; place-items: center; color: var(--asa-amber); background: var(--asa-amber-soft); border-radius: 999px; font-size: 8px; }
-
-.exort-admin-showcase .asa-popular-card,
-.exort-admin-showcase .asa-events-card { min-height: 310px; }
-.exort-admin-showcase .asa-overview-popular,
-.exort-admin-showcase .asa-event-list { display: grid; padding: 0 16px 14px; }
-.exort-admin-showcase .asa-popular-row { display: grid; grid-template-columns: 24px 38px minmax(0, 1fr) auto; gap: 9px; align-items: center; min-height: 54px; border-top: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-popular-row > span { color: var(--asa-muted-2); font-family: var(--asa-display); font-size: 9px; }
-.exort-admin-showcase .asa-popular-row img,
-.exort-admin-showcase .asa-popular-row > i { width: 38px; height: 38px; object-fit: cover; background: var(--asa-accent-soft); border-radius: 8px; }
-.exort-admin-showcase .asa-popular-row > div { display: grid; }
-.exort-admin-showcase .asa-popular-row strong { overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
-.exort-admin-showcase .asa-popular-row small { color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-popular-row > b { font-size: 9px; }
-.exort-admin-showcase .asa-event-row { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 9px; align-items: center; min-height: 54px; border-top: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-event-row > span { display: grid; width: 28px; height: 28px; place-items: center; color: var(--asa-accent-dark); background: var(--asa-accent-soft); border-radius: 8px; font-size: 11px; }
-.exort-admin-showcase .asa-event-row > div { display: grid; }
-.exort-admin-showcase .asa-event-row strong { font-size: 9px; }
-.exort-admin-showcase .asa-event-row small { color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-event-row time { color: var(--asa-muted-2); font-size: 7px; }
-.exort-admin-showcase .asa-live-dot { display: inline-flex; align-items: center; gap: 5px; color: var(--asa-green) !important; font-weight: 800; }
-.exort-admin-showcase .asa-live-dot::before { width: 6px; height: 6px; background: var(--asa-green); border-radius: 50%; content: ""; }
-.exort-admin-showcase .asa-quick-card { grid-column: 1 / -1; }
-.exort-admin-showcase .asa-quick-actions { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border-top: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-quick-actions > * { display: grid; grid-template-columns: 28px minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 8px; min-height: 78px; align-content: center; padding: 12px; background: transparent; border: 0; border-right: 1px solid var(--asa-line); text-align: left; }
-.exort-admin-showcase .asa-quick-actions > *:last-child { border-right: 0; }
-.exort-admin-showcase .asa-quick-actions > *:hover { background: var(--asa-accent-soft); }
-.exort-admin-showcase .asa-quick-actions > * > span { grid-row: 1 / span 2; display: grid; width: 28px; height: 28px; place-items: center; color: var(--asa-accent-dark); background: var(--asa-accent-soft); border-radius: 7px; }
-.exort-admin-showcase .asa-quick-actions strong { font-size: 9px; }
-.exort-admin-showcase .asa-quick-actions small { color: var(--asa-muted); font-size: 7px; }
-
-.exort-admin-showcase .asa-toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.exort-admin-showcase .asa-menu-toolbar > * { min-height: 42px; }
-.exort-admin-showcase .asa-search { display: grid; grid-template-columns: 34px minmax(0, 1fr); min-width: min(320px, 100%); flex: 1; align-items: center; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 9px; }
-.exort-admin-showcase .asa-search span { display: grid; place-items: center; color: var(--asa-muted); }
-.exort-admin-showcase .asa-search input { width: 100%; height: 40px; padding: 0 10px 0 0; background: transparent; border: 0; outline: 0; font-size: 10px; }
-.exort-admin-showcase .asa-toolbar select,
-.exort-admin-showcase .asa-filter-button { height: 42px; padding: 0 30px 0 12px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 9px; font-size: 9px; }
-.exort-admin-showcase .asa-filter-button { padding: 0 12px; }
-.exort-admin-showcase .asa-filter-button > span:not(:empty) { display: grid; min-width: 18px; height: 18px; place-items: center; color: #fff; background: var(--asa-accent); border-radius: 999px; font-size: 7px; }
-.exort-admin-showcase .asa-density-switch { display: flex; padding: 3px; background: var(--asa-surface-2); border: 1px solid var(--asa-line); border-radius: 9px; }
-.exort-admin-showcase .asa-density-switch button { width: 34px; height: 34px; padding: 0; color: var(--asa-muted); background: transparent; border: 0; border-radius: 6px; }
-.exort-admin-showcase .asa-density-switch button.is-active { color: var(--asa-accent-dark); background: var(--asa-surface); box-shadow: 0 2px 8px rgba(29, 33, 30, 0.08); }
-.exort-admin-showcase .asa-filter-popover { display: flex; gap: 18px; align-items: center; margin-top: 8px; padding: 12px 14px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 10px; }
-.exort-admin-showcase .asa-filter-popover label { display: flex; align-items: center; gap: 7px; font-size: 9px; font-weight: 700; }
-.exort-admin-showcase .asa-filter-popover input { accent-color: var(--asa-accent); }
-.exort-admin-showcase .asa-filter-popover button { margin-left: auto; padding: 0; color: var(--asa-accent-dark); background: transparent; border: 0; font-size: 8px; font-weight: 800; }
-.exort-admin-showcase .asa-table-summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 18px 0 8px; color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-table-summary > span { color: var(--asa-ink); font-weight: 800; }
-
-.exort-admin-showcase .asa-menu-list { background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 12px; overflow: hidden; }
-.exort-admin-showcase .asa-menu-header,
-.exort-admin-showcase .asa-menu-row { display: grid; grid-template-columns: 48px minmax(170px, 1.5fr) minmax(110px, 0.75fr) 100px 112px 88px 42px; gap: 12px; align-items: center; }
-.exort-admin-showcase .asa-menu-header { min-height: 42px; padding: 0 14px; color: var(--asa-muted); background: var(--asa-surface-2); border-bottom: 1px solid var(--asa-line); font-size: 7px; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; }
-.exort-admin-showcase .asa-menu-row { min-height: 72px; padding: 10px 14px; border-bottom: 1px solid var(--asa-line); transition: background 150ms ease; }
-.exort-admin-showcase .asa-menu-row:last-child { border-bottom: 0; }
-.exort-admin-showcase .asa-menu-row:hover { background: #fffaf5; }
-.exort-admin-showcase .asa-menu-thumb { display: grid; width: 46px; height: 46px; place-items: center; overflow: hidden; color: var(--asa-accent-dark); background: var(--asa-accent-soft); border-radius: 9px; font-weight: 800; }
-.exort-admin-showcase .asa-menu-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.exort-admin-showcase .asa-menu-name { min-width: 0; }
-.exort-admin-showcase .asa-menu-name strong { display: block; overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.exort-admin-showcase .asa-menu-name small { display: block; margin-top: 4px; overflow: hidden; color: var(--asa-muted); font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
-.exort-admin-showcase .asa-menu-category { color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-menu-price { font-size: 10px; font-weight: 800; }
-.exort-admin-showcase .asa-status { display: inline-flex; width: fit-content; align-items: center; gap: 5px; padding: 5px 7px; border-radius: 999px; font-size: 7px; font-weight: 800; }
-.exort-admin-showcase .asa-status::before { width: 5px; height: 5px; background: currentColor; border-radius: 50%; content: ""; }
-.exort-admin-showcase .asa-status.is-active { color: var(--asa-green); background: var(--asa-green-soft); }
-.exort-admin-showcase .asa-status.is-stop { color: var(--asa-red); background: var(--asa-red-soft); }
-.exort-admin-showcase .asa-status.is-temporary { color: var(--asa-amber); background: var(--asa-amber-soft); }
-.exort-admin-showcase .asa-status.is-inactive { color: var(--asa-muted); background: #eceeea; }
-.exort-admin-showcase .asa-translation-state { display: grid; gap: 3px; }
-.exort-admin-showcase .asa-translation-state span { display: flex; gap: 3px; }
-.exort-admin-showcase .asa-translation-state i { display: grid; width: 17px; height: 17px; place-items: center; color: var(--asa-green); background: var(--asa-green-soft); border-radius: 5px; font-size: 6px; font-style: normal; font-weight: 800; }
-.exort-admin-showcase .asa-translation-state i.is-missing { color: var(--asa-amber); background: var(--asa-amber-soft); }
-.exort-admin-showcase .asa-translation-state small { color: var(--asa-muted); font-size: 6px; }
-.exort-admin-showcase .asa-row-action { width: 38px; height: 38px; padding: 0; background: transparent; border: 1px solid transparent; border-radius: 8px; font-size: 18px; }
-.exort-admin-showcase .asa-row-action:hover { background: var(--asa-surface-2); border-color: var(--asa-line); }
-.exort-admin-showcase .asa-menu-list.is-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 12px; background: transparent; border: 0; overflow: visible; }
-.exort-admin-showcase .asa-menu-list.is-grid .asa-menu-header { display: none; }
-.exort-admin-showcase .asa-menu-list.is-grid .asa-menu-row { position: relative; display: grid; grid-template-columns: 62px minmax(0, 1fr) auto; grid-template-rows: auto auto auto; gap: 7px 10px; min-height: 145px; padding: 14px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 12px; }
-.exort-admin-showcase .asa-menu-list.is-grid .asa-menu-thumb { grid-row: 1 / span 2; width: 62px; height: 62px; }
-.exort-admin-showcase .asa-menu-list.is-grid .asa-menu-name { grid-column: 2; }
-.exort-admin-showcase .asa-menu-list.is-grid .asa-menu-category { grid-column: 2; }
-.exort-admin-showcase .asa-menu-list.is-grid .asa-menu-price { grid-column: 1; align-self: end; }
-.exort-admin-showcase .asa-menu-list.is-grid .asa-status { grid-column: 2; align-self: end; }
-.exort-admin-showcase .asa-menu-list.is-grid .asa-translation-state { grid-column: 3; grid-row: 1 / span 3; }
-.exort-admin-showcase .asa-menu-list.is-grid .asa-row-action { position: absolute; right: 8px; bottom: 8px; }
-
-.exort-admin-showcase .asa-section-note,
-.exort-admin-showcase .asa-stop-summary { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 14px; padding: 16px 18px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 12px; }
-.exort-admin-showcase .asa-section-note > div { display: grid; }
-.exort-admin-showcase .asa-section-note strong { font-size: 11px; }
-.exort-admin-showcase .asa-section-note small,
-.exort-admin-showcase .asa-section-note > div span { color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-section-note > span { padding: 5px 8px; color: var(--asa-accent-dark); background: var(--asa-accent-soft); border-radius: 999px; font-size: 7px; font-weight: 800; }
-.exort-admin-showcase .asa-category-table { background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 12px; overflow: hidden; }
-.exort-admin-showcase .asa-category-row { display: grid; grid-template-columns: 32px minmax(0, 1fr) 100px 110px 150px; gap: 12px; align-items: center; min-height: 68px; padding: 10px 16px; border-bottom: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-category-row:last-child { border-bottom: 0; }
-.exort-admin-showcase .asa-category-row.is-dragging { opacity: 0.55; background: var(--asa-accent-soft); }
-.exort-admin-showcase .asa-drag-handle { color: var(--asa-muted-2); cursor: grab; font-size: 17px; }
-.exort-admin-showcase .asa-category-name strong { display: block; font-size: 10px; }
-.exort-admin-showcase .asa-category-name small { color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-category-count { color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-switch { position: relative; width: 38px; height: 22px; padding: 0; background: #c8cdc7; border: 0; border-radius: 999px; }
-.exort-admin-showcase .asa-switch::after { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; box-shadow: 0 2px 5px rgba(29, 33, 30, 0.2); content: ""; transition: transform 170ms ease; }
-.exort-admin-showcase .asa-switch.is-on { background: var(--asa-accent); }
-.exort-admin-showcase .asa-switch.is-on::after { transform: translateX(16px); }
-.exort-admin-showcase .asa-category-actions { display: flex; justify-content: flex-end; gap: 4px; }
-.exort-admin-showcase .asa-category-actions button { min-width: 34px; height: 34px; padding: 0 8px; color: var(--asa-muted); background: transparent; border: 1px solid var(--asa-line); border-radius: 7px; font-size: 8px; }
-.exort-admin-showcase .asa-category-actions button:hover { color: var(--asa-accent-dark); border-color: #ffc3b4; background: var(--asa-accent-soft); }
-
-.exort-admin-showcase .asa-stop-summary > div { display: grid; grid-template-columns: auto auto; gap: 0 10px; align-items: end; }
-.exort-admin-showcase .asa-stop-summary span { color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-stop-summary strong { grid-row: 1 / span 2; grid-column: 2; font-family: var(--asa-display); font-size: 34px; line-height: 1; }
-.exort-admin-showcase .asa-stop-summary small { color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-stop-list { display: grid; gap: 9px; }
-.exort-admin-showcase .asa-stop-row { display: grid; grid-template-columns: 48px minmax(0, 1fr) 120px 120px auto; gap: 12px; align-items: center; min-height: 70px; padding: 10px 14px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 11px; }
-.exort-admin-showcase .asa-stop-row .asa-menu-thumb { width: 46px; height: 46px; }
-.exort-admin-showcase .asa-stop-row > div:nth-child(2) { display: grid; }
-.exort-admin-showcase .asa-stop-row strong { font-size: 10px; }
-.exort-admin-showcase .asa-stop-row small { color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-stop-time { color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-stop-row .asa-button { min-height: 36px; }
-.exort-admin-showcase .asa-empty-state { display: grid; min-height: 280px; place-items: center; align-content: center; gap: 8px; padding: 30px; color: var(--asa-muted); background: var(--asa-surface); border: 1px dashed var(--asa-line-strong); border-radius: 12px; text-align: center; }
-.exort-admin-showcase .asa-empty-state > span { display: grid; width: 46px; height: 46px; place-items: center; color: var(--asa-green); background: var(--asa-green-soft); border-radius: 50%; font-size: 20px; }
-.exort-admin-showcase .asa-empty-state strong { color: var(--asa-ink); font-size: 12px; }
-.exort-admin-showcase .asa-empty-state p { max-width: 420px; font-size: 9px; }
-
-.exort-admin-showcase .asa-analytics-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 14px; }
-.exort-admin-showcase .asa-period-switch { display: flex; padding: 3px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 10px; }
-.exort-admin-showcase .asa-period-switch button { min-height: 36px; padding: 0 13px; color: var(--asa-muted); background: transparent; border: 0; border-radius: 7px; font-size: 8px; font-weight: 800; }
-.exort-admin-showcase .asa-period-switch button.is-active { color: #fff; background: var(--asa-accent); box-shadow: 0 6px 16px rgba(255, 90, 54, 0.18); }
-.exort-admin-showcase .asa-analytics-header > div:last-child { display: flex; align-items: center; gap: 8px; }
-.exort-admin-showcase .asa-analytics-header label { display: flex; align-items: center; gap: 8px; color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-analytics-header select { height: 40px; padding: 0 30px 0 10px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 9px; font-size: 8px; }
-.exort-admin-showcase .asa-analytics-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
-.exort-admin-showcase .asa-analytics-metric { padding: 17px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 11px; }
-.exort-admin-showcase .asa-analytics-metric span { color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-analytics-metric strong { display: block; margin-top: 9px; font-family: var(--asa-display); font-size: 25px; line-height: 1; letter-spacing: -0.055em; }
-.exort-admin-showcase .asa-analytics-metric small { display: block; margin-top: 8px; color: var(--asa-green); font-size: 7px; }
-.exort-admin-showcase .asa-analytics-layout { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.75fr); gap: 12px; margin-top: 12px; }
-.exort-admin-showcase .asa-analytics-chart-card { min-height: 360px; }
-.exort-admin-showcase .asa-chart-legend span { color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-chart-legend i { display: inline-block; width: 10px; height: 3px; margin-right: 4px; background: var(--asa-accent); border-radius: 3px; }
-.exort-admin-showcase .asa-main-chart { position: relative; display: grid; grid-template-columns: repeat(var(--columns, 17), minmax(28px, 1fr)); gap: 5px; min-height: 282px; align-items: end; padding: 22px 18px 16px; overflow-x: auto; border-top: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-main-chart::before { position: absolute; inset: 22px 18px 46px; background: repeating-linear-gradient(to bottom, transparent 0, transparent calc(25% - 1px), var(--asa-line) 25%); content: ""; }
-.exort-admin-showcase .asa-main-chart .asa-chart-column { height: 232px; }
-.exort-admin-showcase .asa-main-chart .asa-chart-column i { width: min(100%, 22px); }
-.exort-admin-showcase .asa-insights-card { min-height: 360px; }
-.exort-admin-showcase .asa-insights-card > div:last-child { display: grid; padding: 0 16px 14px; }
-.exort-admin-showcase .asa-insight { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 10px; min-height: 70px; align-items: start; padding: 12px 0; border-top: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-insight > span { display: grid; width: 28px; height: 28px; place-items: center; color: var(--asa-accent-dark); background: var(--asa-accent-soft); border-radius: 8px; font-size: 12px; }
-.exort-admin-showcase .asa-insight strong { display: block; font-size: 9px; }
-.exort-admin-showcase .asa-insight p { margin-top: 4px; color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-dish-interest-card,
-.exort-admin-showcase .asa-recent-card { min-height: 390px; }
-.exort-admin-showcase .asa-dish-interest-list { max-height: 315px; overflow-y: auto; padding: 0 16px 14px; scrollbar-width: thin; }
-.exort-admin-showcase .asa-dish-interest-row { display: grid; grid-template-columns: 24px 34px minmax(0, 1fr) 74px 46px; gap: 8px; align-items: center; min-height: 53px; border-top: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-dish-interest-row > span { color: var(--asa-muted-2); font-family: var(--asa-display); font-size: 8px; }
-.exort-admin-showcase .asa-dish-interest-row img,
-.exort-admin-showcase .asa-dish-interest-row > i { width: 34px; height: 34px; object-fit: cover; background: var(--asa-accent-soft); border-radius: 7px; }
-.exort-admin-showcase .asa-dish-interest-row > div { min-width: 0; }
-.exort-admin-showcase .asa-dish-interest-row strong { display: block; overflow: hidden; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
-.exort-admin-showcase .asa-dish-interest-row small { color: var(--asa-muted); font-size: 6px; }
-.exort-admin-showcase .asa-dish-interest-row > b { font-size: 8px; text-align: right; }
-.exort-admin-showcase .asa-dish-interest-row > em { color: var(--asa-green); font-size: 7px; font-style: normal; text-align: right; }
-.exort-admin-showcase .asa-event-list--scroll { max-height: 315px; overflow-y: auto; }
-.exort-admin-showcase .asa-audience-card { grid-column: 1 / -1; }
-.exort-admin-showcase .asa-audience-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-audience-group { padding: 18px; border-right: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-audience-group:last-child { border-right: 0; }
-.exort-admin-showcase .asa-audience-group > strong { display: block; margin-bottom: 13px; font-size: 9px; }
-.exort-admin-showcase .asa-audience-row { display: grid; grid-template-columns: 60px minmax(0, 1fr) 38px; gap: 8px; align-items: center; margin-top: 9px; font-size: 7px; }
-.exort-admin-showcase .asa-audience-row i { height: 5px; overflow: hidden; background: var(--asa-surface-2); border-radius: 999px; }
-.exort-admin-showcase .asa-audience-row i b { display: block; width: var(--value); height: 100%; background: var(--asa-accent); border-radius: inherit; }
-.exort-admin-showcase .asa-audience-row > b { text-align: right; }
-
-.exort-admin-showcase .asa-qr-explainer { display: flex; align-items: center; justify-content: center; gap: 22px; margin-bottom: 14px; padding: 14px 18px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 12px; }
-.exort-admin-showcase .asa-qr-explainer > div { display: flex; align-items: center; gap: 10px; max-width: 360px; }
-.exort-admin-showcase .asa-qr-explainer > div > span { display: grid; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; color: var(--asa-accent-dark); background: var(--asa-accent-soft); border-radius: 8px; }
-.exort-admin-showcase .asa-qr-explainer p { display: grid; }
-.exort-admin-showcase .asa-qr-explainer strong { font-size: 9px; }
-.exort-admin-showcase .asa-qr-explainer small { color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-qr-explainer > i { width: 1px; height: 32px; background: var(--asa-line); }
-.exort-admin-showcase .asa-qr-layout { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.6fr); gap: 14px; align-items: start; }
-.exort-admin-showcase .asa-source-section,
-.exort-admin-showcase .asa-wifi-card { background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 14px; }
-.exort-admin-showcase .asa-source-section > header { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 18px; border-bottom: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-source-section > header p { color: var(--asa-accent-dark); font-size: 8px; font-weight: 800; text-transform: uppercase; }
-.exort-admin-showcase .asa-source-section > header h3 { margin-top: 4px; font-size: 15px; }
-.exort-admin-showcase .asa-source-grid { display: grid; gap: 8px; padding: 12px; }
-.exort-admin-showcase .asa-source-card { display: grid; grid-template-columns: 72px minmax(0, 1fr) 160px; gap: 14px; align-items: center; min-height: 104px; padding: 12px; background: var(--asa-surface-2); border: 1px solid var(--asa-line); border-radius: 10px; }
-.exort-admin-showcase .asa-source-qr { display: grid; width: 72px; height: 72px; place-items: center; overflow: hidden; background: #fff; border: 6px solid #fff; border-radius: 8px; }
-.exort-admin-showcase .asa-source-qr img,
-.exort-admin-showcase .asa-source-qr canvas { width: 100% !important; height: 100% !important; }
-.exort-admin-showcase .asa-source-info { min-width: 0; }
-.exort-admin-showcase .asa-source-info > div { display: flex; align-items: center; gap: 7px; }
-.exort-admin-showcase .asa-source-info h4 { overflow: hidden; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.exort-admin-showcase .asa-source-info > span { display: block; margin-top: 5px; color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-source-info > code { display: block; margin-top: 6px; overflow: hidden; color: var(--asa-blue); font-family: var(--asa-body); font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
-.exort-admin-showcase .asa-source-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.exort-admin-showcase .asa-source-stats span { display: grid; padding: 7px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 7px; }
-.exort-admin-showcase .asa-source-stats strong { font-size: 9px; }
-.exort-admin-showcase .asa-source-stats small { color: var(--asa-muted); font-size: 6px; }
-.exort-admin-showcase .asa-source-actions { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 5px; }
-.exort-admin-showcase .asa-source-actions button { min-height: 31px; padding: 0 9px; color: var(--asa-muted); background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 7px; font-size: 7px; font-weight: 800; }
-.exort-admin-showcase .asa-source-actions button:hover { color: var(--asa-accent-dark); border-color: #ffc4b5; }
-.exort-admin-showcase .asa-wifi-card { position: sticky; top: 130px; padding: 20px; }
-.exort-admin-showcase .asa-wifi-badge { width: fit-content; padding: 5px 7px; color: var(--asa-accent-dark); background: var(--asa-accent-soft); border-radius: 999px; font-size: 7px; font-weight: 800; }
-.exort-admin-showcase .asa-wifi-card h3 { margin-top: 14px; font-size: 16px; }
-.exort-admin-showcase .asa-wifi-card > p { margin-top: 7px; color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-wifi-card form { display: grid; gap: 11px; margin-top: 18px; }
-.exort-admin-showcase .asa-form-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
-.exort-admin-showcase .asa-wifi-result { display: grid; justify-items: center; gap: 10px; margin-top: 18px; padding: 16px; background: var(--asa-surface-2); border: 1px solid var(--asa-line); border-radius: 10px; }
-.exort-admin-showcase .asa-wifi-result > div { display: grid; width: 164px; height: 164px; place-items: center; background: #fff; border: 10px solid #fff; border-radius: 10px; }
-.exort-admin-showcase .asa-wifi-result img,
-.exort-admin-showcase .asa-wifi-result canvas { width: 100% !important; height: 100% !important; }
-.exort-admin-showcase .asa-wifi-result p { color: var(--asa-muted); font-size: 8px; text-align: center; }
-
-.exort-admin-showcase .asa-settings-layout { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 14px; align-items: start; }
-.exort-admin-showcase .asa-settings-nav { position: sticky; top: 132px; display: grid; padding: 7px; background: var(--asa-sidebar); border: 1px solid var(--asa-line); border-radius: 11px; }
-.exort-admin-showcase .asa-settings-nav button { min-height: 40px; padding: 0 10px; color: var(--asa-muted); background: transparent; border: 0; border-radius: 7px; text-align: left; font-size: 8px; font-weight: 750; }
-.exort-admin-showcase .asa-settings-nav button.is-active { color: var(--asa-accent-dark); background: var(--asa-surface); box-shadow: inset 3px 0 var(--asa-accent); }
-.exort-admin-showcase .asa-settings-form { background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 13px; }
-.exort-admin-showcase .asa-settings-panel { display: none; min-height: 420px; padding: 24px; }
-.exort-admin-showcase .asa-settings-panel.is-active { display: block; animation: asa-view-in 180ms ease; }
-.exort-admin-showcase .asa-settings-panel > header { margin-bottom: 22px; padding-bottom: 16px; border-bottom: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-settings-panel > header p { color: var(--asa-accent-dark); font-size: 8px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
-.exort-admin-showcase .asa-settings-panel > header h3 { margin-top: 5px; font-size: 17px; }
-.exort-admin-showcase .asa-settings-form > footer { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 14px 24px; background: var(--asa-surface-2); border-top: 1px solid var(--asa-line); border-radius: 0 0 13px 13px; }
-.exort-admin-showcase .asa-settings-form > footer span { color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
-.exort-admin-showcase .asa-field-wide { grid-column: 1 / -1; }
-.exort-admin-showcase .asa-settings-form label,
-.exort-admin-showcase .asa-modal label,
-.exort-admin-showcase .asa-wifi-card label { display: grid; gap: 6px; color: #535a54; font-size: 8px; font-weight: 750; }
-.exort-admin-showcase .asa-settings-form label > span,
-.exort-admin-showcase .asa-modal label > b { color: var(--asa-accent-dark); font-size: 7px; font-weight: 700; }
-.exort-admin-showcase .asa-settings-form input:not([type="checkbox"]):not([type="color"]),
-.exort-admin-showcase .asa-settings-form select,
-.exort-admin-showcase .asa-settings-form textarea,
-.exort-admin-showcase .asa-modal input:not([type="checkbox"]):not([type="file"]),
-.exort-admin-showcase .asa-modal select,
-.exort-admin-showcase .asa-modal textarea,
-.exort-admin-showcase .asa-wifi-card input:not([type="checkbox"]),
-.exort-admin-showcase .asa-wifi-card select { width: 100%; min-height: 43px; padding: 9px 11px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 8px; outline: 0; font-size: 9px; transition: border-color 150ms ease, box-shadow 150ms ease; }
-.exort-admin-showcase .asa-settings-form textarea,
-.exort-admin-showcase .asa-modal textarea { resize: vertical; }
-.exort-admin-showcase .asa-settings-form input:focus,
-.exort-admin-showcase .asa-settings-form select:focus,
-.exort-admin-showcase .asa-settings-form textarea:focus,
-.exort-admin-showcase .asa-modal input:focus,
-.exort-admin-showcase .asa-modal select:focus,
-.exort-admin-showcase .asa-modal textarea:focus,
-.exort-admin-showcase .asa-wifi-card input:focus,
-.exort-admin-showcase .asa-wifi-card select:focus { border-color: var(--asa-accent); box-shadow: 0 0 0 3px rgba(255, 90, 54, 0.1); }
-.exort-admin-showcase .asa-checkbox { display: flex !important; min-height: 43px; align-items: center; gap: 9px !important; }
-.exort-admin-showcase .asa-checkbox input { width: 17px; height: 17px; flex: 0 0 auto; accent-color: var(--asa-accent); }
-.exort-admin-showcase .asa-form-hint { margin-top: 16px; color: var(--asa-muted); font-size: 8px; line-height: 1.6; }
-.exort-admin-showcase .asa-schedule-list { display: grid; }
-.exort-admin-showcase .asa-schedule-row { display: grid; grid-template-columns: 110px 1fr 1fr auto; gap: 10px; align-items: center; min-height: 58px; border-bottom: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-schedule-row:last-child { border-bottom: 0; }
-.exort-admin-showcase .asa-schedule-row > span { font-size: 9px; font-weight: 800; }
-.exort-admin-showcase .asa-language-settings { display: grid; gap: 8px; }
-.exort-admin-showcase .asa-language-settings label { display: flex; min-height: 52px; align-items: center; gap: 12px; padding: 0 14px; background: var(--asa-surface-2); border: 1px solid var(--asa-line); border-radius: 9px; }
-.exort-admin-showcase .asa-language-settings input { width: 18px; height: 18px; accent-color: var(--asa-accent); }
-.exort-admin-showcase .asa-language-settings strong { display: inline-grid; width: 30px; color: var(--asa-accent-dark); }
-.exort-admin-showcase .asa-appearance-layout,
-.exort-admin-showcase .asa-service-layout { display: grid; grid-template-columns: minmax(0, 1fr) 290px; gap: 20px; }
-.exort-admin-showcase .asa-menu-style-preview { display: grid; min-height: 250px; align-content: end; gap: 6px; padding: 18px; overflow: hidden; color: #fff; background: linear-gradient(160deg, #1e2a24, #32483d); border-radius: 12px; }
-.exort-admin-showcase .asa-menu-style-preview > span { color: rgba(255, 255, 255, 0.72); font-size: 8px; }
-.exort-admin-showcase .asa-menu-style-preview strong { font-family: var(--asa-display); font-size: 24px; line-height: 1.05; }
-.exort-admin-showcase .asa-menu-style-preview i { width: 42px; height: 3px; background: var(--preview-accent, var(--asa-accent)); }
-.exort-admin-showcase .asa-menu-style-preview button { width: fit-content; margin-top: 8px; padding: 7px 10px; color: #fff; background: var(--preview-accent, var(--asa-accent)); border: 0; border-radius: 999px; font-size: 7px; }
-.exort-admin-showcase .asa-service-preview { display: flex; min-height: 150px; align-items: center; gap: 14px; padding: 20px; color: #fff; background: var(--asa-ink); border-radius: 12px; }
-.exort-admin-showcase .asa-service-preview > span { display: grid; width: 48px; height: 48px; flex: 0 0 auto; place-items: center; border: 1px solid rgba(255, 255, 255, 0.38); border-radius: 50%; font-family: var(--asa-display); font-size: 9px; }
-.exort-admin-showcase .asa-service-preview p { color: rgba(255, 255, 255, 0.72); font-size: 9px; }
-.exort-admin-showcase .asa-domain-card { display: grid; gap: 8px; max-width: 540px; padding: 20px; background: var(--asa-surface-2); border: 1px solid var(--asa-line); border-radius: 10px; }
-.exort-admin-showcase .asa-domain-card span { color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-domain-card strong { font-family: var(--asa-display); font-size: 16px; }
-.exort-admin-showcase .asa-domain-card small { color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-domain-card .asa-button { width: fit-content; margin-top: 8px; }
-
-.exort-admin-showcase .asa-integration-intro { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; margin-bottom: 14px; padding: 18px; background: var(--asa-blue-soft); border: 1px solid #ceddf0; border-radius: 12px; }
-.exort-admin-showcase .asa-integration-intro > span { padding: 5px 8px; color: var(--asa-blue); background: #fff; border-radius: 999px; font-size: 7px; font-weight: 800; text-transform: uppercase; }
-.exort-admin-showcase .asa-integration-intro h3 { font-size: 12px; }
-.exort-admin-showcase .asa-integration-intro p { margin-top: 5px; color: #5c6f8a; font-size: 8px; }
-.exort-admin-showcase .asa-integration-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.exort-admin-showcase .asa-integration-card { min-height: 320px; padding: 20px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 13px; }
-.exort-admin-showcase .asa-integration-card > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-integration-logo { display: grid; width: 48px; height: 48px; place-items: center; color: #fff; background: var(--asa-ink); border-radius: 11px; font-size: 11px; font-weight: 800; }
-.exort-admin-showcase .asa-integration-card > header > div:nth-child(2) { flex: 1; }
-.exort-admin-showcase .asa-integration-card h3 { font-size: 14px; }
-.exort-admin-showcase .asa-integration-card header small { color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-integration-card > p { margin-top: 16px; color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-sync-list { display: grid; gap: 8px; margin: 18px 0; }
-.exort-admin-showcase .asa-sync-list span { display: flex; align-items: center; gap: 8px; font-size: 8px; }
-.exort-admin-showcase .asa-sync-list span::before { display: grid; width: 18px; height: 18px; place-items: center; color: var(--asa-green); background: var(--asa-green-soft); border-radius: 50%; content: "✓"; font-size: 7px; font-weight: 800; }
-.exort-admin-showcase .asa-integration-card > footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 18px; padding-top: 15px; border-top: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-integration-card footer small { color: var(--asa-muted); font-size: 7px; }
-
-.exort-admin-showcase .asa-modal-layer { position: fixed; z-index: 200; inset: 0; visibility: hidden; }
-.exort-admin-showcase .asa-modal-layer[aria-hidden="false"] { visibility: visible; }
-.exort-admin-showcase .asa-modal-backdrop { position: absolute; inset: 0; width: 100%; background: rgba(29, 33, 30, 0.42); border: 0; opacity: 0; transition: opacity 200ms ease; backdrop-filter: blur(2px); }
-.exort-admin-showcase .asa-modal-layer[aria-hidden="false"] .asa-modal-backdrop { opacity: 1; }
-.exort-admin-showcase .asa-modal { position: absolute; z-index: 1; top: 50%; left: 50%; width: min(980px, calc(100vw - 32px)); max-height: calc(100vh - 32px); overflow: hidden; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 16px; box-shadow: 0 28px 90px rgba(29, 33, 30, 0.22); opacity: 0; transform: translate(-50%, -47%) scale(0.985); transition: opacity 200ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1); }
-.exort-admin-showcase .asa-modal-layer[aria-hidden="false"] .asa-modal:not([hidden]) { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-.exort-admin-showcase .asa-modal form { display: flex; max-height: calc(100vh - 32px); flex-direction: column; }
-.exort-admin-showcase .asa-modal header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; padding: 20px 22px 16px; border-bottom: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-modal header p { color: var(--asa-accent-dark); font-size: 8px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
-.exort-admin-showcase .asa-modal header h2 { margin-top: 5px; font-family: var(--asa-display); font-size: 20px; line-height: 1.15; letter-spacing: -0.05em; }
-.exort-admin-showcase .asa-modal header > div > span { display: block; margin-top: 6px; color: var(--asa-muted); font-size: 8px; }
-.exort-admin-showcase .asa-modal header > button { width: 38px; height: 38px; flex: 0 0 auto; padding: 0; color: var(--asa-muted); background: var(--asa-surface-2); border: 1px solid var(--asa-line); border-radius: 9px; font-size: 20px; }
-.exort-admin-showcase .asa-modal-body { padding: 20px 22px; overflow-y: auto; }
-.exort-admin-showcase .asa-modal form > footer { display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 14px 22px calc(14px + env(safe-area-inset-bottom)); background: var(--asa-surface-2); border-top: 1px solid var(--asa-line); }
-.exort-admin-showcase .asa-modal form > footer > div { display: flex; gap: 8px; margin-left: auto; }
-.exort-admin-showcase .asa-item-editor { display: grid; grid-template-columns: 210px minmax(0, 1fr); gap: 22px; }
-.exort-admin-showcase .asa-item-media { display: grid; align-content: start; gap: 9px; }
-.exort-admin-showcase .asa-photo-preview { display: grid; width: 100%; aspect-ratio: 1.2; place-items: center; overflow: hidden; color: var(--asa-accent-dark); background: var(--asa-accent-soft); border: 1px dashed #ffc4b4; border-radius: 12px; font-size: 10px; font-weight: 800; }
-.exort-admin-showcase .asa-photo-preview img { width: 100%; height: 100%; object-fit: cover; }
-.exort-admin-showcase .asa-item-media input[type="file"] { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.exort-admin-showcase .asa-item-media > button { padding: 3px 0; color: var(--asa-red); background: transparent; border: 0; font-size: 8px; font-weight: 750; }
-.exort-admin-showcase .asa-item-media > small { color: var(--asa-muted); font-size: 7px; text-align: center; }
-.exort-admin-showcase .asa-mini-dish-preview { display: grid; min-height: 128px; align-content: end; gap: 4px; margin-top: 10px; padding: 13px; color: #fff; background: linear-gradient(150deg, #23362e, #13251e); border-radius: 11px; }
-.exort-admin-showcase .asa-mini-dish-preview span { color: rgba(255, 255, 255, 0.65); font-size: 7px; }
-.exort-admin-showcase .asa-mini-dish-preview strong { font-size: 11px; }
-.exort-admin-showcase .asa-mini-dish-preview b { color: #ff9a80; font-size: 10px; }
-.exort-admin-showcase .asa-item-fields { display: grid; gap: 15px; }
-.exort-admin-showcase .asa-language-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.exort-admin-showcase .asa-language-tabs { display: flex; gap: 4px; padding: 3px; background: var(--asa-surface-2); border: 1px solid var(--asa-line); border-radius: 9px; }
-.exort-admin-showcase .asa-language-tabs button { position: relative; min-width: 44px; min-height: 34px; padding: 0 9px; color: var(--asa-muted); background: transparent; border: 0; border-radius: 6px; font-size: 8px; font-weight: 800; }
-.exort-admin-showcase .asa-language-tabs button.is-active { color: #fff; background: var(--asa-accent); }
-.exort-admin-showcase .asa-language-tabs button i { position: absolute; top: 5px; right: 5px; width: 5px; height: 5px; background: var(--asa-green); border-radius: 50%; }
-.exort-admin-showcase .asa-language-tabs button.is-missing i { background: var(--asa-amber); }
-.exort-admin-showcase .asa-language-editor-head > button { padding: 7px 9px; color: var(--asa-accent-dark); background: var(--asa-accent-soft); border: 1px solid #ffd1c5; border-radius: 7px; font-size: 7px; font-weight: 800; }
-.exort-admin-showcase .asa-translation-note { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 9px; align-items: center; padding: 10px; background: var(--asa-blue-soft); border: 1px solid #d4e2f2; border-radius: 9px; }
-.exort-admin-showcase .asa-translation-note > span { display: grid; width: 28px; height: 28px; place-items: center; color: #fff; background: var(--asa-blue); border-radius: 7px; font-size: 8px; font-weight: 800; }
-.exort-admin-showcase .asa-translation-note p { display: grid; }
-.exort-admin-showcase .asa-translation-note strong { font-size: 8px; }
-.exort-admin-showcase .asa-translation-note small { color: #647991; font-size: 7px; }
-.exort-admin-showcase .asa-language-panels > section { display: none; grid-template-columns: 1fr; gap: 10px; }
-.exort-admin-showcase .asa-language-panels > section.is-active { display: grid; }
-.exort-admin-showcase .asa-editor-section { padding: 15px; background: var(--asa-surface-2); border: 1px solid var(--asa-line); border-radius: 11px; }
-.exort-admin-showcase .asa-editor-section-title { margin-bottom: 12px; font-size: 9px; font-weight: 800; }
-.exort-admin-showcase .asa-status-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.exort-admin-showcase .asa-status-controls label { display: flex; min-height: 58px; align-items: center; gap: 10px; padding: 10px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 9px; }
-.exort-admin-showcase .asa-status-controls input { width: 17px; height: 17px; accent-color: var(--asa-accent); }
-.exort-admin-showcase .asa-status-controls span { display: grid; }
-.exort-admin-showcase .asa-status-controls strong { font-size: 8px; }
-.exort-admin-showcase .asa-status-controls small { color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-field-error { min-height: 11px; color: var(--asa-red); font-size: 7px; }
-.exort-admin-showcase .asa-danger-action { min-height: 40px; padding: 0 12px; color: var(--asa-red); background: var(--asa-red-soft); border: 1px solid #f1c5c1; border-radius: 8px; font-size: 8px; font-weight: 800; }
-.exort-admin-showcase .asa-compact-modal { width: min(520px, calc(100vw - 32px)); }
-.exort-admin-showcase .asa-compact-modal .asa-modal-body { display: grid; gap: 13px; }
-.exort-admin-showcase .asa-category-language-fields { display: grid; }
-.exort-admin-showcase .asa-confirm-modal { width: min(430px, calc(100vw - 32px)); padding: 24px; }
-.exort-admin-showcase .asa-confirm-modal > div { display: grid; justify-items: center; text-align: center; }
-.exort-admin-showcase .asa-confirm-modal > div > span { display: grid; width: 44px; height: 44px; place-items: center; color: var(--asa-red); background: var(--asa-red-soft); border-radius: 50%; font-family: var(--asa-display); font-size: 13px; }
-.exort-admin-showcase .asa-confirm-modal h2 { margin-top: 14px; font-family: var(--asa-display); font-size: 17px; letter-spacing: -0.045em; }
-.exort-admin-showcase .asa-confirm-modal p { max-width: 340px; margin-top: 10px; color: var(--asa-muted); font-size: 9px; }
-.exort-admin-showcase .asa-confirm-modal > div > div { display: flex; gap: 8px; margin-top: 20px; }
-.exort-admin-showcase .asa-command-modal { top: 88px; width: min(620px, calc(100vw - 32px)); max-height: min(650px, calc(100vh - 110px)); transform: translate(-50%, -12px) scale(0.985); }
-.exort-admin-showcase .asa-modal-layer[aria-hidden="false"] .asa-command-modal:not([hidden]) { transform: translate(-50%, 0) scale(1); }
-.exort-admin-showcase .asa-command-modal > div { display: flex; max-height: inherit; flex-direction: column; }
-.exort-admin-showcase .asa-command-modal header { align-items: center; padding: 12px; }
-.exort-admin-showcase .asa-command-modal header label { display: grid; grid-template-columns: 34px minmax(0, 1fr); flex: 1; align-items: center; }
-.exort-admin-showcase .asa-command-modal header label > span { display: grid; place-items: center; }
-.exort-admin-showcase .asa-command-modal input { height: 42px; background: transparent !important; border: 0 !important; box-shadow: none !important; font-size: 11px !important; }
-.exort-admin-showcase .asa-command-results { display: grid; gap: 4px; padding: 8px; overflow-y: auto; }
-.exort-admin-showcase .asa-command-result { display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 9px; align-items: center; min-height: 50px; padding: 6px 8px; background: transparent; border: 0; border-radius: 8px; text-align: left; }
-.exort-admin-showcase .asa-command-result:hover,
-.exort-admin-showcase .asa-command-result.is-active { background: var(--asa-accent-soft); }
-.exort-admin-showcase .asa-command-result > span { display: grid; width: 34px; height: 34px; place-items: center; color: var(--asa-accent-dark); background: var(--asa-surface-2); border-radius: 8px; }
-.exort-admin-showcase .asa-command-result strong { display: block; font-size: 9px; }
-.exort-admin-showcase .asa-command-result small { color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-command-result > b { color: var(--asa-muted-2); font-size: 8px; }
-
-.exort-admin-showcase .asa-toast-region { position: fixed; z-index: 400; top: 16px; left: 50%; display: grid; width: min(420px, calc(100vw - 24px)); gap: 8px; justify-items: center; transform: translateX(-50%); pointer-events: none; }
-.exort-admin-showcase .asa-toast { display: grid; grid-template-columns: 9px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; min-height: 52px; padding: 11px 13px; color: var(--asa-ink); background: rgba(255, 253, 248, 0.96); border: 1px solid var(--asa-line); border-radius: 10px; box-shadow: 0 16px 44px rgba(29, 33, 30, 0.16); backdrop-filter: blur(14px); animation: asa-toast-in 220ms cubic-bezier(0.22, 1, 0.36, 1); pointer-events: auto; }
-.exort-admin-showcase .asa-toast > i { width: 8px; height: 8px; background: var(--asa-accent); border-radius: 50%; }
-.exort-admin-showcase .asa-toast strong { display: block; font-size: 9px; }
-.exort-admin-showcase .asa-toast small { color: var(--asa-muted); font-size: 7px; }
-.exort-admin-showcase .asa-toast button { width: 28px; height: 28px; color: var(--asa-muted); background: transparent; border: 0; }
-.exort-admin-showcase .asa-toast.is-success > i { background: var(--asa-green); }
-.exort-admin-showcase .asa-toast.is-warning > i { background: var(--asa-amber); }
-.exort-admin-showcase .asa-toast.is-error > i { background: var(--asa-red); }
-.exort-admin-showcase .asa-toast.is-hiding { opacity: 0; transform: translateY(-8px); transition: 180ms ease; }
-
-@keyframes asa-view-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } }
-@keyframes asa-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
-@keyframes asa-toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
-
-@media (max-width: 1180px) {
-  .exort-admin-showcase .asa-sidebar { width: 224px; }
-  .exort-admin-showcase .asa-workspace { margin-left: 224px; }
-  .exort-admin-showcase .asa-command-button { min-width: 42px; width: 42px; padding: 0; }
-  .exort-admin-showcase .asa-command-button span:last-of-type,
-  .exort-admin-showcase .asa-command-button kbd { display: none; }
-  .exort-admin-showcase .asa-dashboard-grid { grid-template-columns: 1fr 1fr; }
-  .exort-admin-showcase .asa-activity-card { grid-column: 1 / -1; }
-  .exort-admin-showcase .asa-quick-actions { grid-template-columns: repeat(3, 1fr); }
-  .exort-admin-showcase .asa-quick-actions > *:nth-child(3) { border-right: 0; }
-  .exort-admin-showcase .asa-quick-actions > *:nth-child(-n + 3) { border-bottom: 1px solid var(--asa-line); }
-  .exort-admin-showcase .asa-menu-header,
-  .exort-admin-showcase .asa-menu-row { grid-template-columns: 48px minmax(150px, 1.4fr) minmax(100px, 0.7fr) 90px 100px 42px; }
-  .exort-admin-showcase .asa-menu-header > *:nth-child(6),
-  .exort-admin-showcase .asa-menu-row > *:nth-child(6) { display: none; }
-  .exort-admin-showcase .asa-menu-list.is-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .exort-admin-showcase .asa-qr-layout { grid-template-columns: 1fr; }
-  .exort-admin-showcase .asa-wifi-card { position: static; }
+@media (max-width: 1366px) {
+  .admin-showcase-live .app-shell { grid-template-columns: 244px minmax(0, 1fr); }
+  .admin-showcase-live .sidebar { width: 244px; }
+  .admin-showcase-live .workspace { padding-inline: 26px; }
+  .admin-showcase-live .menu-toolbar { grid-template-columns: minmax(230px, 1.2fr) minmax(165px, .8fr) minmax(155px, .7fr) auto; }
+  .admin-showcase-live .menu-toolbar .toolbar-action { grid-column: auto; }
+  .admin-showcase-live .dish-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-@media (max-width: 900px) {
-  .exort-admin-showcase { padding-bottom: env(safe-area-inset-bottom); }
-  .exort-admin-showcase .asa-sidebar { width: min(310px, calc(100vw - 42px)); transform: translateX(-105%); box-shadow: 22px 0 70px rgba(29, 33, 30, 0.18); transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1); }
-  .exort-admin-showcase.is-sidebar-open .asa-sidebar { transform: none; }
-  .exort-admin-showcase .asa-sidebar-close { display: grid; margin-left: 0; place-items: center; }
-  .exort-admin-showcase .asa-demo-chip { margin-left: auto; }
-  .exort-admin-showcase .asa-sidebar-backdrop { position: fixed; z-index: 70; inset: 0; display: block; visibility: hidden; background: rgba(29, 33, 30, 0.34); border: 0; opacity: 0; transition: 180ms ease; }
-  .exort-admin-showcase.is-sidebar-open .asa-sidebar-backdrop { visibility: visible; opacity: 1; }
-  .exort-admin-showcase .asa-workspace { margin-left: 0; }
-  .exort-admin-showcase .asa-mobile-header { display: grid; grid-template-columns: 44px 1fr 44px; min-height: 58px; align-items: center; padding: 0 14px; background: var(--asa-sidebar); border-bottom: 1px solid var(--asa-line); }
-  .exort-admin-showcase .asa-mobile-header > button,
-  .exort-admin-showcase .asa-mobile-header > a:last-child { display: grid; width: 42px; height: 42px; place-items: center; background: transparent; border: 0; border-radius: 9px; }
-  .exort-admin-showcase .asa-mobile-header .asa-brand { justify-self: center; }
-  .exort-admin-showcase .asa-demo-banner { min-height: 40px; padding-inline: 12px; }
-  .exort-admin-showcase .asa-topbar { top: 0; min-height: 88px; padding: 16px 20px; }
-  .exort-admin-showcase .asa-page-heading > span { display: none; }
-  .exort-admin-showcase .asa-topbar-actions .asa-command-button,
-  .exort-admin-showcase .asa-topbar-actions .asa-button--secondary { display: none; }
-  .exort-admin-showcase .asa-main { padding: 22px 20px 60px; }
-  .exort-admin-showcase .asa-metric-strip { grid-template-columns: repeat(2, 1fr); }
-  .exort-admin-showcase .asa-metric:nth-child(2) { border-right: 0; }
-  .exort-admin-showcase .asa-metric:nth-child(-n + 2) { border-bottom: 1px solid var(--asa-line); }
-  .exort-admin-showcase .asa-dashboard-grid { grid-template-columns: 1fr; }
-  .exort-admin-showcase .asa-activity-card,
-  .exort-admin-showcase .asa-quick-card { grid-column: auto; }
-  .exort-admin-showcase .asa-toolbar select { flex: 1; }
-  .exort-admin-showcase .asa-density-switch { margin-left: auto; }
-  .exort-admin-showcase .asa-menu-header { display: none; }
-  .exort-admin-showcase .asa-menu-list { display: grid; gap: 8px; background: transparent; border: 0; overflow: visible; }
-  .exort-admin-showcase .asa-menu-row { position: relative; display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; grid-template-rows: auto auto auto; gap: 6px 10px; min-height: 118px; padding: 12px; background: var(--asa-surface); border: 1px solid var(--asa-line); border-radius: 11px; }
-  .exort-admin-showcase .asa-menu-thumb { grid-row: 1 / span 2; width: 54px; height: 54px; }
-  .exort-admin-showcase .asa-menu-name { grid-column: 2; }
-  .exort-admin-showcase .asa-menu-category { grid-column: 2; }
-  .exort-admin-showcase .asa-menu-price { grid-column: 1; align-self: end; }
-  .exort-admin-showcase .asa-menu-row .asa-status { grid-column: 2; align-self: end; }
-  .exort-admin-showcase .asa-translation-state { grid-column: 3; grid-row: 1 / span 3; }
-  .exort-admin-showcase .asa-row-action { position: absolute; right: 7px; bottom: 7px; }
-  .exort-admin-showcase .asa-menu-list.is-grid { grid-template-columns: repeat(2, 1fr); padding: 0; }
-  .exort-admin-showcase .asa-category-row { grid-template-columns: 28px minmax(0, 1fr) 88px auto; }
-  .exort-admin-showcase .asa-category-count { display: none; }
-  .exort-admin-showcase .asa-stop-row { grid-template-columns: 48px minmax(0, 1fr) auto; }
-  .exort-admin-showcase .asa-stop-time,
-  .exort-admin-showcase .asa-stop-row > .asa-status { display: none; }
-  .exort-admin-showcase .asa-analytics-layout { grid-template-columns: 1fr; }
-  .exort-admin-showcase .asa-audience-card { grid-column: auto; }
-  .exort-admin-showcase .asa-settings-layout { grid-template-columns: 1fr; }
-  .exort-admin-showcase .asa-settings-nav { position: static; display: flex; overflow-x: auto; }
-  .exort-admin-showcase .asa-settings-nav button { flex: 0 0 auto; }
-  .exort-admin-showcase .asa-integration-grid { grid-template-columns: 1fr; }
+@media (max-width: 1024px) {
+  .admin-showcase-live .menu-hero-manager { grid-template-columns: 1fr; }
+  .admin-showcase-live .menu-toolbar { grid-template-columns: 1fr 1fr; }
+  .admin-showcase-live .menu-toolbar .search-control { grid-column: 1 / -1; }
+  .admin-showcase-live .analytics-v2-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 820px) {
+  .admin-showcase-live { padding-bottom: 82px; }
+  .admin-showcase-live .workspace { padding: 0 18px 34px; }
+  .admin-showcase-live .topbar { min-height: 88px; }
+  .admin-showcase-live .topbar h1 { font-size: 27px; }
+  .admin-showcase-live .mobile-nav { grid-template-columns: repeat(5, 1fr); background: #1d211e; }
+  .admin-showcase-live .mobile-nav button { min-height: 56px; font-size: 12px; }
+  .admin-showcase-live .mobile-nav button span { font-size: 11px; }
+  .admin-showcase-live .mobile-nav .is-active { color: #fff; background: rgba(255, 90, 54, 0.25); }
+  .admin-showcase-live .drawer-body { grid-template-columns: 1fr; }
+  .admin-showcase-live .dish-live-preview { position: static; grid-column: 1; grid-row: auto; }
 }
 
 @media (max-width: 620px) {
-  .exort-admin-showcase .asa-demo-banner { justify-content: flex-start; font-size: 8px; }
-  .exort-admin-showcase .asa-demo-banner button { display: none; }
-  .exort-admin-showcase .asa-topbar { min-height: 82px; padding: 14px; }
-  .exort-admin-showcase .asa-page-heading h1 { font-size: 20px; }
-  .exort-admin-showcase .asa-topbar-actions .asa-button--primary { min-width: 44px; width: 44px; padding: 0; }
-  .exort-admin-showcase .asa-topbar-actions .asa-button--primary span { display: none; }
-  .exort-admin-showcase .asa-main { padding: 16px 12px 52px; }
-  .exort-admin-showcase .asa-overview-status { align-items: flex-start; flex-direction: column; }
-  .exort-admin-showcase .asa-overview-status button { margin-left: 42px; }
-  .exort-admin-showcase .asa-metric-strip { grid-template-columns: 1fr 1fr; }
-  .exort-admin-showcase .asa-metric { min-height: 116px; padding: 16px; }
-  .exort-admin-showcase .asa-metric strong { font-size: 23px; }
-  .exort-admin-showcase .asa-dashboard-grid { gap: 10px; }
-  .exort-admin-showcase .asa-quick-actions { grid-template-columns: repeat(2, 1fr); }
-  .exort-admin-showcase .asa-quick-actions > * { border-bottom: 1px solid var(--asa-line); }
-  .exort-admin-showcase .asa-quick-actions > *:nth-child(2n) { border-right: 0; }
-  .exort-admin-showcase .asa-quick-actions > *:nth-last-child(-n + 2) { border-bottom: 0; }
-  .exort-admin-showcase .asa-menu-toolbar { display: grid; grid-template-columns: 1fr 1fr; }
-  .exort-admin-showcase .asa-search { grid-column: 1 / -1; min-width: 0; }
-  .exort-admin-showcase .asa-menu-toolbar > select,
-  .exort-admin-showcase .asa-filter-button { width: 100%; min-width: 0; }
-  .exort-admin-showcase .asa-density-switch { grid-column: 1 / -1; justify-self: end; margin-left: 0; }
-  .exort-admin-showcase .asa-filter-popover { align-items: flex-start; flex-direction: column; }
-  .exort-admin-showcase .asa-filter-popover button { margin-left: 0; }
-  .exort-admin-showcase .asa-table-summary small { display: none; }
-  .exort-admin-showcase .asa-menu-list.is-grid { grid-template-columns: 1fr; }
-  .exort-admin-showcase .asa-category-row { grid-template-columns: 24px minmax(0, 1fr) auto; gap: 8px; padding: 10px; }
-  .exort-admin-showcase .asa-category-row > .asa-switch { display: none; }
-  .exort-admin-showcase .asa-category-actions button:nth-child(-n + 2) { display: none; }
-  .exort-admin-showcase .asa-stop-summary { align-items: stretch; flex-direction: column; }
-  .exort-admin-showcase .asa-stop-summary .asa-button { width: 100%; }
-  .exort-admin-showcase .asa-stop-row { grid-template-columns: 46px minmax(0, 1fr); padding: 10px; }
-  .exort-admin-showcase .asa-stop-row .asa-button { grid-column: 1 / -1; width: 100%; }
-  .exort-admin-showcase .asa-analytics-header { align-items: stretch; flex-direction: column; }
-  .exort-admin-showcase .asa-period-switch { display: grid; grid-template-columns: repeat(4, 1fr); }
-  .exort-admin-showcase .asa-period-switch button { padding: 0 6px; }
-  .exort-admin-showcase .asa-analytics-header > div:last-child { display: grid; grid-template-columns: 1fr auto; }
-  .exort-admin-showcase .asa-analytics-header label { display: grid; grid-template-columns: auto 1fr; }
-  .exort-admin-showcase .asa-analytics-metrics { grid-template-columns: repeat(2, 1fr); }
-  .exort-admin-showcase .asa-audience-grid { grid-template-columns: 1fr; }
-  .exort-admin-showcase .asa-audience-group { border-right: 0; border-bottom: 1px solid var(--asa-line); }
-  .exort-admin-showcase .asa-audience-group:last-child { border-bottom: 0; }
-  .exort-admin-showcase .asa-qr-explainer { align-items: stretch; flex-direction: column; }
-  .exort-admin-showcase .asa-qr-explainer > i { width: 100%; height: 1px; }
-  .exort-admin-showcase .asa-source-section > header { align-items: stretch; flex-direction: column; }
-  .exort-admin-showcase .asa-source-section > header .asa-button { width: 100%; }
-  .exort-admin-showcase .asa-source-card { grid-template-columns: 68px minmax(0, 1fr); }
-  .exort-admin-showcase .asa-source-stats { grid-column: 1 / -1; }
-  .exort-admin-showcase .asa-source-actions { grid-column: 1 / -1; }
-  .exort-admin-showcase .asa-form-grid,
-  .exort-admin-showcase .asa-appearance-layout,
-  .exort-admin-showcase .asa-service-layout { grid-template-columns: 1fr; }
-  .exort-admin-showcase .asa-field-wide { grid-column: auto; }
-  .exort-admin-showcase .asa-settings-panel { padding: 18px 14px; }
-  .exort-admin-showcase .asa-settings-form > footer { position: sticky; bottom: 0; align-items: stretch; flex-direction: column; padding: 12px; }
-  .exort-admin-showcase .asa-settings-form > footer .asa-button { width: 100%; }
-  .exort-admin-showcase .asa-schedule-row { grid-template-columns: 84px 1fr 1fr; }
-  .exort-admin-showcase .asa-schedule-row > .asa-switch { display: none; }
-  .exort-admin-showcase .asa-modal { top: 8px; bottom: 0; left: 0; width: 100%; max-height: none; border-radius: 15px 15px 0 0; transform: translateY(24px); }
-  .exort-admin-showcase .asa-modal-layer[aria-hidden="false"] .asa-modal:not([hidden]) { transform: none; }
-  .exort-admin-showcase .asa-modal form { max-height: 100%; }
-  .exort-admin-showcase .asa-item-editor { grid-template-columns: 1fr; padding: 14px; }
-  .exort-admin-showcase .asa-item-media { grid-template-columns: 110px minmax(0, 1fr); align-items: start; }
-  .exort-admin-showcase .asa-photo-preview { grid-row: 1 / span 4; }
-  .exort-admin-showcase .asa-mini-dish-preview { display: none; }
-  .exort-admin-showcase .asa-language-editor-head { align-items: stretch; flex-direction: column; }
-  .exort-admin-showcase .asa-language-tabs { display: grid; grid-template-columns: repeat(4, 1fr); }
-  .exort-admin-showcase .asa-status-controls { grid-template-columns: 1fr; }
-  .exort-admin-showcase .asa-modal form > footer { position: sticky; bottom: 0; align-items: stretch; flex-direction: column; padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); }
-  .exort-admin-showcase .asa-modal form > footer > div { display: grid; grid-template-columns: 1fr 1fr; width: 100%; margin-left: 0; }
-  .exort-admin-showcase .asa-danger-action { width: 100%; }
-  .exort-admin-showcase .asa-compact-modal,
-  .exort-admin-showcase .asa-confirm-modal { top: 50%; bottom: auto; left: 50%; width: calc(100vw - 24px); border-radius: 14px; transform: translate(-50%, -47%) scale(0.985); }
-  .exort-admin-showcase .asa-modal-layer[aria-hidden="false"] .asa-compact-modal:not([hidden]),
-  .exort-admin-showcase .asa-modal-layer[aria-hidden="false"] .asa-confirm-modal:not([hidden]) { transform: translate(-50%, -50%) scale(1); }
-  .exort-admin-showcase .asa-command-modal { top: 10px; bottom: auto; left: 12px; width: calc(100vw - 24px); max-height: calc(100vh - 20px); border-radius: 13px; transform: translateY(-10px); }
-  .exort-admin-showcase .asa-modal-layer[aria-hidden="false"] .asa-command-modal:not([hidden]) { transform: none; }
+  .admin-showcase-live .login-card { padding: 28px 22px; }
+  .admin-showcase-live .metric-grid,
+  .admin-showcase-live .quick-actions,
+  .admin-showcase-live .dish-grid,
+  .admin-showcase-live .menu-toolbar,
+  .admin-showcase-live .analytics-v2-metrics,
+  .admin-showcase-live .system-state-grid { grid-template-columns: 1fr; }
+  .admin-showcase-live .menu-toolbar .search-control { grid-column: auto; }
+  .admin-showcase-live .metric-card { min-height: 132px; }
+  .admin-showcase-live .dish-visual { height: 210px; }
+  .admin-showcase-live .drawer-panel { inset: 8px 0 0; max-height: calc(100vh - 8px); border-radius: 18px 18px 0 0; }
+  .admin-showcase-live .drawer-body { padding: 18px 16px 130px; }
+  .admin-showcase-live .drawer-panel > footer { padding: 14px 16px calc(16px + env(safe-area-inset-bottom)); }
+  .admin-showcase-live .category-row { grid-template-columns: 24px minmax(0, 1fr) auto; }
+  .admin-showcase-live .stop-row { grid-template-columns: 48px minmax(0, 1fr) auto; }
 }
 
 @media (max-width: 390px) {
-  .exort-admin-showcase .asa-main { padding-inline: 10px; }
-  .exort-admin-showcase .asa-metric { padding: 14px 12px; }
-  .exort-admin-showcase .asa-metric > i { display: none; }
-  .exort-admin-showcase .asa-surface-head { padding-inline: 14px; }
-  .exort-admin-showcase .asa-mini-chart { padding-inline: 14px; }
-  .exort-admin-showcase .asa-analytics-metrics { grid-template-columns: 1fr 1fr; }
-  .exort-admin-showcase .asa-dish-interest-row { grid-template-columns: 22px 32px minmax(0, 1fr) 50px; }
-  .exort-admin-showcase .asa-dish-interest-row > em { display: none; }
-}
-
-@media (max-width: 360px) {
-  .exort-admin-showcase .asa-topbar { padding-inline: 10px; }
-  .exort-admin-showcase .asa-period-switch button { font-size: 7px; }
-  .exort-admin-showcase .asa-source-card { grid-template-columns: 1fr; }
-  .exort-admin-showcase .asa-source-qr { margin: auto; }
-  .exort-admin-showcase .asa-source-actions,
-  .exort-admin-showcase .asa-source-stats { grid-column: auto; }
+  .admin-showcase-live .workspace { padding-inline: 13px; }
+  .admin-showcase-live .topbar h1 { font-size: 24px; }
+  .admin-showcase-live .view { padding-top: 20px; }
+  .admin-showcase-live .panel,
+  .admin-showcase-live .metric-card { padding: 18px; }
+  .admin-showcase-live .mobile-nav { inset-inline: 6px; bottom: 6px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .exort-admin-showcase *,
-  .exort-admin-showcase *::before,
-  .exort-admin-showcase *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .admin-showcase-live *,
+  .admin-showcase-live *::before,
+  .admin-showcase-live *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

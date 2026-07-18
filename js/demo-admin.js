@@ -5,7 +5,7 @@ const ADMIN_API_URL = getAdminApiUrl();
 const sessionKeyPrefix = "exort-admin-session:";
 
 const state = {
-  restaurant: { slug: DEFAULT_RESTAURANT_SLUG, name: "Exort Demo Restaurant", city: "Almaty", brand: "#2563eb" },
+  restaurant: { slug: DEFAULT_RESTAURANT_SLUG, name: "", city: "", brand: "#ff5a36" },
   categories: [],
   items: [],
   sessionToken: sessionStorage.getItem(sessionKeyPrefix + getRestaurantSlug()) || "",
@@ -13,6 +13,11 @@ const state = {
   loading: false,
   dirty: false,
   pendingConfirm: null,
+  savingItem: false,
+  savingCategory: false,
+  overviewAnalytics: null,
+  overviewAnalyticsLoading: false,
+  overviewAnalyticsError: "",
 };
 
 const el = {
@@ -69,6 +74,8 @@ const viewMeta = {
   stoplist: ["Стоп-лист", "Быстрая доступность"],
   analytics: ["Аналитика", "Поведение гостей и эффективность меню"],
   qr: ["QR-коды", "Источники переходов в меню"],
+  settings: ["Настройки", "Реальные данные заведения"],
+  integrations: ["Интеграции", "Состояние подключений"],
 };
 
 init();
@@ -179,14 +186,21 @@ async function init() {
 async function requestPublicSupabase(table, query) {
   const url = new URL(table, SUPABASE_REST_URL);
   Object.entries(query).forEach(([key, value]) => url.searchParams.set(key, value));
-  const response = await fetch(url, {
-    headers: {
-      apikey: SUPABASE_PUBLISHABLE_KEY,
-      Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
-    },
-  });
-  if (!response.ok) throw new Error(await response.text());
-  return response.json();
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch(url, {
+      headers: {
+        apikey: SUPABASE_PUBLISHABLE_KEY,
+        Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      signal: controller.signal,
+    });
+    if (!response.ok) throw new Error(await response.text());
+    return response.json();
+  } finally {
+    window.clearTimeout(timeout);
+  }
 }
 
 async function loadPublicRestaurantIdentity() {
@@ -199,10 +213,10 @@ async function loadPublicRestaurantIdentity() {
     });
     if (restaurants[0]) {
       state.restaurant = { ...state.restaurant, ...restaurants[0] };
-      syncRestaurantIdentity();
     }
   } catch (error) {
     console.warn("Public restaurant load failed:", error);
+  } finally {
     syncRestaurantIdentity();
   }
 }
@@ -282,9 +296,9 @@ function normalizeRestaurant(restaurant) {
   return {
     id: restaurant.id,
     slug: restaurant.slug || getRestaurantSlug(),
-    name: restaurant.name || "Exort Demo Restaurant",
-    city: restaurant.city || "Almaty",
-    brand: restaurant.brand_color || restaurant.brand || "#2563eb",
+    name: restaurant.name || "Заведение",
+    city: restaurant.city || "",
+    brand: restaurant.brand_color || restaurant.brand || "#ff5a36",
     hero_image_url: restaurant.hero_image_url || restaurant.menu_cover_url || "",
   };
 }
@@ -320,6 +334,10 @@ function normalizeItem(item) {
     is_active: item.is_active !== false,
     is_stoplisted: item.is_stoplisted === true || item.in_stock === false,
     inactive_until: item.inactive_until || "",
+    old_price: item.old_price == null ? null : Number(item.old_price),
+    weight: item.weight || "",
+    calories: item.calories == null ? null : Number(item.calories),
+    spice_level: item.spice_level || "",
     sort_order: Number(item.sort_order || 0),
     version: Number(item.version || 1),
   };
@@ -351,6 +369,23 @@ function openApp(render = true) {
   el.app.hidden = false;
   syncRestaurantIdentity();
   if (render) renderAll();
+  loadOverviewAnalytics();
+}
+
+async function loadOverviewAnalytics() {
+  if (!state.sessionToken || state.overviewAnalyticsLoading || state.overviewAnalytics) return;
+  state.overviewAnalyticsLoading = true;
+  state.overviewAnalyticsError = "";
+  renderMetrics();
+  try {
+    const result = await adminApi("getAnalytics", { range: "today" });
+    state.overviewAnalytics = result?.analytics || null;
+  } catch (error) {
+    state.overviewAnalyticsError = toFriendlyError(error?.message || "Аналитика недоступна");
+  } finally {
+    state.overviewAnalyticsLoading = false;
+    renderMetrics();
+  }
 }
 
 function showLoginScreen() {
@@ -362,6 +397,8 @@ function logout() {
   const run = () => {
     sessionStorage.removeItem(sessionKeyPrefix + getRestaurantSlug());
     state.sessionToken = "";
+    state.overviewAnalytics = null;
+    state.overviewAnalyticsError = "";
     clearAdminHash();
     showLoginScreen();
     el.pinInput.value = "";
@@ -370,10 +407,11 @@ function logout() {
 }
 
 function syncRestaurantIdentity() {
-  const initial = state.restaurant.name?.charAt(0)?.toUpperCase() || "E";
-  el.restaurantNames.forEach((node) => { node.textContent = state.restaurant.name; });
+  const restaurantName = state.restaurant.name?.trim() || "Заведение";
+  const initial = restaurantName.charAt(0).toUpperCase() || "E";
+  el.restaurantNames.forEach((node) => { node.textContent = restaurantName; });
   el.restaurantInitials.forEach((node) => { node.textContent = initial; });
-  document.documentElement.style.setProperty("--brand", state.restaurant.brand || "#2563eb");
+  document.documentElement.style.setProperty("--brand", state.restaurant.brand || "#ff5a36");
   document.querySelectorAll("[data-menu-link]").forEach((link) => {
     link.href = `/demo-menu?restaurant=${encodeURIComponent(state.restaurant.slug || getRestaurantSlug())}`;
   });
@@ -500,9 +538,11 @@ function getAttentionStatus(count, type) {
 
 function renderFilters() {
   const selected = el.categoryFilter.value || "all";
-  el.categoryFilter.innerHTML = `<option value="all">Все категории</option>${state.categories.map((category) => `<option value="${category.id}">${escapeHtml(category.name)}</option>`).join("")}`;
+  el.categoryFilter.innerHTML = `<option value="all">Все категории</option><option value="missing">Без категории</option>${state.categories.map((category) => `<option value="${category.id}">${escapeHtml(category.name)}</option>`).join("")}`;
   el.categoryFilter.value = [...el.categoryFilter.options].some((option) => option.value === selected) ? selected : "all";
-  el.itemForm.elements.category_id.innerHTML = state.categories.map((category) => `<option value="${category.id}">${escapeHtml(category.name)}</option>`).join("");
+  const editorCategory = el.itemForm.elements.category_id.value;
+  el.itemForm.elements.category_id.innerHTML = `<option value="">Выберите категорию</option>${state.categories.map((category) => `<option value="${category.id}">${escapeHtml(category.name)}</option>`).join("")}`;
+  el.itemForm.elements.category_id.value = state.categories.some((category) => category.id === editorCategory) ? editorCategory : "";
 }
 
 function filteredItems() {
@@ -514,7 +554,7 @@ function filteredItems() {
 
   return getDishItems().filter((item) => {
     const matchesQuery = !query || [getItemDisplayName(item), getItemDisplayDescription(item), item.content_key].join(" ").toLowerCase().includes(query);
-    const matchesCategory = category === "all" || item.category_id === category;
+    const matchesCategory = category === "all" || (category === "missing" ? !item.category_id : item.category_id === category);
     const matchesStatus =
       status === "all" ||
       (status === "active" && item.is_active && !item.is_stoplisted && !isTemporarilyUnavailable(item)) ||
@@ -522,7 +562,12 @@ function filteredItems() {
       (status === "inactive" && !item.is_active) ||
       (status === "temporary" && isTemporarilyUnavailable(item));
     const matchesPhoto = photo === "all" || (photo === "with" && item.image) || (photo === "missing" && !item.image);
-    const matchesTranslation = translation === "all" || (translation === "complete" && !hasMissingTranslation(item)) || (translation === "missing" && hasMissingTranslation(item));
+    const matchesTranslation = translation === "all" ||
+      (translation === "complete" && !hasMissingTranslation(item)) ||
+      (translation === "missing" && hasMissingTranslation(item)) ||
+      (translation === "missing-ru" && !String(item.name_ru || "").trim()) ||
+      (translation === "missing-kz" && (!String(item.name_kz || "").trim() || !String(item.description_kz || "").trim())) ||
+      (translation === "missing-en" && (!String(item.name_en || "").trim() || !String(item.description_en || "").trim()));
     return matchesQuery && matchesCategory && matchesStatus && matchesPhoto && matchesTranslation;
   });
 }
@@ -626,7 +671,11 @@ function getNextSortOrder(categoryId) {
 function syncSortOrderForSelectedCategory(force = false) {
   if (!el.itemForm || el.itemForm.elements.id.value) return;
   if (!force && el.itemForm.dataset.sortMode === "manual") return;
-  const categoryId = el.itemForm.elements.category_id.value || state.categories[0]?.id || "";
+  const categoryId = el.itemForm.elements.category_id.value || "";
+  if (!categoryId) {
+    el.itemForm.elements.sort_order.value = "";
+    return;
+  }
   el.itemForm.elements.sort_order.value = getNextSortOrder(categoryId);
   el.itemForm.dataset.sortMode = "auto";
 }
@@ -666,6 +715,7 @@ function editCategory(id) {
 
 async function handleCategorySubmit(event) {
   event.preventDefault();
+  if (state.savingCategory) return;
   const data = Object.fromEntries(new FormData(el.categoryForm));
   const existing = state.categories.find((entry) => entry.id === data.id);
   const payload = {
@@ -678,6 +728,9 @@ async function handleCategorySubmit(event) {
   };
   if (!payload.name_ru) return;
 
+  const submitButton = el.categoryForm.querySelector('button[type="submit"]');
+  state.savingCategory = true;
+  if (submitButton) submitButton.disabled = true;
   try {
     const result = await adminApi("saveCategory", { category: payload });
     upsertLocalCategory(result.category);
@@ -687,6 +740,9 @@ async function handleCategorySubmit(event) {
     renderAll();
   } catch (error) {
     toast(error.message || "Не удалось сохранить категорию", "danger");
+  } finally {
+    state.savingCategory = false;
+    if (submitButton) submitButton.disabled = false;
   }
 }
 
@@ -767,6 +823,7 @@ function handleDocumentClick(event) {
   const stock = event.target.closest("[data-toggle-stock]")?.dataset.toggleStock;
   const edit = event.target.closest("[data-edit-item]")?.dataset.editItem;
   const attention = event.target.closest("[data-attention-view]")?.dataset.attentionView;
+  const attentionFilter = event.target.closest("[data-attention-filter]")?.dataset.attentionFilter;
   const toggleCat = event.target.closest("[data-toggle-category]")?.dataset.toggleCategory;
   const editCat = event.target.closest("[data-edit-category]")?.dataset.editCategory;
   const move = event.target.closest("[data-move-category]");
@@ -778,7 +835,9 @@ function handleDocumentClick(event) {
   if (stock) toggleStock(stock);
   if (edit) openItemDrawer(edit);
   if (attention) navigate(attention);
+  if (attentionFilter) openAttentionFilter(attentionFilter);
   if (event.target.closest("[data-logout]")) logout();
+  if (event.target.closest("[data-support-status]")) toast("Канал поддержки будет доступен после подключения контакта заведения.");
   if (event.target.closest("[data-close-drawer]")) closeDrawer();
   if (toggleCat) toggleCategory(toggleCat);
   if (editCat) editCategory(editCat);
@@ -947,6 +1006,9 @@ function ensureAdminEnhancements() {
     <option value="all">Все переводы</option>
     <option value="complete">Перевод полный</option>
     <option value="missing">Нет перевода</option>
+    <option value="missing-ru">Нет русского названия</option>
+    <option value="missing-kz">Нет казахского перевода</option>
+    <option value="missing-en">Нет английского перевода</option>
   `;
   photoFilter.insertAdjacentElement("afterend", translationFilter);
   el.translationFilter = translationFilter;
@@ -998,29 +1060,46 @@ function ensureAdminEnhancements() {
 function renderMetrics() {
   const dishItems = getDishItems();
   const active = dishItems.filter((item) => item.is_active && !item.is_stoplisted && !isTemporarilyUnavailable(item)).length;
-  const stopped = dishItems.filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item)).length;
-  const needsAttention = dishItems.filter((item) => !item.image || hasMissingTranslation(item) || item.is_stoplisted || isTemporarilyUnavailable(item)).length;
+  const summary = state.overviewAnalytics?.summary;
+  const analyticsValue = (entry, formatter = (value) => Number(value).toLocaleString("ru-RU")) => {
+    if (state.overviewAnalyticsLoading) return "Загрузка…";
+    if (!entry || entry.value === null || entry.value === undefined) return "Нет данных";
+    return formatter(entry.value);
+  };
   const values = [
-    ["Всего блюд", dishItems.length],
-    ["В продаже", active],
-    ["Стоп-лист", stopped],
-    ["Требует внимания", needsAttention],
+    ["Сессии меню сегодня", analyticsValue(summary?.sessions), state.overviewAnalyticsError || "Реальные открытия меню"],
+    ["Открытия блюд", analyticsValue(summary?.dishOpens), "События открытия карточек"],
+    ["Среднее время изучения", analyticsValue(summary?.averageStudyMs, (value) => `${Math.floor(Number(value) / 60000)}:${String(Math.floor((Number(value) % 60000) / 1000)).padStart(2, "0")}`), "По событию выхода из меню"],
+    ["Позиции в продаже", active, `${dishItems.length} всего`],
   ];
-  el.metrics.innerHTML = values.map(([label, value]) => `<article class="metric-card"><span>${label}</span><strong>${value}</strong></article>`).join("");
+  el.metrics.innerHTML = values.map(([label, value, hint]) => `<article class="metric-card"><span>${label}</span><strong>${value}</strong><small>${escapeHtml(hint || "")}</small></article>`).join("");
+}
+
+function openAttentionFilter(filter) {
+  navigate("menu");
+  el.categoryFilter.value = filter === "category" ? "missing" : "all";
+  el.statusFilter.value = filter === "inactive" ? "inactive" : filter === "stop" ? "stop" : "all";
+  if (el.photoFilter) el.photoFilter.value = filter === "photo" ? "missing" : "all";
+  if (el.translationFilter) el.translationFilter.value = ["missing-ru", "missing-kz", "missing-en"].includes(filter) ? filter : "all";
+  renderDishes();
 }
 
 function renderAttention() {
   const dishItems = getDishItems();
   const issues = [
-    { name: "Нет фото", count: dishItems.filter((item) => !item.image).length, view: "menu", type: "issue" },
-    { name: "Нет перевода", count: dishItems.filter((item) => hasMissingTranslation(item)).length, view: "menu", type: "issue" },
-    { name: "Стоп-лист", count: dishItems.filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item)).length, view: "stoplist", type: "neutral" },
+    { name: "Без фотографии", count: dishItems.filter((item) => !item.image).length, filter: "photo", type: "issue" },
+    { name: "Без русского названия", count: dishItems.filter((item) => !String(item.name_ru || "").trim()).length, filter: "missing-ru", type: "issue" },
+    { name: "Без казахского перевода", count: dishItems.filter((item) => !String(item.name_kz || "").trim() || !String(item.description_kz || "").trim()).length, filter: "missing-kz", type: "issue" },
+    { name: "Без английского перевода", count: dishItems.filter((item) => !String(item.name_en || "").trim() || !String(item.description_en || "").trim()).length, filter: "missing-en", type: "issue" },
+    { name: "Без категории", count: dishItems.filter((item) => !item.category_id).length, filter: "category", type: "issue" },
+    { name: "Неактивные", count: dishItems.filter((item) => !item.is_active).length, filter: "inactive", type: "neutral" },
+    { name: "Стоп-лист", count: dishItems.filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item)).length, filter: "stop", type: "neutral" },
   ];
   const total = issues.reduce((sum, issue) => sum + issue.count, 0);
   el.attentionCount.textContent = total ? `${formatPositionCount(total)}` : "Все хорошо";
   el.attentionList.innerHTML = issues.map((issue) => {
     const status = getAttentionStatus(issue.count, issue.type);
-    return `<button class="attention-item attention-item--${status.className}" type="button" data-attention-view="${issue.view}">
+    return `<button class="attention-item attention-item--${status.className}" type="button" data-attention-filter="${issue.filter}">
       <i></i>
       <span class="attention-copy"><strong>${issue.name}</strong><small>${status.description}</small></span>
       <span class="attention-result"><b>${formatPositionCount(issue.count)}</b><em>${status.label}</em></span>
@@ -1139,6 +1218,13 @@ async function adminApi(action, payload = {}) {
       responseText: rawText,
       data,
     });
+
+    if (response.status === 401 && action !== "login") {
+      sessionStorage.removeItem(sessionKeyPrefix + getRestaurantSlug());
+      state.sessionToken = "";
+      showLoginScreen();
+      throw new Error("Сессия истекла. Войдите снова.");
+    }
 
     if ([404, 405, 500, 502, 503].includes(response.status)) {
       console.error("[exort-admin] API endpoint is unavailable.", {
@@ -1612,10 +1698,22 @@ async function flushPendingAutoTranslateBeforeSave() {
 
 async function handleItemSubmit(event) {
   event.preventDefault();
+  if (state.savingItem) return;
 
   await flushPendingAutoTranslateBeforeSave();
 
   const data = Object.fromEntries(new FormData(el.itemForm));
+  if (!String(data.name_ru || "").trim()) {
+    setEditorLanguage("ru");
+    el.itemForm.elements.name_ru.focus();
+    toast("Укажите название блюда на русском", "danger");
+    return;
+  }
+  if (!data.category_id) {
+    el.itemForm.elements.category_id.focus();
+    toast("Выберите категорию", "danger");
+    return;
+  }
   const existing = state.items.find((entry) => entry.id === data.id);
   const payload = {
     id: existing?.id || "",
@@ -1631,14 +1729,18 @@ async function handleItemSubmit(event) {
     weight: String(data.weight || "").trim(),
     calories: String(data.calories || "").trim() ? Number(data.calories) : null,
     spice_level: String(data.spice_level || "").trim(),
+    currency: data.currency || existing?.currency || "KZT",
     sort_order: Number(data.sort_order) || 0,
-    is_active: existing ? existing.is_active : true,
+    is_active: data.is_active === "on",
     is_stoplisted: data.is_stoplisted === "true",
-    inactive_until: existing?.inactive_until || null,
+    inactive_until: data.inactive_until || null,
     image_url: el.itemForm.dataset.image || "",
     imageData: el.itemForm.dataset.pendingImage || "",
   };
 
+  const submitButton = el.itemForm.querySelector('button[type="submit"]');
+  state.savingItem = true;
+  if (submitButton) submitButton.disabled = true;
   try {
     const result = await adminApi("saveItem", { item: payload });
     upsertLocalItem(result.item);
@@ -1648,6 +1750,9 @@ async function handleItemSubmit(event) {
     renderAll();
   } catch (error) {
     toast(toFriendlyError(error.message) || "Не удалось сохранить блюдо", "danger");
+  } finally {
+    state.savingItem = false;
+    if (submitButton) submitButton.disabled = false;
   }
 }
 if (el.viewTitle && viewMeta[state.activeView]) {
@@ -1741,7 +1846,10 @@ function openItemDrawer(id = "") {
   if (el.itemForm.elements.weight) el.itemForm.elements.weight.value = item?.weight || "";
   if (el.itemForm.elements.calories) el.itemForm.elements.calories.value = item?.calories || "";
   if (el.itemForm.elements.spice_level) el.itemForm.elements.spice_level.value = item?.spice_level || "";
-  el.itemForm.elements.category_id.value = item?.category_id || state.categories[0]?.id || "";
+  if (el.itemForm.elements.currency) el.itemForm.elements.currency.value = item?.currency || "KZT";
+  if (el.itemForm.elements.inactive_until) el.itemForm.elements.inactive_until.value = toDatetimeLocal(item?.inactive_until || "");
+  if (el.itemForm.elements.is_active) el.itemForm.elements.is_active.checked = item ? item.is_active !== false : true;
+  el.itemForm.elements.category_id.value = item?.category_id || "";
   el.itemForm.elements.sort_order.value = item ? item.sort_order || 0 : "";
   syncSortOrderForSelectedCategory(true);
   el.itemForm.dataset.image = item?.image || "";

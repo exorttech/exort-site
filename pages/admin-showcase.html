@@ -2,275 +2,393 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#f3f0e9" />
-    <title>Exort Admin Showcase — демонстрационная панель</title>
-    <meta name="description" content="Изолированная демонстрационная версия административной панели Exort на вымышленных локальных данных." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f1ea" />
+    <title>Exort Admin — новая рабочая панель</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="../css/admin-showcase.css?v=1" />
+    <link rel="stylesheet" href="../css/demo-admin.css?v=20" />
+    <link rel="stylesheet" href="../css/demo-admin-navigation.css?v=9" />
+    <link rel="stylesheet" href="../css/admin-showcase.css?v=30" />
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script defer src="../js/admin-showcase.js?v=1"></script>
+    <script defer src="../js/admin-analytics.js?v=22"></script>
+    <script defer src="../js/admin-qr.js?v=20"></script>
+    <script defer src="../js/demo-admin.js?v=30"></script>
   </head>
-  <body class="exort-admin-showcase">
-    <a class="asa-skip-link" href="#asa-main">Перейти к рабочей области</a>
+  <body class="admin-showcase-live">
+    <svg class="icon-sprite" aria-hidden="true">
+      <symbol id="icon-dashboard" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
+      <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M16 3v7a3 3 0 0 0 3 3h1"/><path d="M20 3v18"/><path d="M8 3v18"/><path d="M4 3v5a4 4 0 0 0 8 0V3"/></symbol>
+      <symbol id="icon-categories" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+      <symbol id="icon-stop" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m6.4 6.4 11.2 11.2"/></symbol>
+      <symbol id="icon-photo" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="m21 15-4.5-4.5L6 20"/></symbol>
+      <symbol id="icon-analytics" viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 16v-5"/><path d="M12 16V8"/><path d="M16 16v-7"/><path d="M20 16v-3"/></symbol>
+      <symbol id="icon-qr" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM14 20h2M20 14h1"/></symbol>
+      <symbol id="icon-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9"/><path d="M19 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></symbol>
+      <symbol id="icon-support" viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H9l-5 3v-7a9 9 0 1 1 17 0Z"/><path d="M8.5 10.5h.01M12 10.5h.01M15.5 10.5h.01"/></symbol>
+      <symbol id="icon-logout" viewBox="0 0 24 24"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4M14 8l4 4-4 4M18 12H9"/></symbol>
+    </svg>
 
-    <div class="asa-app" data-app>
-      <button class="asa-sidebar-backdrop" type="button" data-sidebar-close aria-label="Закрыть навигацию" tabindex="-1"></button>
-
-      <aside class="asa-sidebar" data-sidebar aria-label="Основная навигация">
-        <div class="asa-brand-row">
-          <a class="asa-brand" href="#overview" data-nav-target="overview" aria-label="Exort, обзор">
-            <span>Exort<i aria-hidden="true"></i></span>
-          </a>
-          <span class="asa-demo-chip">Showcase</span>
-          <button class="asa-sidebar-close" type="button" data-sidebar-close aria-label="Закрыть навигацию">×</button>
+    <section class="login-screen" data-login-screen>
+      <div class="login-orb login-orb--one"></div>
+      <div class="login-orb login-orb--two"></div>
+      <div class="login-card">
+        <div class="login-brand"><span>E</span><strong>Exort</strong></div>
+        <div class="restaurant-identity">
+          <div class="restaurant-avatar" data-restaurant-initial>E</div>
+          <div><strong data-restaurant-name>Заведение</strong><span><i></i> Защищённый вход</span></div>
         </div>
+        <div class="login-copy">
+          <p class="kicker">Безопасный доступ</p>
+          <h1>Вход в административную панель</h1>
+          <p>Введите PIN ресторана, чтобы управлять меню.</p>
+        </div>
+        <form class="pin-form" data-pin-form>
+          <label for="pin">PIN / пароль</label>
+          <div class="pin-field">
+            <input id="pin" data-pin-input type="password" inputmode="numeric" autocomplete="current-password" maxlength="12" placeholder="Введите PIN" required />
+            <button type="button" data-pin-visibility aria-label="Показать PIN">Показать</button>
+          </div>
+          <p class="form-error" data-login-error aria-live="polite"></p>
+          <button class="primary-button" type="submit"><span data-login-label>Войти</span></button>
+        </form>
+        <p class="support-note">Если забыли PIN — обратитесь в поддержку Exort.</p>
+      </div>
+    </section>
 
-        <button class="asa-venue-switch" type="button" data-venue-switch aria-label="Выбрать заведение">
-          <span class="asa-venue-avatar">ED</span>
-          <span><strong>Exort Demo</strong><small><i></i> Меню опубликовано</small></span>
-          <b aria-hidden="true">⌄</b>
-        </button>
-
-        <nav class="asa-nav" aria-label="Разделы панели">
-          <p>Рабочее пространство</p>
-          <button class="is-active" type="button" data-nav="overview"><span class="asa-nav-icon">⌂</span><span>Обзор</span></button>
-          <button type="button" data-nav="menu"><span class="asa-nav-icon">≡</span><span>Меню</span><b data-menu-count>12</b></button>
-          <button type="button" data-nav="categories"><span class="asa-nav-icon">◫</span><span>Категории</span></button>
-          <button type="button" data-nav="stoplist"><span class="asa-nav-icon">⊘</span><span>Стоп-лист</span><b data-stop-count>2</b></button>
-          <button type="button" data-nav="analytics"><span class="asa-nav-icon">↗</span><span>Аналитика</span></button>
-          <button type="button" data-nav="qr"><span class="asa-nav-icon">⌁</span><span>QR-коды и источники</span></button>
+    <div class="app-shell" data-app-shell hidden>
+      <aside class="sidebar">
+        <div class="sidebar-product"><span class="exort-mark">E</span><strong>Exort</strong><small>Панель управления</small></div>
+        <div class="side-restaurant sidebar-restaurant">
+          <div class="restaurant-avatar" data-restaurant-initial>E</div>
+          <div><strong data-restaurant-name>Заведение</strong><span><i></i> Меню опубликовано</span></div>
+        </div>
+        <nav class="side-nav" aria-label="Разделы панели">
+          <p>Управление</p>
+          <button class="is-active" type="button" data-nav="overview"><svg><use href="#icon-dashboard"/></svg><span>Обзор</span></button>
+          <button type="button" data-nav="menu"><svg><use href="#icon-menu"/></svg><span>Меню</span></button>
+          <button type="button" data-nav="categories"><svg><use href="#icon-categories"/></svg><span>Категории</span></button>
+          <button type="button" data-nav="stoplist"><svg><use href="#icon-stop"/></svg><span>Стоп-лист</span></button>
+          <button type="button" data-nav="analytics"><svg><use href="#icon-analytics"/></svg><span>Аналитика</span></button>
+          <button type="button" data-nav="qr"><svg><use href="#icon-qr"/></svg><span>QR-коды</span></button>
           <p>Система</p>
-          <button type="button" data-nav="settings"><span class="asa-nav-icon">⚙</span><span>Настройки</span></button>
-          <button type="button" data-nav="integrations"><span class="asa-nav-icon">⇄</span><span>Интеграции</span><em>Demo</em></button>
+          <button type="button" data-nav="settings"><svg><use href="#icon-categories"/></svg><span>Настройки</span></button>
+          <button type="button" data-nav="integrations"><svg><use href="#icon-external"/></svg><span>Интеграции</span></button>
         </nav>
-
-        <div class="asa-sidebar-footer">
-          <a href="/demo-menu?restaurant=exort-demo" target="_blank" rel="noreferrer"><span>↗</span><span>Открыть меню</span></a>
-          <button type="button" data-demo-logout><span class="asa-profile-avatar">АС</span><span><strong>Алина С.</strong><small>Владелец · demo</small></span><b>•••</b></button>
+        <div class="side-footer">
+          <a data-menu-link href="/demo-menu" target="_blank" rel="noreferrer"><svg><use href="#icon-external"/></svg><span>Открыть меню</span></a>
+          <button type="button" data-support-status><svg><use href="#icon-support"/></svg><span>Поддержка Exort</span></button>
+          <button type="button" data-logout><svg><use href="#icon-logout"/></svg><span>Выйти</span></button>
         </div>
       </aside>
 
-      <div class="asa-workspace">
-        <header class="asa-mobile-header">
-          <button type="button" data-sidebar-open aria-label="Открыть навигацию" aria-expanded="false">☰</button>
-          <a class="asa-brand" href="#overview" data-nav-target="overview"><span>Exort<i></i></span></a>
-          <a href="/demo-menu?restaurant=exort-demo" target="_blank" rel="noreferrer" aria-label="Открыть гостевое меню">↗</a>
-        </header>
-
-        <div class="asa-demo-banner" role="note">
-          <span><i></i> Демонстрационный режим — изменения не сохраняются в реальном заведении</span>
-          <button type="button" data-demo-info>Как это работает</button>
-        </div>
-
-        <header class="asa-topbar">
-          <div class="asa-page-heading">
-            <p data-page-kicker>Сегодня · локальное время заведения</p>
-            <h1 data-page-title>Обзор</h1>
-            <span data-page-description>Состояние меню и интерес гостей в одном экране.</span>
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="kicker" data-view-kicker>Рабочее пространство</p>
+            <h1 data-view-title>Обзор</h1>
           </div>
-          <div class="asa-topbar-actions">
-            <button class="asa-command-button" type="button" data-command-open aria-label="Открыть быстрый поиск"><span>⌕</span><span>Поиск</span><kbd>⌘ K</kbd></button>
-            <a class="asa-button asa-button--secondary" href="/demo-menu?restaurant=exort-demo" target="_blank" rel="noreferrer"><span>Открыть меню</span><b>↗</b></a>
-            <button class="asa-button asa-button--primary" type="button" data-primary-action><span>Добавить позицию</span><b>＋</b></button>
+          <div class="topbar-actions">
+            <span class="connection-status"><i></i><span>Меню онлайн</span></span>
+            <a class="secondary-button compact" data-menu-link href="/demo-menu" target="_blank" rel="noreferrer">Открыть меню</a>
+            <button class="icon-button" type="button" data-logout aria-label="Выйти">↗</button>
           </div>
         </header>
 
-        <main class="asa-main" id="asa-main" tabindex="-1">
-          <section class="asa-view is-active" data-view="overview" aria-labelledby="overview-title">
-            <h2 class="asa-visually-hidden" id="overview-title">Обзор</h2>
-            <div class="asa-overview-status" data-overview-status></div>
-            <div class="asa-metric-strip" data-overview-metrics></div>
+        <section class="view is-active" data-view="overview">
+          <div class="metric-grid" data-metrics></div>
+          <article class="menu-hero-manager" data-menu-hero-manager>
+            <div class="menu-hero-manager__copy">
+              <p class="kicker">Витрина меню</p>
+              <h2>Главное фото меню</h2>
+              <p>Изображение показывается в верхнем блоке публичного меню и хранится в существующей записи Menu hero.</p>
+            </div>
+            <div class="menu-hero-manager__preview" data-menu-hero-preview></div>
+            <label class="secondary-button compact menu-hero-manager__button">
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" data-menu-hero-file />
+              <span data-menu-hero-file-label>Заменить фото</span>
+            </label>
+          </article>
+          <div class="overview-grid">
+            <article class="panel">
+              <div class="panel-heading"><div><p class="kicker">Быстрый старт</p><h2>Действия</h2></div></div>
+              <div class="quick-actions">
+                <button type="button" data-action="add-item"><span>+</span><strong>Добавить блюдо</strong><small>Название, цена и фото</small></button>
+                <button type="button" data-action="add-category"><span>+</span><strong>Добавить категорию</strong><small>Новый раздел меню</small></button>
+                <a data-menu-link href="/demo-menu" target="_blank" rel="noreferrer"><span>↗</span><strong>Открыть меню</strong><small>Посмотреть глазами гостя</small></a>
+              </div>
+            </article>
+            <article class="panel attention-panel">
+              <div class="panel-heading"><div><p class="kicker">Контроль качества</p><h2>Требует внимания</h2></div><span data-attention-count></span></div>
+              <div class="attention-list" data-attention-list></div>
+            </article>
+          </div>
+        </section>
 
-            <div class="asa-dashboard-grid">
-              <article class="asa-surface asa-activity-card">
-                <header class="asa-surface-head">
-                  <div><p>Сегодня</p><h3>Активность меню</h3></div>
-                  <button type="button" data-nav-target="analytics">Подробнее <span>→</span></button>
-                </header>
-                <div class="asa-mini-chart" data-overview-chart aria-label="Активность меню по часам"></div>
+        <section class="view" data-view="menu">
+          <div class="menu-toolbar">
+            <label class="search-control"><span>⌕</span><input type="search" data-menu-search placeholder="Найти блюдо" /></label>
+            <select data-category-filter aria-label="Фильтр категорий"></select>
+            <select data-status-filter aria-label="Фильтр статуса">
+              <option value="all">Все статусы</option>
+              <option value="active">В продаже</option>
+              <option value="stop">Стоп-лист</option>
+              <option value="temporary">Временно недоступные</option>
+              <option value="inactive">Неактивные</option>
+            </select>
+            <button class="primary-button compact" type="button" data-action="add-item">Добавить блюдо</button>
+          </div>
+          <div class="dish-grid" data-dish-grid></div>
+        </section>
+
+        <section class="view" data-view="categories">
+          <div class="section-toolbar"><p>Управляйте порядком и видимостью категорий.</p><button class="primary-button compact" type="button" data-action="add-category">Добавить категорию</button></div>
+          <div class="category-list" data-category-list></div>
+        </section>
+
+        <section class="view" data-view="stoplist">
+          <div class="section-toolbar"><p>Меняйте доступность блюда за одно действие.</p><span class="autosave-status">Изменения сохраняются автоматически</span></div>
+          <div class="stop-list" data-stop-list></div>
+        </section>
+
+        <section class="view" data-view="analytics">
+          <div class="analytics-page" data-analytics-root>
+            <div class="analytics-summary-grid">
+              <article class="analytics-metric-card">
+                <span>Посещения меню</span>
+                <strong>Данных пока нет</strong>
+                <small>Появится после подключения статистики</small>
+              </article>
+              <article class="analytics-metric-card">
+                <span>Сессии меню</span>
+                <strong>Данных пока нет</strong>
+                <small>Считаются только реальные сессии</small>
+              </article>
+              <article class="analytics-metric-card">
+                <span>Открытия блюд</span>
+                <strong>Данных пока нет</strong>
+                <small>Появится после первых открытий карточек</small>
+              </article>
+              <article class="analytics-metric-card">
+                <span>Среднее время просмотра</span>
+                <strong>Данных пока нет</strong>
+                <small>Будет доступно после сбора статистики</small>
+              </article>
+            </div>
+
+            <div class="analytics-main-grid">
+              <article class="analytics-card analytics-card--wide">
+                <div class="analytics-card-head">
+                  <div><p class="kicker">Интерес гостей</p><h2>Популярные блюда</h2></div>
+                </div>
+                <div class="analytics-empty">
+                  <strong>События появятся после первых открытий карточек</strong>
+                  <p>Здесь будет рейтинг блюд по количеству просмотров.</p>
+                </div>
+                <div class="analytics-list-skeleton" aria-hidden="true">
+                  <span></span><span></span><span></span>
+                </div>
               </article>
 
-              <article class="asa-surface asa-attention-card">
-                <header class="asa-surface-head"><div><p>Контроль качества</p><h3>Требует внимания</h3></div><span data-attention-total></span></header>
-                <div class="asa-attention-list" data-attention-list></div>
-              </article>
-
-              <article class="asa-surface asa-popular-card">
-                <header class="asa-surface-head"><div><p>Интерес гостей</p><h3>Популярные позиции</h3></div><small>Сегодня</small></header>
-                <div class="asa-overview-popular" data-overview-popular></div>
-              </article>
-
-              <article class="asa-surface asa-events-card">
-                <header class="asa-surface-head"><div><p>Живая лента</p><h3>Последние действия</h3></div><span class="asa-live-dot">Live</span></header>
-                <div class="asa-event-list" data-overview-events></div>
-              </article>
-
-              <article class="asa-surface asa-quick-card">
-                <header class="asa-surface-head"><div><p>Без лишних переходов</p><h3>Быстрые действия</h3></div></header>
-                <div class="asa-quick-actions">
-                  <button type="button" data-quick-action="add-item"><span>＋</span><strong>Позиция</strong><small>Добавить в меню</small></button>
-                  <button type="button" data-quick-action="add-category"><span>◫</span><strong>Категория</strong><small>Создать раздел</small></button>
-                  <button type="button" data-quick-action="add-stop"><span>⊘</span><strong>Стоп-лист</strong><small>Скрыть позицию</small></button>
-                  <button type="button" data-quick-action="add-qr"><span>⌁</span><strong>QR-код</strong><small>Новый источник</small></button>
-                  <button type="button" data-quick-action="analytics"><span>↗</span><strong>Аналитика</strong><small>Открыть отчёт</small></button>
-                  <a href="/demo-menu?restaurant=exort-demo" target="_blank" rel="noreferrer"><span>↗</span><strong>Меню</strong><small>Глазами гостя</small></a>
+              <article class="analytics-card analytics-card--wide">
+                <div class="analytics-card-head">
+                  <div><p class="kicker">Активность</p><h2>Посещения по времени</h2></div>
+                </div>
+                <div class="analytics-chart-shell">
+                  <div class="analytics-chart-grid" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span><span></span>
+                  </div>
+                  <div class="analytics-time-axis" aria-hidden="true">
+                    <span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span>
+                  </div>
+                  <p>График появится после сбора статистики</p>
                 </div>
               </article>
             </div>
-          </section>
 
-          <section class="asa-view" data-view="menu" aria-labelledby="menu-title">
-            <h2 class="asa-visually-hidden" id="menu-title">Управление меню</h2>
-            <div class="asa-toolbar asa-menu-toolbar">
-              <label class="asa-search"><span>⌕</span><input type="search" data-menu-search placeholder="Название или ингредиент" autocomplete="off" /></label>
-              <select data-menu-category aria-label="Категория"></select>
-              <select data-menu-status aria-label="Статус"><option value="all">Все статусы</option><option value="active">В продаже</option><option value="stop">На стопе</option><option value="temporary">Временно недоступно</option><option value="inactive">Скрыто</option></select>
-              <button class="asa-filter-button" type="button" data-filter-popover aria-expanded="false">Ещё фильтры <span data-filter-count></span></button>
-              <select data-menu-sort aria-label="Сортировка"><option value="order">По порядку</option><option value="name">По названию</option><option value="price-high">Сначала дороже</option><option value="price-low">Сначала дешевле</option></select>
-              <div class="asa-density-switch" role="group" aria-label="Вид меню"><button class="is-active" type="button" data-menu-layout="list" aria-label="Список">☷</button><button type="button" data-menu-layout="grid" aria-label="Сетка">▦</button></div>
-            </div>
-            <div class="asa-filter-popover" data-filter-panel hidden>
-              <label><input type="checkbox" data-menu-photo-missing /> Без фотографии</label>
-              <label><input type="checkbox" data-menu-translation-missing /> Требует перевода</label>
-              <button type="button" data-clear-filters>Сбросить фильтры</button>
-            </div>
-            <div class="asa-table-summary"><span data-menu-result-count></span><small>Изменения в этой версии существуют только до перезагрузки</small></div>
-            <div class="asa-menu-list" data-menu-list></div>
-          </section>
+            <div class="analytics-secondary-grid">
+              <article class="analytics-card">
+                <div class="analytics-card-head">
+                  <div><p class="kicker">Языки</p><h2>Языки гостей</h2></div>
+                </div>
+                <div class="analytics-option-list">
+                  <span>RU</span><span>KZ</span><span>EN</span>
+                </div>
+                <p class="analytics-muted">Пока нет данных</p>
+              </article>
 
-          <section class="asa-view" data-view="categories" aria-labelledby="categories-title">
-            <h2 class="asa-visually-hidden" id="categories-title">Категории</h2>
-            <div class="asa-section-note"><div><strong>Порядок категорий</strong><span>Перетащите строки или используйте кнопки. Изменения остаются только в демо.</span></div><span>Локальная сортировка</span></div>
-            <div class="asa-category-table" data-category-list></div>
-          </section>
+              <article class="analytics-card">
+                <div class="analytics-card-head">
+                  <div><p class="kicker">Устройства</p><h2>Устройства гостей</h2></div>
+                </div>
+                <div class="analytics-option-list">
+                  <span>Телефон</span><span>Планшет</span><span>Компьютер</span>
+                </div>
+                <p class="analytics-muted">Пока нет данных</p>
+              </article>
 
-          <section class="asa-view" data-view="stoplist" aria-labelledby="stoplist-title">
-            <h2 class="asa-visually-hidden" id="stoplist-title">Стоп-лист</h2>
-            <div class="asa-stop-summary"><div><span>Недоступно сейчас</span><strong data-stop-total>0</strong><small>позиции не показываются как доступные гостю</small></div><button class="asa-button asa-button--primary" type="button" data-add-stop>Добавить в стоп <b>＋</b></button></div>
-            <div class="asa-stop-list" data-stop-list></div>
-          </section>
-
-          <section class="asa-view" data-view="analytics" aria-labelledby="analytics-title">
-            <h2 class="asa-visually-hidden" id="analytics-title">Аналитика</h2>
-            <div class="asa-analytics-header">
-              <div class="asa-period-switch" role="group" aria-label="Период аналитики">
-                <button class="is-active" type="button" data-period="today">Сегодня</button><button type="button" data-period="7d">7 дней</button><button type="button" data-period="30d">30 дней</button><button type="button" data-period="all">Всё время</button>
-              </div>
-              <div><label>Источник<select data-analytics-source><option value="all">Все источники</option></select></label><button class="asa-button asa-button--secondary" type="button" data-export-analytics>Экспорт CSV</button></div>
-            </div>
-            <div class="asa-analytics-metrics" data-analytics-metrics></div>
-            <div class="asa-analytics-layout">
-              <article class="asa-surface asa-analytics-chart-card"><header class="asa-surface-head"><div><p>Локальное время · UTC+5</p><h3 data-chart-title>Активность по часам</h3></div><div class="asa-chart-legend"><span><i></i> текущий период</span></div></header><div class="asa-main-chart" data-analytics-chart></div></article>
-              <article class="asa-surface asa-insights-card"><header class="asa-surface-head"><div><p>Наблюдения</p><h3>Автоматические выводы</h3></div><span>Demo</span></header><div data-insights-list></div></article>
-              <article class="asa-surface asa-dish-interest-card"><header class="asa-surface-head"><div><p>Открытия карточек</p><h3>Популярные блюда</h3></div><small>внутренний скролл</small></header><div class="asa-dish-interest-list" data-analytics-dishes></div></article>
-              <article class="asa-surface asa-recent-card"><header class="asa-surface-head"><div><p>Последние 30 минут</p><h3>Последние действия</h3></div><span class="asa-live-dot">Live</span></header><div class="asa-event-list asa-event-list--scroll" data-analytics-events></div></article>
-              <article class="asa-surface asa-audience-card"><header class="asa-surface-head"><div><p>Аудитория</p><h3>Языки, устройства и источники</h3></div></header><div class="asa-audience-grid" data-audience-grid></div></article>
-            </div>
-          </section>
-
-          <section class="asa-view" data-view="qr" aria-labelledby="qr-title">
-            <h2 class="asa-visually-hidden" id="qr-title">QR-коды и источники</h2>
-            <div class="asa-qr-explainer"><div><span>⌁</span><p><strong>QR меню</strong><small>Открывает меню и передаёт источник в аналитику.</small></p></div><i></i><div><span>⌁</span><p><strong>QR Wi-Fi</strong><small>Только подключает гостя к сети. Не влияет на аналитику меню.</small></p></div></div>
-            <div class="asa-qr-layout">
-              <section class="asa-source-section"><header><div><p>Источники меню</p><h3>QR-коды и ссылки</h3></div><button class="asa-button asa-button--primary" type="button" data-add-qr>Создать QR-код <b>＋</b></button></header><div class="asa-source-grid" data-source-list></div></section>
-              <aside class="asa-wifi-card">
-                <div class="asa-wifi-badge">Локальный генератор · данные не сохраняются</div>
-                <h3>Wi-Fi QR-код</h3>
-                <p>Пароль используется только в браузере и очищается после перезагрузки.</p>
-                <form data-wifi-form>
-                  <label>Название сети<input name="ssid" autocomplete="off" maxlength="64" required placeholder="Например, Exort Demo Guest" /></label>
-                  <div class="asa-form-row"><label>Защита<select name="security"><option value="WPA">WPA / WPA2</option><option value="WEP">WEP</option><option value="nopass">Без пароля</option></select></label><label class="asa-checkbox"><input type="checkbox" name="hidden" /><span>Скрытая сеть</span></label></div>
-                  <label data-wifi-password>Пароль<input name="password" type="password" autocomplete="new-password" maxlength="64" required /></label>
-                  <button class="asa-button asa-button--primary" type="submit">Создать Wi-Fi QR</button>
-                </form>
-                <div class="asa-wifi-result" data-wifi-result hidden><div data-wifi-qr></div><p data-wifi-summary></p><button class="asa-button asa-button--secondary" type="button" data-download-wifi>Скачать PNG</button></div>
-              </aside>
-            </div>
-          </section>
-
-          <section class="asa-view" data-view="settings" aria-labelledby="settings-title">
-            <h2 class="asa-visually-hidden" id="settings-title">Настройки заведения</h2>
-            <div class="asa-settings-layout">
-              <nav class="asa-settings-nav" aria-label="Группы настроек">
-                <button class="is-active" type="button" data-settings-tab="general">Основная информация</button><button type="button" data-settings-tab="schedule">Режим работы</button><button type="button" data-settings-tab="languages">Языки</button><button type="button" data-settings-tab="appearance">Оформление меню</button><button type="button" data-settings-tab="service">Сервисный сбор</button><button type="button" data-settings-tab="domain">Домен</button>
-              </nav>
-              <form class="asa-settings-form" data-settings-form>
-                <section class="asa-settings-panel is-active" data-settings-panel="general"><header><p>Основная информация</p><h3>Как заведение представлено гостям</h3></header><div class="asa-form-grid"><label>Название<input name="venue_name" value="Exort Demo" maxlength="60" /></label><label>Подзаголовок<input name="venue_subtitle" value="ALL-DAY KITCHEN · COFFEE · CITY BAR" maxlength="90" /></label><label>Город<input name="venue_city" value="Демо-город" /></label><label>Телефон <span>вымышленный</span><input name="venue_phone" value="+7 000 000 00 00" /></label><label class="asa-field-wide">Адрес <span>вымышленный</span><input name="venue_address" value="Демо-город, улица Примерная, дом 00" /></label><label>Instagram <span>вымышленный</span><input name="venue_social" value="@exort.demo" /></label></div></section>
-                <section class="asa-settings-panel" data-settings-panel="schedule"><header><p>Режим работы</p><h3>Часы, которые видит гость</h3></header><div class="asa-schedule-list" data-schedule-list></div></section>
-                <section class="asa-settings-panel" data-settings-panel="languages"><header><p>Языки меню</p><h3>Порядок и доступность переводов</h3></header><div class="asa-language-settings"><label><input type="checkbox" checked disabled /><span><strong>RU</strong> Основной язык</span></label><label><input type="checkbox" checked /><span><strong>KZ</strong> Казахский</span></label><label><input type="checkbox" checked /><span><strong>EN</strong> Английский</span></label><label><input type="checkbox" checked /><span><strong>TR</strong> Турецкий</span></label></div><p class="asa-form-hint">Русский текст используется как источник демонстрационного автоперевода. Ручные изменения не перезаписываются без действия пользователя.</p></section>
-                <section class="asa-settings-panel" data-settings-panel="appearance"><header><p>Оформление меню</p><h3>Базовая визуальная идентичность</h3></header><div class="asa-appearance-layout"><div class="asa-form-grid"><label>Акцентный цвет<input name="accent" type="color" value="#ff5a36" /></label><label>Главное изображение<input name="hero_file" type="file" accept="image/png,image/jpeg,image/webp" /></label><label class="asa-checkbox asa-field-wide"><input name="show_about" type="checkbox" checked /><span>Показывать блок о заведении</span></label></div><div class="asa-menu-style-preview" data-style-preview><span>Exort Demo</span><strong>Меню сегодня</strong><i></i><button type="button" tabindex="-1">Популярное</button></div></div></section>
-                <section class="asa-settings-panel" data-settings-panel="service"><header><p>Сервисный сбор</p><h3>Уведомление перед просмотром меню</h3></header><div class="asa-service-layout"><div class="asa-form-grid"><label class="asa-checkbox asa-field-wide"><input name="service_enabled" type="checkbox" checked /><span>Показывать уведомление</span></label><label>Процент<input name="service_percent" type="number" min="0" max="30" value="10" /></label><label class="asa-field-wide">Текст уведомления<textarea name="service_text" rows="3">К итоговой сумме заказа добавляется сервисный сбор 10%.</textarea></label></div><div class="asa-service-preview" data-service-preview><span>10%</span><p>К итоговой сумме заказа добавляется сервисный сбор 10%.</p></div></div><p class="asa-form-hint">Заведение самостоятельно отвечает за корректность текста и применение сервисного сбора.</p></section>
-                <section class="asa-settings-panel" data-settings-panel="domain"><header><p>Домен</p><h3>Публичный адрес меню</h3></header><div class="asa-domain-card"><span>Текущий адрес</span><strong>exort.kz/demo-menu</strong><small>Демонстрационный адрес. Подключение собственного домена настраивается командой Exort.</small><button class="asa-button asa-button--secondary" type="button" data-copy-demo-domain>Скопировать адрес</button></div></section>
-                <footer><span>Изменения сохранятся только в памяти этой страницы</span><button class="asa-button asa-button--primary" type="submit">Сохранить настройки</button></footer>
-              </form>
-            </div>
-          </section>
-
-          <section class="asa-view" data-view="integrations" aria-labelledby="integrations-title">
-            <h2 class="asa-visually-hidden" id="integrations-title">Интеграции</h2>
-            <div class="asa-integration-intro"><span>Demo</span><div><h3>Интеграции показывают утверждённую модель работы</h3><p>Цены и доступность могут приходить из учётной системы. Названия, описания, фотографии и переводы остаются в Exort. Подключение здесь не выполняется.</p></div></div>
-            <div class="asa-integration-grid" data-integration-list></div>
-          </section>
-        </main>
-      </div>
-    </div>
-
-    <div class="asa-modal-layer" data-modal-layer aria-hidden="true">
-      <button class="asa-modal-backdrop" type="button" data-modal-close aria-label="Закрыть окно"></button>
-
-      <section class="asa-modal asa-item-modal" data-modal="item" role="dialog" aria-modal="true" aria-labelledby="item-modal-title" hidden>
-        <form data-item-form novalidate>
-          <header><div><p>Карточка позиции</p><h2 id="item-modal-title" data-item-modal-title>Новая позиция</h2><span>Все изменения остаются в демонстрационном режиме</span></div><button type="button" data-modal-close aria-label="Закрыть">×</button></header>
-          <div class="asa-modal-body asa-item-editor">
-            <aside class="asa-item-media">
-              <div class="asa-photo-preview" data-item-photo-preview><span>Фото</span></div>
-              <label class="asa-button asa-button--secondary"><input type="file" data-item-photo accept="image/png,image/jpeg,image/webp" /><span>Загрузить фото</span></label>
-              <button type="button" data-item-photo-remove>Удалить фото</button>
-              <small data-photo-status>PNG, JPG или WebP · до 5 МБ</small>
-              <div class="asa-mini-dish-preview" data-item-live-preview></div>
-            </aside>
-            <div class="asa-item-fields">
-              <input type="hidden" name="id" />
-              <div class="asa-language-editor-head"><div class="asa-language-tabs" role="tablist" aria-label="Язык позиции"><button class="is-active" type="button" role="tab" aria-selected="true" data-item-lang="ru">RU <i></i></button><button type="button" role="tab" aria-selected="false" data-item-lang="kk">KZ <i></i></button><button type="button" role="tab" aria-selected="false" data-item-lang="en">EN <i></i></button><button type="button" role="tab" aria-selected="false" data-item-lang="tr">TR <i></i></button></div><button type="button" data-auto-translate>Перевести с RU</button></div>
-              <div class="asa-translation-note" data-translation-note><span>RU</span><p><strong>Основной текст</strong><small>Измените русский текст, затем обновите переводы вручную.</small></p></div>
-              <div class="asa-language-panels">
-                <section class="is-active" data-item-lang-panel="ru"><label>Название на русском<input name="name_ru" maxlength="120" required /></label><label>Описание<textarea name="description_ru" rows="4" maxlength="600"></textarea></label></section>
-                <section data-item-lang-panel="kk"><label>Название на казахском<input name="name_kk" maxlength="120" /></label><label>Описание<textarea name="description_kk" rows="4" maxlength="600"></textarea></label></section>
-                <section data-item-lang-panel="en"><label>Название на английском<input name="name_en" maxlength="120" /></label><label>Описание<textarea name="description_en" rows="4" maxlength="600"></textarea></label></section>
-                <section data-item-lang-panel="tr"><label>Название на турецком<input name="name_tr" maxlength="120" /></label><label>Описание<textarea name="description_tr" rows="4" maxlength="600"></textarea></label></section>
-              </div>
-              <div class="asa-editor-section"><div class="asa-editor-section-title"><span>Основные параметры</span></div><div class="asa-form-grid"><label>Категория <b>обязательно</b><select name="category_id" required><option value="">Выберите категорию</option></select><small class="asa-field-error" data-field-error="category_id"></small></label><label>Цена, ₸<input name="price" type="number" min="0" step="1" required /><small class="asa-field-error" data-field-error="price"></small></label><label>Старая цена, ₸<input name="old_price" type="number" min="0" step="1" /></label><label>Вес / объём<input name="weight" maxlength="40" placeholder="250 г или 350 мл" /></label><label>Бейдж<input name="badge" maxlength="30" placeholder="Хит, Новинка" /></label><label>Недоступно до<input name="unavailable_until" type="datetime-local" /></label></div></div>
-              <div class="asa-editor-section"><div class="asa-editor-section-title"><span>Публикация и доступность</span></div><div class="asa-status-controls"><label><input name="active" type="checkbox" checked /><span><strong>Позиция активна</strong><small>Показывается в меню</small></span></label><label><input name="stoplisted" type="checkbox" /><span><strong>Добавить в стоп-лист</strong><small>Гость увидит недоступность</small></span></label></div></div>
+              <article class="analytics-card">
+                <div class="analytics-card-head">
+                  <div><p class="kicker">Лента</p><h2>Последние действия</h2></div>
+                </div>
+                <div class="analytics-empty analytics-empty--compact">
+                  <strong>Действий пока нет</strong>
+                  <p>Список появится после подключения событий меню.</p>
+                </div>
+              </article>
             </div>
           </div>
-          <footer><button class="asa-danger-action" type="button" data-delete-item hidden>Удалить позицию</button><div><button class="asa-button asa-button--secondary" type="button" data-modal-close>Отмена</button><button class="asa-button asa-button--primary" type="submit" data-save-item>Сохранить позицию</button></div></footer>
-        </form>
-      </section>
+        </section>
 
-      <section class="asa-modal asa-compact-modal" data-modal="category" role="dialog" aria-modal="true" aria-labelledby="category-modal-title" hidden>
-        <form data-category-form novalidate><header><div><p>Структура меню</p><h2 id="category-modal-title" data-category-modal-title>Новая категория</h2></div><button type="button" data-modal-close aria-label="Закрыть">×</button></header><div class="asa-modal-body"><input type="hidden" name="id" /><div class="asa-language-tabs" role="tablist" aria-label="Языки категории"><button class="is-active" type="button" data-category-lang="ru">RU</button><button type="button" data-category-lang="kk">KZ</button><button type="button" data-category-lang="en">EN</button><button type="button" data-category-lang="tr">TR</button></div><div class="asa-category-language-fields"><label data-category-lang-field="ru">Название на русском<input name="name_ru" required maxlength="80" /></label><label data-category-lang-field="kk" hidden>Название на казахском<input name="name_kk" maxlength="80" /></label><label data-category-lang-field="en" hidden>Название на английском<input name="name_en" maxlength="80" /></label><label data-category-lang-field="tr" hidden>Название на турецком<input name="name_tr" maxlength="80" /></label></div><label class="asa-checkbox"><input name="active" type="checkbox" checked /><span>Категория активна</span></label></div><footer><button class="asa-button asa-button--secondary" type="button" data-modal-close>Отмена</button><button class="asa-button asa-button--primary" type="submit">Сохранить категорию</button></footer></form>
-      </section>
+        <section class="view" data-view="qr">
+          <div class="qr-page" data-qr-root>
+            <div class="analytics-loading">Загружаем QR-коды...</div>
+          </div>
+        </section>
 
-      <section class="asa-modal asa-compact-modal" data-modal="qr" role="dialog" aria-modal="true" aria-labelledby="qr-modal-title" hidden>
-        <form data-qr-form novalidate><header><div><p>Источник меню</p><h2 id="qr-modal-title" data-qr-modal-title>Новый QR-код</h2></div><button type="button" data-modal-close aria-label="Закрыть">×</button></header><div class="asa-modal-body"><input type="hidden" name="id" /><label>Название источника<input name="name" maxlength="60" required placeholder="Например, Летняя терраса" /></label><label>Тип<select name="type"><option value="hall">Зал</option><option value="table">Стол</option><option value="social">Социальная сеть</option><option value="hotel">Гостиничная зона</option><option value="other">Другое</option></select></label><p class="asa-form-hint">QR-код откроет демонстрационное меню и передаст имя источника только в локальную аналитику этой страницы.</p></div><footer><button class="asa-button asa-button--secondary" type="button" data-modal-close>Отмена</button><button class="asa-button asa-button--primary" type="submit">Создать источник</button></footer></form>
-      </section>
+        <section class="view" data-view="settings">
+          <div class="system-state-grid">
+            <article class="system-state-card">
+              <p class="kicker">Текущее заведение</p>
+              <h2 data-restaurant-name>Заведение</h2>
+              <p>Название, оформление и ссылка загружены из существующей записи ресторана.</p>
+              <a class="secondary-button compact" data-menu-link href="/demo-menu" target="_blank" rel="noreferrer">Открыть публичное меню</a>
+            </article>
+            <article class="system-state-card is-disabled">
+              <span>Только чтение</span>
+              <h2>Расширенные настройки</h2>
+              <p>Backend пока не предоставляет безопасное действие для изменения настроек ресторана. Поля не имитируют сохранение и будут включены после отдельного API.</p>
+            </article>
+          </div>
+        </section>
 
-      <section class="asa-modal asa-compact-modal" data-modal="stop" role="dialog" aria-modal="true" aria-labelledby="stop-modal-title" hidden>
-        <form data-stop-form><header><div><p>Доступность</p><h2 id="stop-modal-title">Добавить в стоп-лист</h2></div><button type="button" data-modal-close aria-label="Закрыть">×</button></header><div class="asa-modal-body"><label>Позиция<select name="item_id" required></select></label><label>Режим<select name="mode"><option value="stop">До ручного возврата</option><option value="temporary">Временно</option></select></label><label data-stop-until hidden>Недоступно до<input name="until" type="datetime-local" /></label></div><footer><button class="asa-button asa-button--secondary" type="button" data-modal-close>Отмена</button><button class="asa-button asa-button--primary" type="submit">Добавить в стоп</button></footer></form>
-      </section>
+        <section class="view" data-view="integrations">
+          <div class="system-state-grid">
+            <article class="system-state-card is-disabled"><span>Не подключено</span><h2>r_keeper</h2><p>Текущий backend не подтверждает подключение этой интеграции. Время синхронизации не показывается.</p></article>
+            <article class="system-state-card is-disabled"><span>Не подключено</span><h2>iiko</h2><p>Текущий backend не подтверждает подключение этой интеграции. Раздел будет доступен после подключения.</p></article>
+          </div>
+        </section>
+      </main>
 
-      <section class="asa-modal asa-confirm-modal" data-modal="confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-modal-title" hidden>
-        <div><span data-confirm-icon>!</span><h2 id="confirm-modal-title" data-confirm-title>Подтвердите действие</h2><p data-confirm-text></p><div><button class="asa-button asa-button--secondary" type="button" data-modal-close>Отмена</button><button class="asa-button asa-button--danger" type="button" data-confirm-action>Подтвердить</button></div></div>
-      </section>
-
-      <section class="asa-modal asa-command-modal" data-modal="command" role="dialog" aria-modal="true" aria-labelledby="command-title" hidden>
-        <div><header><label><span>⌕</span><input type="search" data-command-input placeholder="Раздел, позиция или действие" autocomplete="off" /></label><button type="button" data-modal-close aria-label="Закрыть">Esc</button></header><h2 class="asa-visually-hidden" id="command-title">Быстрый поиск</h2><div class="asa-command-results" data-command-results></div></div>
-      </section>
+      <nav class="mobile-nav" aria-label="Мобильная навигация">
+        <button class="is-active" type="button" data-nav="overview" aria-label="Обзор"><svg><use href="#icon-dashboard"/></svg><span>Обзор</span></button>
+        <button type="button" data-nav="menu" aria-label="Меню"><svg><use href="#icon-menu"/></svg><span>Меню</span></button>
+        <button type="button" data-nav="stoplist" aria-label="Стоп-лист"><svg><use href="#icon-stop"/></svg><span>Стоп</span></button>
+        <button type="button" data-nav="analytics" aria-label="Аналитика"><svg><use href="#icon-analytics"/></svg><span>Аналитика</span></button>
+        <button type="button" data-nav="qr" aria-label="QR-коды"><svg><use href="#icon-qr"/></svg><span>QR</span></button>
+      </nav>
     </div>
 
-    <div class="asa-toast-region" data-toast-region aria-live="polite" aria-atomic="true"></div>
+    <aside class="drawer" data-drawer aria-hidden="true">
+      <button class="drawer-backdrop" type="button" data-close-drawer aria-label="Закрыть"></button>
+      <form class="drawer-panel" data-item-form>
+        <header><div><p class="kicker">Карточка блюда</p><h2 data-drawer-title>Новое блюдо</h2></div><button type="button" data-close-drawer aria-label="Закрыть">×</button></header>
+        <div class="drawer-body">
+          <input type="hidden" name="id" />
+          <input type="hidden" name="sort_order" />
+          <div class="editor-layout">
+            <button class="secondary-button compact preview-toggle" type="button" data-toggle-preview>Показать превью</button>
+
+            <div class="editor-side-column">
+              <aside class="dish-live-preview" data-dish-preview aria-label="Предпросмотр блюда"></aside>
+              <div class="editor-photo-preview" data-editor-image hidden></div>
+              <div class="editor-photo-actions">
+                <label class="secondary-button compact">
+                  <input type="file" accept="image/png,image/jpeg,image/webp" data-editor-file />
+                  <span data-editor-file-label>Загрузить фото</span>
+                </label>
+                <button class="secondary-button compact editor-photo-remove" type="button" data-remove-editor-image hidden>Удалить фото</button>
+                <small>Фото будет оптимизировано перед загрузкой.</small>
+              </div>
+            </div>
+
+            <div class="editor-form-column">
+              <section class="field-group content-editor">
+                <div class="drawer-section-heading">
+                  <span>Контент блюда</span>
+                </div>
+                <div class="language-tabs mobile-editor-language-tabs">
+                  <button class="is-active" type="button" data-lang-tab="ru">RU</button>
+                  <button type="button" data-lang-tab="kz">KZ</button>
+                  <button type="button" data-lang-tab="en">EN</button>
+                </div>
+                <div class="content-language-fields">
+                  <label data-mobile-lang-field="ru">Название (рус.)<input name="name_ru" required /></label>
+                  <label data-mobile-lang-field="ru">Описание (рус.)<textarea name="description_ru" rows="4" placeholder="Красочное описание блюда или перечень ингредиентов"></textarea></label>
+                  <label data-mobile-lang-field="kz">Название (каз.)<input name="name_kz" /></label>
+                  <label data-mobile-lang-field="kz">Описание (каз.)<textarea name="description_kz" rows="4" placeholder="Описание блюда на казахском языке"></textarea></label>
+                  <label data-mobile-lang-field="en">Название (англ.)<input name="name_en" /></label>
+                  <label data-mobile-lang-field="en">Описание (англ.)<textarea name="description_en" rows="4" placeholder="Описание блюда на английском языке"></textarea></label>
+                </div>
+              </section>
+
+              <section class="field-group sales-editor">
+                <div class="drawer-section-heading">
+                  <span>Продажи</span>
+                  <strong class="editor-status-badge is-sale" data-editor-status-badge>В продаже</strong>
+                </div>
+                <div class="dual-field-grid">
+                  <label>Цена<input name="price" type="number" min="0" required /></label>
+                  <label>Категория<select name="category_id" required></select></label>
+                </div>
+                <div class="sales-status-row">
+                  <div class="status-segment" data-status-segment>
+                    <label data-status-choice>
+                      <input type="radio" name="is_stoplisted" value="false" checked />
+                      <span>В продаже</span>
+                    </label>
+                    <label data-status-choice>
+                      <input type="radio" name="is_stoplisted" value="true" />
+                      <span>На стопе</span>
+                    </label>
+                  </div>
+                  <label class="auto-translate-toggle auto-translate-toggle--plain">
+                    <input type="checkbox" data-auto-translate-toggle checked />
+                    <span>Автоперевод</span>
+                  </label>
+                  <span class="translate-status" data-translate-status hidden>Автоперевод включен</span>
+                  <button class="secondary-button compact" type="button" data-translate-current-item hidden>Перевести с RU</button>
+                </div>
+              </section>
+
+              <details class="drawer-accordion" data-extra-details>
+                <summary>Дополнительная информация</summary>
+                <div class="accordion-body">
+                  <div class="dual-field-grid">
+                    <label>Старая цена<input name="old_price" type="number" min="0" step="1" inputmode="numeric" /></label>
+                    <label>Вес / порция<input name="weight" type="text" maxlength="40" /></label>
+                    <label>Калории<input name="calories" type="number" min="0" step="1" inputmode="numeric" /></label>
+                    <label>Валюта<select name="currency"><option value="KZT">KZT · ₸</option></select></label>
+                    <label>Недоступно до<input name="inactive_until" type="datetime-local" /></label>
+                    <label>Острота<select name="spice_level">
+                      <option value="">Не указана</option>
+                      <option value="mild">Легкая</option>
+                      <option value="medium">Средняя</option>
+                      <option value="hot">Острая</option>
+                    </select></label>
+                    <label class="check-line"><input name="is_active" type="checkbox" checked /><span>Позиция активна</span></label>
+                  </div>
+                </div>
+              </details>
+            </div>
+          </div>
+        </div>
+        <footer><button class="danger-button" type="button" data-delete-item hidden>Удалить</button><div><button class="secondary-button compact" type="button" data-close-drawer>Отмена</button><button class="primary-button compact" type="submit">Сохранить</button></div></footer>
+      </form>
+    </aside>
+
+    <dialog class="confirm-dialog category-dialog" data-category-dialog>
+      <form class="settings-form" data-category-form>
+        <input type="hidden" name="id" />
+        <p class="kicker">Структура меню</p>
+        <h2 data-category-dialog-title>Новая категория</h2>
+        <label>Название категории<input name="name" maxlength="80" autocomplete="off" required /></label>
+        <div><button type="button" class="secondary-button compact" data-close-category>Отмена</button><button type="submit" class="primary-button compact">Сохранить</button></div>
+      </form>
+    </dialog>
+
+    <dialog class="confirm-dialog" data-confirm-dialog><form method="dialog"><h2 data-confirm-title>Подтвердите действие</h2><p data-confirm-text></p><div><button value="cancel" class="secondary-button compact">Отмена</button><button value="confirm" class="danger-button">Подтвердить</button></div></form></dialog>
+    <div class="toast-stack" data-toast-stack aria-live="polite"></div>
   </body>
 </html>

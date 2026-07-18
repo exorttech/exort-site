@@ -25,8 +25,8 @@ export async function getAnalyticsV2(env, slug, input = {}) {
     analytics: {
       period: {
         ...period,
-        label: periodLabel(period.start, shiftDate(period.end, -1), timeZone),
-        comparisonLabel: periodLabel(period.comparisonStart, shiftDate(period.comparisonEnd, -1), timeZone),
+        label: period.range === "all" ? "Всё время" : periodLabel(period.start, shiftDate(period.end, -1), timeZone),
+        comparisonLabel: period.range === "all" ? "сравнение недоступно" : periodLabel(period.comparisonStart, shiftDate(period.comparisonEnd, -1), timeZone),
       },
       selectedSourceId: sourceId || "all",
       summary: {
@@ -45,6 +45,7 @@ export async function getAnalyticsV2(env, slug, input = {}) {
         devices: audience(current, "device_type", (value) => ({ mobile: "Телефон", tablet: "Планшет", desktop: "Компьютер" }[value] || "Другое")),
       },
       sources: sourceAnalytics(current, previous, sourceNames),
+      recentEvents: recentEvents(current, items),
       sourceOptions: [
         { id: "all", name: "Все источники", isActive: true },
         { id: "direct", name: "Прямые переходы", isActive: true },
@@ -77,8 +78,19 @@ async function fetchEvents(env, restaurantId, fromIso, sourceId, timeZone) {
 }
 
 function resolvePeriod(input, timeZone) {
-  const range = ["today", "7d", "30d", "custom"].includes(input.range) ? input.range : "7d";
+  const range = ["today", "7d", "30d", "all", "custom"].includes(input.range) ? input.range : "7d";
   const today = dateKey(new Date(), timeZone);
+  if (range === "all") {
+    return {
+      range,
+      start: "1970-01-01",
+      end: shiftDate(today, 1),
+      comparisonStart: "1970-01-01",
+      comparisonEnd: "1970-01-01",
+      activityStart: shiftDate(today, -29),
+      dayCount: 30,
+    };
+  }
   let start = range === "today" ? today : shiftDate(today, range === "30d" ? -29 : -6);
   let end = shiftDate(today, 1);
   if (range === "custom" && datePattern(input.startDate) && datePattern(input.endDate)) {
@@ -122,7 +134,7 @@ function change(value, previous) {
 
 function comparableDays(current, previous, period) {
   return Array.from({ length: period.dayCount }, (_, index) => {
-    const date = shiftDate(period.start, index);
+    const date = shiftDate(period.activityStart || period.start, index);
     const oldDate = shiftDate(period.comparisonStart, index);
     const a = metrics(current.filter((event) => event.localDateKey === date));
     const b = metrics(previous.filter((event) => event.localDateKey === oldDate));
@@ -226,13 +238,40 @@ function audience(events, field, formatter) {
 }
 
 function dayDetails(events, period) {
-  return Object.fromEntries(Array.from({ length: period.dayCount }, (_, index) => shiftDate(period.start, index)).map((date) => {
+  return Object.fromEntries(Array.from({ length: period.dayCount }, (_, index) => shiftDate(period.activityStart || period.start, index)).map((date) => {
     const day = events.filter((event) => event.localDateKey === date);
     return [date, { label: shortDate(date), hours: Array.from({ length: 24 }, (_, hour) => {
       const slice = day.filter((event) => event.localHour === hour);
       return { hour, sessions: sessionIds(slice).size, dishOpens: slice.filter((event) => event.event_type === "dish_open").length };
     }) }];
   }));
+}
+
+function recentEvents(events, items) {
+  const names = Object.fromEntries(items.map((item) => [item.id, String(item.name_ru || item.title_ru || "Позиция").trim()]));
+  const labels = {
+    session_start: "Начало сессии",
+    menu_open: "Открыто меню",
+    category_view: "Открыта категория",
+    dish_open: "Открыта карточка блюда",
+    dish_close: "Закрыта карточка блюда",
+    language_change: "Изменён язык",
+    search: "Поиск по меню",
+    menu_exit: "Завершено изучение меню",
+  };
+  return [...events]
+    .sort((left, right) => new Date(right.created_at) - new Date(left.created_at))
+    .slice(0, 20)
+    .map((event) => ({
+      id: event.id,
+      type: event.event_type,
+      label: labels[event.event_type] || "Событие меню",
+      item: event.menu_item_id ? (names[event.menu_item_id] || "Удалённая позиция") : "",
+      language: event.language || "",
+      device: event.device_type || "",
+      source: event.source_fallback || "",
+      createdAt: event.created_at,
+    }));
 }
 
 function insights(current, previous, days, dishes, events) {

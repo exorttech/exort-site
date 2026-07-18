@@ -69,12 +69,11 @@
         <div><p class="kicker">Результаты меню</p><h2>Аналитика меню</h2><p>${escapeHtml(data.period.label)} · сравнение с ${escapeHtml(data.period.comparisonLabel)}</p></div>
         <div class="analytics-v2-actions">
           <div class="analytics-period-switch" role="group" aria-label="Период аналитики">
-            ${periodButton("today", "Сегодня")}${periodButton("7d", "7 дней")}${periodButton("30d", "30 дней")}${periodButton("custom", "Свой период")}
+            ${periodButton("today", "Сегодня")}${periodButton("7d", "7 дней")}${periodButton("30d", "30 дней")}${periodButton("all", "Всё время")}
           </div>
           <button class="secondary-button compact" type="button" data-analytics-export>Экспорт</button>
         </div>
       </header>
-      ${state.range === "custom" ? customRange() : ""}
       <div class="analytics-filter-row">
         <label>Источник<select data-analytics-source>${(data.sourceOptions || []).map((item) => `<option value="${escapeHtml(item.id)}" ${state.sourceId === item.id ? "selected" : ""}>${escapeHtml(item.name)}${item.isActive ? "" : " · архив"}</option>`).join("")}</select></label>
         ${state.error ? `<span class="analytics-inline-error">${escapeHtml(state.error)}</span>` : ""}
@@ -85,7 +84,7 @@
         ${metricCard("Открытия блюд", data.summary.dishOpens, "Все открытия карточек")}
         ${metricCard("Среднее время изучения", data.summary.averageStudyMs, "По событию выхода из меню")}
       </div>
-      ${activityCard(data.activity?.days || [])}
+      ${state.range === "today" ? hourlyActivityCard(data.dayDetails || {}) : activityCard(data.activity?.days || [])}
       <div class="analytics-v2-two-column">
         ${heatmapCard(data.heatmap || [])}
         ${insightsCard(data.insights || [])}
@@ -95,6 +94,7 @@
         ${funnelCard(data.funnel || [])}
         ${audienceCard(data.audience || {})}
       </div>
+      ${recentEventsCard(data.recentEvents || [], data.timeZone)}
       ${sourceCard(data.sources || [])}`;
   }
 
@@ -132,6 +132,13 @@
     </section>`;
   }
 
+  function hourlyActivityCard(details) {
+    const detail = Object.values(details)[0];
+    const hours = detail?.hours || Array.from({ length: 24 }, (_, hour) => ({ hour, sessions: 0, dishOpens: 0 }));
+    const max = Math.max(...hours.map((hour) => Number(hour.sessions || 0)), 1);
+    return `<section class="analytics-v2-card analytics-activity-card"><div class="analytics-v2-card-head"><div><p class="kicker">Сегодня · локальное время</p><h3>Сессии по часам</h3></div></div><div class="day-detail day-detail--always"><div class="day-detail-chart">${hours.map((hour) => `<span title="${hour.hour}:00 · ${hour.sessions} сессий · ${hour.dishOpens} открытий"><i style="height:${barHeight(hour.sessions, max)}%"></i><small>${String(hour.hour).padStart(2, "0")}</small></span>`).join("")}</div></div></section>`;
+  }
+
   function metricSwitch(value, label) { return `<button class="${state.metric === value ? "is-active" : ""}" type="button" data-analytics-metric="${value}">${label}</button>`; }
 
   function heatmapCard(rows) {
@@ -167,6 +174,17 @@
     return `<section class="analytics-v2-card audience-card"><div class="analytics-v2-card-head"><div><p class="kicker">Вторичный срез</p><h3>Аудитория</h3></div></div><div class="audience-columns"><div><h4>Языки</h4>${audienceRows(data.languages || [])}</div><div><h4>Устройства</h4>${audienceRows(data.devices || [])}</div></div></section>`;
   }
   function audienceRows(items) { return items.length ? items.map((item) => `<div class="audience-row"><span>${escapeHtml(item.label)}</span><i><b style="width:${item.percent}%"></b></i><strong>${item.percent}% <small>${number(item.count)}</small></strong></div>`).join("") : '<p class="analytics-note">Нет данных</p>'; }
+
+  function recentEventsCard(items, timeZone) {
+    const rows = items.length ? items.map((item) => `<li><time>${escapeHtml(formatEventTime(item.createdAt, timeZone))}</time><div><strong>${escapeHtml(item.label)}</strong><small>${escapeHtml([item.item, item.language ? item.language.toUpperCase() : "", item.device, item.source].filter(Boolean).join(" · "))}</small></div></li>`).join("") : '<li class="analytics-empty analytics-empty--compact"><strong>Событий пока нет</strong><p>Здесь появятся только реальные действия гостей.</p></li>';
+    return `<section class="analytics-v2-card recent-events-card"><div class="analytics-v2-card-head"><div><p class="kicker">Реальные события</p><h3>Последние действия</h3></div></div><ol>${rows}</ol></section>`;
+  }
+
+  function formatEventTime(value, timeZone) {
+    if (!value) return "—";
+    try { return new Intl.DateTimeFormat("ru-RU", { timeZone: timeZone || "Asia/Almaty", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(value)); }
+    catch { return "—"; }
+  }
 
   function sourceCard(items) {
     return `<section class="analytics-v2-card source-analytics-card"><div class="analytics-v2-card-head"><div><p class="kicker">Точки входа</p><h3>Откуда открывают меню</h3></div></div><div class="analytics-table-scroll"><table><thead><tr><th>Источник</th><th>Сессии</th><th>Доля</th><th>Вовлечённость</th><th>Динамика</th></tr></thead><tbody>${items.length ? items.map((item) => `<tr data-source-filter="${escapeHtml(item.id)}"><td><button type="button" data-filter-source="${escapeHtml(item.id)}">${escapeHtml(item.name)}</button></td><td>${number(item.sessions)}</td><td>${item.share}%</td><td>${item.engagement}%</td><td>${changeBadge(item.change)}</td></tr>`).join("") : '<tr><td colspan="5">Источники появятся после первых сессий.</td></tr>'}</tbody></table></div></section>`;
