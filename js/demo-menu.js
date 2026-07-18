@@ -469,7 +469,10 @@
     elements.searchInput.setAttribute("aria-label", languageCopy.searchPlaceholder);
     elements.categoryNav.setAttribute("aria-label", languageCopy.categories);
     document.querySelector('[data-copy="featuredEyebrow"]').textContent = `${languageCopy.featuredEyebrow} ${state.venue.name}`;
-    document.title = `${state.venue.name} — ${localeValue(getCategory("popular").name)} · Exort demo`;
+    const popularCategory = getCategory("popular");
+    document.title = popularCategory
+      ? `${state.venue.name} — ${localeValue(popularCategory.name)} · Exort demo`
+      : `${state.venue.name} — Exort demo`;
   }
 
   function setLanguage(language) {
