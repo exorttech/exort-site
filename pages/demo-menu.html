@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#14271f" />
+    <title>Exort Demo — демонстрационное меню</title>
+    <meta
+      name="description"
+      content="Демонстрационное цифровое меню вымышленного городского заведения Exort Demo."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/demo-menu.css?v=1" />
+    <script defer src="../js/demo-menu.js?v=1"></script>
+  </head>
+  <body class="showcase-page is-loader-open">
+    <div class="showcase-loader" data-loader role="dialog" aria-modal="true" aria-labelledby="loader-title" aria-hidden="false">
+      <div class="showcase-loader__mark"><strong>Exort<i></i></strong><span>Demo</span></div>
+      <div class="showcase-loader__content">
+        <h1 id="loader-title" data-copy="beforeMenu">Перед просмотром меню</h1>
+        <div class="showcase-loader__notice">
+        <p><strong>10%</strong><span data-copy="loaderService">К стоимости заказа добавляется сервисный сбор.</span></p>
+        <p><strong>!</strong><span data-copy="allergyNotice">Если у вас есть аллергия, пожалуйста, сообщите официанту.</span></p>
+        </div>
+        <button class="showcase-loader__accept" type="button" data-loader-accept data-copy="understood" disabled>Понятно</button>
+      </div>
+      <div class="showcase-loader__line"><span></span></div>
+    </div>
+
+    <header class="showcase-sticky" data-sticky-header inert>
+      <a class="showcase-sticky__brand" href="#top" aria-label="Exort Demo, наверх">
+        <span class="showcase-exort-mark">Exort<i></i></span>
+        <strong>Demo</strong>
+      </a>
+      <div class="showcase-sticky__actions">
+        <button class="showcase-icon-button" type="button" data-search-toggle aria-expanded="false" aria-label="Открыть поиск">
+          <span aria-hidden="true">⌕</span>
+        </button>
+        <button class="showcase-icon-button" type="button" data-info-open aria-label="Информация о заведении">
+          <span aria-hidden="true">i</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="showcase-shell" id="top" inert>
+      <section class="showcase-hero" aria-labelledby="showcase-title">
+        <img
+          class="showcase-hero__image"
+          src="../assets/demo-menu/hero.webp"
+          alt="Интерьер современного городского кафе"
+          fetchpriority="high"
+        />
+        <div class="showcase-hero__overlay"></div>
+        <div class="showcase-hero__top">
+          <a class="showcase-wordmark" href="#top" aria-label="Exort Demo, наверх"><span>Exort<i></i></span><b>Demo</b></a>
+          <div class="showcase-hero__tools">
+            <div class="showcase-languages showcase-languages--hero" data-language-switcher aria-label="Выбор языка">
+              <button type="button" class="is-active" data-language="ru" aria-pressed="true">RU</button>
+              <button type="button" data-language="kk" aria-pressed="false">KZ</button>
+              <button type="button" data-language="en" aria-pressed="false">EN</button>
+              <button type="button" data-language="tr" aria-pressed="false">TR</button>
+            </div>
+            <button class="showcase-round-button" type="button" data-info-open aria-label="Информация о заведении">
+              <span aria-hidden="true">i</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="showcase-hero__content">
+          <div class="showcase-open-status"><i></i><span data-copy="openNow">Открыто до 23:00</span></div>
+          <p class="showcase-eyebrow" data-venue-subtitle>ALL-DAY KITCHEN · COFFEE · CITY BAR</p>
+          <h1 id="showcase-title" data-venue-name>Exort Demo</h1>
+          <p class="showcase-hero__city" data-venue-city>Демо-город</p>
+          <div class="showcase-hero__buttons">
+            <button class="showcase-primary-action" type="button" data-scroll-menu>
+              <span data-copy="viewMenu">Смотреть меню</span><span aria-hidden="true">↓</span>
+            </button>
+            <button class="showcase-text-action" type="button" data-info-open data-copy="aboutVenue">О заведении</button>
+          </div>
+        </div>
+
+        <div class="showcase-hero__stamp" aria-hidden="true">
+          <strong>08—23</strong><span>EVERY DAY</span>
+        </div>
+      </section>
+
+      <section class="showcase-menu" id="menu" aria-labelledby="menu-title">
+        <div class="showcase-menu__intro showcase-reveal">
+          <div>
+            <p class="showcase-kicker" data-copy="menuEyebrow">МЕНЮ · СЕГОДНЯ</p>
+            <h2 id="menu-title" data-copy="menuTitle">Выбирайте глазами.<br />Оставайтесь ради вкуса.</h2>
+          </div>
+          <p data-copy="menuLead">Завтраки весь день, понятная еда и напитки с неожиданным характером.</p>
+        </div>
+
+        <div class="showcase-service-note showcase-reveal" role="note">
+          <span aria-hidden="true">10%</span>
+          <p><strong data-copy="serviceTitle">Сервисный сбор</strong><small data-copy="serviceText">К стоимости заказа добавляется сервисный сбор 10%. Демонстрационный текст.</small></p>
+        </div>
+
+        <div class="showcase-search" data-search-panel aria-hidden="true">
+          <label>
+            <span aria-hidden="true">⌕</span>
+            <input type="search" data-search-input aria-label="Поиск по меню" placeholder="Блюдо, напиток или ингредиент" autocomplete="off" />
+            <button type="button" data-search-clear aria-label="Очистить поиск">×</button>
+          </label>
+          <button type="button" data-search-close data-copy="cancel">Отмена</button>
+        </div>
+
+        <nav class="showcase-category-nav" data-category-nav aria-label="Категории меню"></nav>
+
+        <div class="showcase-results-line" aria-live="polite">
+          <span data-results-status></span>
+          <button type="button" data-reset-search hidden data-copy="reset">Сбросить</button>
+        </div>
+
+        <section class="showcase-featured showcase-reveal" data-featured-section aria-labelledby="featured-title">
+          <div class="showcase-section-heading">
+            <p class="showcase-kicker" data-copy="featuredEyebrow">ВЫБОР EXORT DEMO</p>
+            <h2 id="featured-title" data-copy="featuredTitle">Популярно сегодня</h2>
+          </div>
+          <div class="showcase-featured__grid" data-featured-grid></div>
+        </section>
+
+        <div class="showcase-sections" data-menu-sections></div>
+
+        <div class="showcase-empty" data-empty hidden>
+          <span aria-hidden="true">0</span>
+          <h2 data-copy="nothingFound">Ничего не найдено</h2>
+          <p data-copy="tryAnother">Попробуйте другое название или ингредиент.</p>
+          <button type="button" data-reset-search data-copy="resetSearch">Сбросить поиск</button>
+        </div>
+      </section>
+
+      <section class="showcase-about-band showcase-reveal" aria-labelledby="about-band-title">
+        <p class="showcase-kicker" data-copy="venueEyebrow">EXORT DEMO · ДЕМО-КОНЦЕПТ</p>
+        <h2 id="about-band-title" data-copy="venueStatement">Утро, обед и поздний кофе — в одном городском ритме.</h2>
+        <button type="button" data-info-open><span data-copy="venueDetails">Адрес и часы</span><span aria-hidden="true">↗</span></button>
+      </section>
+
+      <footer class="showcase-footer">
+        <div class="showcase-footer__brand">
+          <strong data-venue-name>Exort Demo</strong>
+          <span data-copy="fictionalVenue">Вымышленное демонстрационное заведение</span>
+        </div>
+        <div class="showcase-footer__links">
+          <button type="button" data-info-open data-copy="information">Информация</button>
+          <div class="showcase-languages" data-language-switcher aria-label="Выбор языка">
+            <button type="button" class="is-active" data-language="ru" aria-pressed="true">RU</button>
+            <button type="button" data-language="kk" aria-pressed="false">KZ</button>
+            <button type="button" data-language="en" aria-pressed="false">EN</button>
+            <button type="button" data-language="tr" aria-pressed="false">TR</button>
+          </div>
+        </div>
+        <div class="showcase-footer__exort">
+          <p><span data-copy="poweredBy">Меню работает на</span> <strong>Exort</strong></p>
+          <a href="/" data-copy="wantMenu">Хочу такое меню</a>
+        </div>
+        <p class="showcase-footer__disclaimer" data-copy="disclaimer">Все названия, контакты, блюда и данные на этой странице демонстрационные.</p>
+        <p class="showcase-footer__copyright">© Exort</p>
+      </footer>
+    </main>
+
+    <div class="showcase-modal" data-dish-modal aria-hidden="true">
+      <button class="showcase-modal__backdrop" type="button" tabindex="-1" data-modal-close aria-label="Закрыть карточку блюда"></button>
+      <article class="showcase-dish-modal" role="dialog" aria-modal="true" aria-labelledby="dish-modal-title" data-modal-panel>
+        <div class="showcase-modal__handle" aria-hidden="true"></div>
+        <button class="showcase-modal__close" type="button" data-modal-close aria-label="Закрыть">×</button>
+        <div data-dish-modal-content></div>
+      </article>
+    </div>
+
+    <div class="showcase-modal" data-info-modal aria-hidden="true">
+      <button class="showcase-modal__backdrop" type="button" tabindex="-1" data-info-close aria-label="Закрыть информацию"></button>
+      <article class="showcase-info-modal" role="dialog" aria-modal="true" aria-labelledby="info-modal-title" data-modal-panel>
+        <button class="showcase-modal__close showcase-modal__close--dark" type="button" data-info-close aria-label="Закрыть">×</button>
+        <p class="showcase-kicker" data-copy="aboutEyebrow">О ЗАВЕДЕНИИ</p>
+        <h2 id="info-modal-title"><span data-copy="aboutTitle">Городская кухня</span><br /><span data-venue-name>Exort Demo</span></h2>
+        <p class="showcase-info-modal__lead" data-copy="aboutText">Вымышленное all-day заведение с открытой кухней, спешелти-кофе и небольшим вечерним баром.</p>
+        <dl class="showcase-info-list">
+          <div><dt data-copy="addressLabel">Адрес</dt><dd data-copy="addressValue">Демо-город, квартал Северный Свет, дом 00</dd></div>
+          <div><dt data-copy="hoursLabel">Режим работы</dt><dd data-copy="hoursValue">Ежедневно · 08:00–23:00</dd></div>
+          <div><dt data-copy="phoneLabel">Телефон</dt><dd>+7 000 000 00 00 · demo</dd></div>
+          <div><dt>Instagram</dt><dd data-venue-instagram>@exort.demo.menu</dd></div>
+          <div><dt>Wi-Fi</dt><dd>EXORT-DEMO · demo-only</dd></div>
+          <div><dt data-copy="serviceLanguages">Языки обслуживания</dt><dd>RU · KZ · EN · TR</dd></div>
+        </dl>
+        <button class="showcase-map-demo" type="button" data-map-demo><span data-copy="mapButton">Показать на карте</span><small data-copy="mapDemo">Демо — без перехода к реальному адресу</small></button>
+      </article>
+    </div>
+
+    <aside class="showcase-editor" data-editor hidden aria-label="Персонализация демо">
+      <button class="showcase-editor__toggle" type="button" data-editor-toggle aria-expanded="true">DEMO EDITOR</button>
+      <div class="showcase-editor__body">
+        <label><span>Название</span><input type="text" data-editor-name maxlength="36" /></label>
+        <label><span>Подзаголовок</span><input type="text" data-editor-subtitle maxlength="80" /></label>
+        <label><span>Город</span><input type="text" data-editor-city maxlength="40" /></label>
+        <label><span>Instagram</span><input type="text" data-editor-instagram maxlength="50" /></label>
+        <label class="showcase-editor__color"><span>Акцент</span><input type="color" data-editor-accent value="#ff5a36" /></label>
+        <button type="button" data-copy-link>Скопировать ссылку</button>
+        <input class="showcase-editor__link" type="text" data-share-link readonly aria-label="Готовая ссылка" />
+        <p data-editor-status aria-live="polite"></p>
+      </div>
+    </aside>
+  </body>
+</html>

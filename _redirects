@@ -1,10 +1,6 @@
 /demo-admin /pages/demo-admin.html 200
-/menu-demo /pages/menu-demo.html 200
-/rkeeper-test-admin /pages/rkeeper-test-admin.html 200
-/rkeeper-test-menu /pages/rkeeper-test-menu.html 200
+/admin-showcase /pages/admin-showcase.html 200
+/demo-menu /pages/demo-menu.html 200
+/coffee-menu-demo /pages/coffee-menu-demo.html 200
 /bdayvideo /pages/bdayvideo.html 200
 /admin-demo /demo-admin 301
-git status
-git add _redirects
-git commit -m "add cloudflare redirects"
-git push

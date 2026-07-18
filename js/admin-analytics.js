@@ -16,6 +16,14 @@
     const requestId = ++state.requestId;
     state.loading = true;
     state.error = "";
+    const watchdogId = window.setTimeout(() => {
+      if (state.loading && requestId === state.requestId) {
+        state.loading = false;
+        state.data = null;
+        state.error = "Аналитика не ответила за 22 секунды. Проверьте публикацию Worker и повторите запрос.";
+        render();
+      }
+    }, 22000);
     render();
     try {
       const payload = { range: state.range, sourceId: state.sourceId === "all" ? "" : state.sourceId };
@@ -31,6 +39,7 @@
       state.error = error?.message || "Не удалось загрузить аналитику.";
     } finally {
       if (requestId === state.requestId) {
+        window.clearTimeout(watchdogId);
         state.loading = false;
         try {
           render();

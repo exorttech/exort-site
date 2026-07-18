@@ -123,7 +123,6 @@ async function saveItem(env, slug, item) {
   if (!item || !String(item.name_ru || "").trim()) throw new Error("RU dish name is required.");
 
   const current = item.id ? await getOwnedRow(env, "menu_items", restaurant.id, item.id) : null;
-  const preserveRkeeperPrice = slug === "rkeeper-test" && (item.rkeeper_readonly_price === true || item.price === undefined);
   let imageData = {};
 
   if (item.imageData && String(item.imageData).startsWith("data:image/")) {
@@ -152,7 +151,7 @@ async function saveItem(env, slug, item) {
     description_kz: clean(item.description_kz),
     description_kk: clean(item.description_kz),
     description_en: clean(item.description_en),
-    price: preserveRkeeperPrice ? Number(current?.price || 0) : Number(item.price || 0),
+    price: Number(item.price || 0),
     currency: item.currency || "KZT",
     is_active: item.is_active !== false,
     is_stoplisted: item.is_stoplisted === true,
@@ -403,7 +402,7 @@ function normalizeMenuPath(value) {
 }
 
 function buildPublicMenuUrl(slug, publicId, menuPath = "") {
-  const path = menuPath || "/menu-demo";
+  const path = menuPath || "/demo-menu";
   const separator = path.includes("?") ? "&" : "?";
   const restaurantPart = path.includes("restaurant=") ? "" : `restaurant=${encodeURIComponent(slug)}&`;
   return `https://exort.kz${path}${separator}${restaurantPart}source=${encodeURIComponent(publicId)}`;

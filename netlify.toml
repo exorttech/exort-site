@@ -10,8 +10,18 @@
   status = 200
 
 [[redirects]]
-  from = "/menu-demo"
-  to = "/pages/menu-demo.html"
+  from = "/admin-showcase"
+  to = "/pages/admin-showcase.html"
+  status = 200
+
+[[redirects]]
+  from = "/demo-menu"
+  to = "/pages/demo-menu.html"
+  status = 200
+
+[[redirects]]
+  from = "/coffee-menu-demo"
+  to = "/pages/coffee-menu-demo.html"
   status = 200
 
 [[redirects]]

@@ -375,7 +375,7 @@ function syncRestaurantIdentity() {
   el.restaurantInitials.forEach((node) => { node.textContent = initial; });
   document.documentElement.style.setProperty("--brand", state.restaurant.brand || "#2563eb");
   document.querySelectorAll("[data-menu-link]").forEach((link) => {
-    link.href = `/menu-demo?restaurant=${encodeURIComponent(state.restaurant.slug || getRestaurantSlug())}`;
+    link.href = `/demo-menu?restaurant=${encodeURIComponent(state.restaurant.slug || getRestaurantSlug())}`;
   });
 }
 
@@ -1093,11 +1093,14 @@ async function adminApi(action, payload = {}) {
   };
 
   let response;
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), action === "getAnalytics" ? 20000 : 45000);
   try {
     response = await fetch(ADMIN_API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(requestPayload),
+      signal: controller.signal,
     });
   } catch (error) {
     console.error("[exort-admin] API request failed.", {
@@ -1107,7 +1110,14 @@ async function adminApi(action, payload = {}) {
       error: error?.message || String(error),
       payload: requestPayload,
     });
+    if (error?.name === "AbortError") {
+      throw new Error(action === "getAnalytics"
+        ? "Сервер аналитики не ответил за 20 секунд. Обновите страницу или повторите запрос."
+        : "Сервер не ответил вовремя. Обновите страницу или повторите запрос.");
+    }
     throw new Error("Сервис временно недоступен. Попробуйте обновить страницу или обратитесь в поддержку Exort.");
+  } finally {
+    window.clearTimeout(timeoutId);
   }
 
   const rawText = await response.text();

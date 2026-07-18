@@ -42,7 +42,7 @@
         <form class="qr-create-card" data-qr-form>
           <div><p class="kicker">Новый источник</p><h3>Создать QR-код</h3></div>
           <label>Страница меню
-            <select name="menuPath"><option value="/menu-demo">Основное меню · exort.kz/menu-demo</option></select>
+            <select name="menuPath"><option value="/demo-menu">Основное меню · exort.kz/demo-menu</option></select>
           </label>
           <label>Название источника
             <input name="name" maxlength="100" placeholder="Например, Гостиница" required />

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7f1e8" />
+    <title>MORI Coffee | Цифровое меню</title>
+    <meta
+      name="description"
+      content="Демонстрационное цифровое меню современной городской кофейни MORI Coffee."
+    />
+    <link rel="preconnect" href="https://images.unsplash.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/coffee-menu-demo.css?v=1" />
+    <script defer src="../js/coffee-menu-demo.js?v=1"></script>
+  </head>
+  <body>
+    <div class="demo-layout">
+      <aside class="atmosphere-panel" aria-label="MORI Coffee">
+        <div class="atmosphere-panel__image"></div>
+        <div class="atmosphere-panel__veil"></div>
+        <div class="atmosphere-panel__content">
+          <p class="eyebrow">EXORT · DIGITAL MENU</p>
+          <h2>Меню, которое продолжает атмосферу заведения.</h2>
+          <p>
+            Живой пример для кофейни: быстрый выбор, честная подача и визуальный язык бренда прямо после сканирования QR-кода.
+          </p>
+          <div class="atmosphere-panel__note">
+            <span>Демо-концепт</span>
+            <strong>Вымышленный бренд · 2026</strong>
+          </div>
+        </div>
+      </aside>
+
+      <main class="menu-app" id="top">
+        <header class="hero">
+          <img
+            class="hero__image"
+            src="https://images.unsplash.com/photo-1445116572660-236099ec97a0?auto=format&fit=crop&w=1400&q=86"
+            alt="Интерьер современной кофейни"
+            fetchpriority="high"
+          />
+          <div class="hero__shade"></div>
+
+          <div class="hero__topbar">
+            <a class="brand-chip" href="#top" aria-label="MORI Coffee, наверх">MORI</a>
+            <div class="hero__actions">
+              <button class="icon-button" type="button" data-search-toggle aria-label="Открыть поиск">
+                <span aria-hidden="true">⌕</span>
+              </button>
+              <div class="language-switch" aria-label="Выбор языка">
+                <button type="button" data-language="ru" class="is-active">RU</button>
+                <button type="button" data-language="kk">KZ</button>
+                <button type="button" data-language="en">EN</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero__content">
+            <div class="status-line">
+              <span class="status-dot"></span>
+              <span data-copy="openNow">Открыто до 22:00</span>
+            </div>
+            <p class="hero__kicker" data-copy="positioning">Specialty coffee · Завтраки весь день</p>
+            <h1>MORI Coffee</h1>
+            <p class="hero__address" data-copy="addressShort">Демо-город · вымышленная локация</p>
+            <div class="hero__links">
+              <button class="primary-button" type="button" data-scroll-menu>
+                <span data-copy="viewMenu">Смотреть меню</span>
+                <span aria-hidden="true">↓</span>
+              </button>
+              <a class="quiet-link" href="#about" data-copy="aboutLink">О кофейне</a>
+            </div>
+          </div>
+        </header>
+
+        <section class="search-drawer" data-search-drawer aria-hidden="true">
+          <label class="search-field">
+            <span aria-hidden="true">⌕</span>
+            <input
+              type="search"
+              data-search-input
+              placeholder="Напиток, блюдо или ингредиент"
+              autocomplete="off"
+            />
+            <button type="button" data-search-clear aria-label="Очистить поиск">×</button>
+          </label>
+          <button class="search-cancel" type="button" data-search-close data-copy="cancel">Отмена</button>
+        </section>
+
+        <nav class="category-nav" data-category-nav aria-label="Категории меню"></nav>
+
+        <div class="menu-content" id="menu">
+          <section class="intro-section">
+            <p class="eyebrow eyebrow--dark" data-copy="todayEyebrow">ВЫБОР MORI</p>
+            <div class="section-heading">
+              <h2 data-copy="todayTitle">То, за чем возвращаются</h2>
+              <p data-copy="todayText">Наши главные вкусы и сезонные сочетания.</p>
+            </div>
+            <div class="featured-grid" data-featured-grid></div>
+          </section>
+
+          <div class="menu-sections" data-menu-sections></div>
+
+          <div class="empty-state" data-empty-state hidden>
+            <span>⌕</span>
+            <h2 data-copy="nothingFound">Ничего не нашли</h2>
+            <p data-copy="tryAnother">Попробуйте другое название или ингредиент.</p>
+            <button type="button" class="secondary-button" data-reset-search data-copy="resetSearch">
+              Сбросить поиск
+            </button>
+          </div>
+        </div>
+
+        <section class="about-section" id="about">
+          <div class="about-section__header">
+            <p class="eyebrow eyebrow--dark" data-copy="aboutEyebrow">ЗАЙТИ В MORI</p>
+            <h2 data-copy="aboutTitle">Кофе без спешки.<br />Завтраки без расписания.</h2>
+          </div>
+          <p class="about-section__lead" data-copy="aboutText">
+            Городская кофейня с зерном собственной обжарки, открытой кухней и спокойной музыкой.
+          </p>
+
+          <p class="demo-disclaimer" data-copy="demoDisclaimer">
+            MORI Coffee и все адреса, контакты и условия на этой странице вымышлены.
+          </p>
+
+          <div class="info-list">
+            <div class="info-row">
+              <span data-copy="addressLabel">Адрес</span>
+              <strong data-copy="addressFull">Демо-квартал MORI, павильон 00</strong>
+            </div>
+            <div class="info-row">
+              <span data-copy="hoursLabel">Режим работы</span>
+              <strong data-copy="hoursValue">Ежедневно · 08:00–22:00</strong>
+            </div>
+            <div class="info-row">
+              <span>Instagram · demo</span>
+              <strong>@mori.demo.coffee</strong>
+            </div>
+            <div class="info-row">
+              <span data-copy="phoneLabel">Телефон</span>
+              <strong>+7 000 000 00 00 · demo</strong>
+            </div>
+            <div class="info-row">
+              <span>Wi-Fi</span>
+              <strong>MORI DEMO GUEST · demo-only</strong>
+            </div>
+          </div>
+        </section>
+
+        <footer class="powered-footer">
+          <div>
+            <span data-copy="poweredBy">Меню работает на</span>
+            <strong>EXORT</strong>
+          </div>
+          <a href="../index.html" data-copy="wantMenu">Хочу такое меню</a>
+        </footer>
+      </main>
+    </div>
+
+    <div class="sheet-layer" data-sheet-layer aria-hidden="true">
+      <button class="sheet-backdrop" type="button" data-sheet-close aria-label="Закрыть карточку"></button>
+      <article class="product-sheet" data-product-sheet role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <button class="sheet-close" type="button" data-sheet-close aria-label="Закрыть">×</button>
+        <div data-sheet-content></div>
+      </article>
+    </div>
+  </body>
+</html>
