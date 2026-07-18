@@ -88,8 +88,11 @@ function getRestaurantSlug() {
   const querySlug = new URLSearchParams(window.location.search).get("restaurant");
   if (querySlug) return sanitizeSlug(querySlug);
 
-  const adminMatch = window.location.pathname.match(/admin-([a-z0-9-]+)/i);
-  if (adminMatch) return sanitizeSlug(adminMatch[1]);
+  const adminMatch = window.location.pathname.match(/(?:^|\/)admin-([a-z0-9-]+)(?:\/|$)/i);
+  const reservedAdminRoutes = new Set(["demo", "showcase", "legacy"]);
+  if (adminMatch && !reservedAdminRoutes.has(adminMatch[1].toLowerCase())) {
+    return sanitizeSlug(adminMatch[1]);
+  }
 
   return DEFAULT_RESTAURANT_SLUG;
 }
