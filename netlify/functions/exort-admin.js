@@ -30,7 +30,9 @@ exports.handler = async (event) => {
     if (action === "deleteItem") return deleteItem(restaurantSlug, body.itemId);
     if (action === "toggleStock") return toggleStock(restaurantSlug, body.itemId, body.is_stoplisted);
     if (action === "uploadItemPhoto") return uploadItemPhoto(restaurantSlug, body.itemId, body.imageData);
-    if (action === "saveCategory") return saveCategory(restaurantSlug, body.category);
+    if (action === "saveCategory") return saveCategory(restaurantSlug, body.category, body.requireTranslations === true);
+    if (action === "splitCategory") return splitCategory(restaurantSlug, body);
+    if (action === "deleteCategory") return deleteCategory(restaurantSlug, body);
     if (action === "sortCategories") return sortCategories(restaurantSlug, body.categories || []);
 
     return response(400, { error: "??????????? ???????? ???????." });
@@ -173,9 +175,10 @@ async function uploadItemPhoto(slug, itemId, imageData) {
   return response(200, { item: rows[0] });
 }
 
-async function saveCategory(slug, category) {
+async function saveCategory(slug, category, requireTranslations = false) {
   const restaurant = await getRestaurant(slug);
   if (!category || !String(category.name_ru || category.name || "").trim()) throw new Error("??????? ???????? ????????? ???????????.");
+  if (requireTranslations && (!clean(category.name_kz) || !clean(category.name_en))) throw new Error("All category translations are required.");
   const current = category.id ? await getOwnedRow("menu_categories", restaurant.id, category.id) : null;
   const nameRu = clean(category.name_ru || category.name);
   const payload = {
@@ -197,6 +200,45 @@ async function saveCategory(slug, category) {
     prefer: "return=representation",
   });
   return response(200, { category: rows[0] });
+}
+
+async function splitCategory(slug, body) {
+  const restaurant = await getRestaurant(slug);
+  const category = body.category || {};
+  const itemIds = [...new Set((Array.isArray(body.itemIds) ? body.itemIds : []).filter(isUuid))];
+  if (!isUuid(body.categoryId)) throw new Error("Category id is invalid.");
+  if (itemIds.length !== (Array.isArray(body.itemIds) ? new Set(body.itemIds).size : 0)) throw new Error("One or more dish ids are invalid.");
+
+  await supabaseRest("rpc/admin_split_menu_category", {
+    method: "POST",
+    body: {
+      p_restaurant_id: restaurant.id,
+      p_category_id: body.categoryId,
+      p_name_ru: clean(category.name_ru),
+      p_name_kz: clean(category.name_kz),
+      p_name_en: clean(category.name_en),
+      p_item_ids: itemIds,
+    },
+  });
+  return response(200, await buildAdminData(restaurant));
+}
+
+async function deleteCategory(slug, body) {
+  const restaurant = await getRestaurant(slug);
+  const mode = ["empty", "move", "cascade"].includes(body.mode) ? body.mode : "";
+  if (!isUuid(body.categoryId) || !mode) throw new Error("Category deletion request is invalid.");
+  const targetCategoryId = mode === "move" && isUuid(body.targetCategoryId) ? body.targetCategoryId : null;
+
+  await supabaseRest("rpc/admin_delete_menu_category", {
+    method: "POST",
+    body: {
+      p_restaurant_id: restaurant.id,
+      p_category_id: body.categoryId,
+      p_mode: mode,
+      p_target_category_id: targetCategoryId,
+    },
+  });
+  return response(200, await buildAdminData(restaurant));
 }
 
 async function sortCategories(slug, categories) {
@@ -434,6 +476,10 @@ function slugify(value) {
 
 function sanitizeSlug(value) {
   return String(value || "exort-demo").toLowerCase().replace(/[^a-z0-9-]/g, "") || "exort-demo";
+}
+
+function isUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ""));
 }
 
 function response(statusCode, body) {

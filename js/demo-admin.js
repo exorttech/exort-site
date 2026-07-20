@@ -18,6 +18,12 @@ const state = {
   overviewAnalytics: null,
   overviewAnalyticsLoading: false,
   overviewAnalyticsError: "",
+  attentionIssue: "",
+  splittingCategory: false,
+  deletingCategory: false,
+  categoryOperationId: "",
+  stopPickerCategory: "all",
+  stockUpdating: new Set(),
 };
 
 const el = {
@@ -39,9 +45,17 @@ const el = {
   menuHeroFileLabel: document.querySelector("[data-menu-hero-file-label]"),
   attentionList: document.querySelector("[data-attention-list]"),
   attentionCount: document.querySelector("[data-attention-count]"),
+  attentionModal: document.querySelector("[data-attention-modal]"),
+  attentionModalTitle: document.querySelector("[data-attention-modal-title]"),
+  attentionModalBody: document.querySelector("[data-attention-modal-body]"),
   dishGrid: document.querySelector("[data-dish-grid]"),
   categoryList: document.querySelector("[data-category-list]"),
   stopList: document.querySelector("[data-stop-list]"),
+  stopPickerDialog: document.querySelector("[data-stop-picker-dialog]"),
+  stopPickerSearch: document.querySelector("[data-stop-picker-search]"),
+  stopPickerBack: document.querySelector("[data-stop-picker-back]"),
+  stopPickerSummary: document.querySelector("[data-stop-picker-summary]"),
+  stopPickerItems: document.querySelector("[data-stop-picker-items]"),
   photoGrid: document.querySelector("[data-photo-grid]"),
   analyticsRoot: document.querySelector("[data-analytics-root]"),
   categoryFilter: document.querySelector("[data-category-filter]"),
@@ -64,6 +78,15 @@ const el = {
   categoryDialog: document.querySelector("[data-category-dialog]"),
   categoryForm: document.querySelector("[data-category-form]"),
   categoryDialogTitle: document.querySelector("[data-category-dialog-title]"),
+  categorySplitDialog: document.querySelector("[data-category-split-dialog]"),
+  categorySplitForm: document.querySelector("[data-category-split-form]"),
+  categorySplitSource: document.querySelector("[data-category-split-source]"),
+  categorySplitItems: document.querySelector("[data-category-split-items]"),
+  categorySplitError: document.querySelector("[data-category-split-error]"),
+  categoryDeleteDialog: document.querySelector("[data-category-delete-dialog]"),
+  categoryDeleteTitle: document.querySelector("[data-category-delete-title]"),
+  categoryDeleteBody: document.querySelector("[data-category-delete-body]"),
+  categoryDeleteFooter: document.querySelector("[data-category-delete-footer]"),
   toasts: document.querySelector("[data-toast-stack]"),
 };
 
@@ -330,6 +353,7 @@ function normalizeItem(item) {
     description_ru: item.description_ru || "",
     description_kz: item.description_kz || item.description_kk || "",
     description_en: item.description_en || "",
+    description_required: item.description_required === true,
     price: Number(item.price || 0),
     currency: item.currency || "KZT",
     image: item.image_url || "",
@@ -422,6 +446,7 @@ function syncRestaurantIdentity() {
 
 function navigate(view) {
   if (!viewMeta[view]) return;
+  if (view !== "analytics") window.ExortAnalytics?.closeDetail?.();
   state.activeView = view;
   document.querySelectorAll("[data-view]").forEach((node) => node.classList.toggle("is-active", node.dataset.view === view));
   document.querySelectorAll("[data-nav]").forEach((node) => {
@@ -460,6 +485,7 @@ function renderAll() {
   renderDishes();
   renderCategories();
   renderStopList();
+  if (el.stopPickerDialog?.open) renderStopPicker();
 }
 
 function renderMenuHeroManager() {
@@ -569,8 +595,8 @@ function filteredItems() {
       (translation === "complete" && !hasMissingTranslation(item)) ||
       (translation === "missing" && hasMissingTranslation(item)) ||
       (translation === "missing-ru" && !String(item.name_ru || "").trim()) ||
-      (translation === "missing-kz" && (!String(item.name_kz || "").trim() || !String(item.description_kz || "").trim())) ||
-      (translation === "missing-en" && (!String(item.name_en || "").trim() || !String(item.description_en || "").trim()));
+      (translation === "missing-kz" && !String(item.name_kz || "").trim()) ||
+      (translation === "missing-en" && !String(item.name_en || "").trim());
     return matchesQuery && matchesCategory && matchesStatus && matchesPhoto && matchesTranslation;
   });
 }
@@ -598,12 +624,77 @@ function renderStopList() {
     <div class="dish-placeholder">${escapeHtml((getItemDisplayName(item) || "?").charAt(0))}</div>
     <div><strong>${escapeHtml(item.name_ru || "Без названия")}</strong><small>${escapeHtml(categoryName(item.category_id))} · ${formatPrice(item.price, item.currency)}</small></div>
     <span class="stop-state">На стопе</span>
-    <button class="large-switch" type="button" data-toggle-stock="${item.id}" aria-label="Вернуть блюдо в продажу"></button>
+    <button class="large-switch" type="button" data-toggle-stock="${item.id}" aria-label="Вернуть блюдо в продажу" ${state.stockUpdating.has(item.id) ? "disabled" : ""}></button>
   </article>`).join("") : `<div class="empty-state stop-empty-state">
     <h2>В стоп-листе пока нет блюд</h2>
-    <p>Добавьте блюдо в стоп-лист из раздела меню.</p>
-    <button class="primary-button compact" type="button" data-action="open-stop-filter">Добавить в стоп-лист</button>
+    <p>Добавьте блюдо из любого раздела меню.</p>
+    <button class="primary-button compact" type="button" data-open-stop-picker>Добавить в стоп-лист</button>
   </div>`;
+}
+
+function openStopPicker() {
+  state.stopPickerCategory = "all";
+  el.stopPickerSearch.value = "";
+  renderStopPicker();
+  el.stopPickerDialog.showModal();
+  el.stopPickerSearch.focus();
+}
+
+function closeStopPicker() {
+  if (el.stopPickerDialog?.open) el.stopPickerDialog.close();
+}
+
+function renderStopPicker() {
+  if (!el.stopPickerItems) return;
+  const query = el.stopPickerSearch.value.trim().toLowerCase();
+  const availableItems = getDishItems().filter((item) => !item.is_stoplisted && !isTemporarilyUnavailable(item));
+  const selectedCategory = state.categories.find((category) => category.id === state.stopPickerCategory);
+  const showDishes = Boolean(query) || state.stopPickerCategory !== "all";
+  el.stopPickerBack.hidden = !showDishes;
+
+  if (!showDishes) {
+    const sortedCategories = [...state.categories].sort((a, b) => a.sort - b.sort);
+    const uncategorizedCount = availableItems.filter((item) => !item.category_id).length;
+    const rows = sortedCategories.map((category) => {
+      const count = availableItems.filter((item) => item.category_id === category.id).length;
+      return `<button class="stop-picker-section-row" type="button" data-stop-picker-section="${escapeHtml(category.id)}">
+        <span><strong>${escapeHtml(getCategoryDisplayName(category))}</strong><small>${formatDishCount(count)} доступно</small></span>
+        <b aria-hidden="true">→</b>
+      </button>`;
+    });
+    if (uncategorizedCount) {
+      rows.push(`<button class="stop-picker-section-row" type="button" data-stop-picker-section="missing"><span><strong>Без раздела</strong><small>${formatDishCount(uncategorizedCount)} доступно</small></span><b aria-hidden="true">→</b></button>`);
+    }
+    el.stopPickerSummary.textContent = `${rows.length} ${rows.length === 1 ? "раздел" : rows.length >= 2 && rows.length <= 4 ? "раздела" : "разделов"}`;
+    el.stopPickerItems.innerHTML = rows.length ? `<div class="stop-picker-section-table">${rows.join("")}</div>` : `<div class="stop-picker-empty"><strong>Разделов пока нет</strong><span>Сначала добавьте раздел и блюда в меню.</span></div>`;
+    return;
+  }
+
+  const filtered = availableItems
+    .filter((item) => {
+      if (query) {
+        return [item.name_ru, item.name_kz, item.name_en, item.content_key, categoryName(item.category_id)]
+          .join(" ")
+          .toLowerCase()
+          .includes(query);
+      }
+      return state.stopPickerCategory === "missing" ? !item.category_id : item.category_id === state.stopPickerCategory;
+    })
+    .sort((a, b) => {
+      const categoryDifference = (state.categories.find((entry) => entry.id === a.category_id)?.sort || 9999) - (state.categories.find((entry) => entry.id === b.category_id)?.sort || 9999);
+      return categoryDifference || Number(a.sort_order || 0) - Number(b.sort_order || 0) || getItemDisplayName(a).localeCompare(getItemDisplayName(b), "ru");
+    });
+
+  const scopeName = query ? `Результаты поиска «${el.stopPickerSearch.value.trim()}»` : state.stopPickerCategory === "missing" ? "Без раздела" : getCategoryDisplayName(selectedCategory);
+  el.stopPickerSummary.textContent = `${scopeName} · ${formatDishCount(filtered.length)}`;
+  el.stopPickerItems.innerHTML = filtered.length ? `<div class="stop-picker-dish-table">${filtered.map((item) => {
+    const updating = state.stockUpdating.has(item.id);
+    return `<article class="stop-picker-dish-row">
+      <div class="stop-picker-dish-visual">${item.image ? `<img src="${escapeHtml(item.image)}" alt="" />` : `<span>${escapeHtml((getItemDisplayName(item) || "?").charAt(0))}</span>`}</div>
+      <div class="stop-picker-dish-copy"><strong>${escapeHtml(getItemDisplayName(item))}</strong><small>${escapeHtml(categoryName(item.category_id) || "Без раздела")} · ${formatPrice(item.price, item.currency)}</small></div>
+      <button class="secondary-button compact" type="button" data-stop-picker-add="${escapeHtml(item.id)}" ${updating ? "disabled" : ""}>${updating ? "Добавляем…" : "Добавить"}</button>
+    </article>`;
+  }).join("")}</div>` : `<div class="stop-picker-empty"><strong>${query ? "Ничего не найдено" : "Все блюда раздела уже в стоп-листе"}</strong><span>${query ? "Попробуйте изменить запрос." : "Вернитесь к разделам и выберите другой."}</span></div>`;
 }
 
 
@@ -617,7 +708,19 @@ function isTemporarilyUnavailable(item) {
 }
 
 function hasMissingTranslation(item) {
-  return !String(item.name_kz || "").trim() || !String(item.name_en || "").trim() || !String(item.description_kz || "").trim() || !String(item.description_en || "").trim();
+  return getMissingTranslationLanguages(item).length > 0;
+}
+
+function getMissingTranslationLanguages(item) {
+  const required = [
+    { key: "ru", label: "Русский", title: item.name_ru, description: item.description_ru },
+    { key: "kz", label: "Казахский", title: item.name_kz, description: item.description_kz },
+    { key: "en", label: "Английский", title: item.name_en, description: item.description_en },
+  ];
+  return required.filter((language) => {
+    if (!String(language.title || "").trim()) return true;
+    return item.description_required === true && !String(language.description || "").trim();
+  });
 }
 
 function categoryName(id) {
@@ -700,6 +803,7 @@ function addCategory() {
   el.categoryForm.reset();
   el.categoryForm.elements.id.value = "";
   el.categoryDialogTitle.textContent = "Новая категория";
+  setCategoryManagementActionsVisible(false);
   el.categoryDialog.showModal();
   el.categoryForm.elements.name_ru.focus();
 }
@@ -712,8 +816,14 @@ function editCategory(id) {
   el.categoryForm.elements.name_kz.value = category.name_kz || "";
   el.categoryForm.elements.name_en.value = category.name_en || "";
   el.categoryDialogTitle.textContent = "Редактирование категории";
+  setCategoryManagementActionsVisible(true);
   el.categoryDialog.showModal();
   el.categoryForm.elements.name_ru.focus();
+}
+
+function setCategoryManagementActionsVisible(visible) {
+  el.categoryForm.querySelector("[data-open-category-split]").hidden = !visible;
+  el.categoryForm.querySelector("[data-open-category-delete]").hidden = !visible;
 }
 
 async function handleCategorySubmit(event) {
@@ -729,13 +839,16 @@ async function handleCategorySubmit(event) {
     sort_order: existing?.sort || (state.categories.length + 1) * 10,
     is_active: existing?.active ?? true,
   };
-  if (!payload.name_ru) return;
+  if (!payload.name_ru || !payload.name_kz || !payload.name_en) {
+    toast("Заполните названия раздела на русском, казахском и английском", "danger");
+    return;
+  }
 
   const submitButton = el.categoryForm.querySelector('button[type="submit"]');
   state.savingCategory = true;
   if (submitButton) submitButton.disabled = true;
   try {
-    const result = await adminApi("saveCategory", { category: payload });
+    const result = await adminApi("saveCategory", { category: payload, requireTranslations: true });
     upsertLocalCategory(result.category);
     el.categoryDialog.close();
     toast(existing ? "Категория обновлена" : "Категория добавлена", "success");
@@ -826,10 +939,20 @@ function handleDocumentClick(event) {
   const stock = event.target.closest("[data-toggle-stock]")?.dataset.toggleStock;
   const edit = event.target.closest("[data-edit-item]")?.dataset.editItem;
   const attention = event.target.closest("[data-attention-view]")?.dataset.attentionView;
-  const attentionFilter = event.target.closest("[data-attention-filter]")?.dataset.attentionFilter;
+  const attentionIssue = event.target.closest("[data-attention-issue]")?.dataset.attentionIssue;
+  const attentionMore = event.target.closest("[data-attention-more]");
+  const attentionOpenItem = event.target.closest("[data-attention-open-item]")?.dataset.attentionOpenItem;
   const toggleCat = event.target.closest("[data-toggle-category]")?.dataset.toggleCategory;
   const editCat = event.target.closest("[data-edit-category]")?.dataset.editCategory;
   const move = event.target.closest("[data-move-category]");
+  const categoryAutoTranslate = event.target.closest("[data-category-auto-translate]");
+  const openCategorySplitButton = event.target.closest("[data-open-category-split]");
+  const openCategoryDeleteButton = event.target.closest("[data-open-category-delete]");
+  const categoryDeleteStage = event.target.closest("[data-category-delete-stage]")?.dataset.categoryDeleteStage;
+  const categoryDeleteConfirm = event.target.closest("[data-category-delete-confirm]")?.dataset.categoryDeleteConfirm;
+  const openStopPickerButton = event.target.closest("[data-open-stop-picker]");
+  const stopPickerSection = event.target.closest("[data-stop-picker-section]")?.dataset.stopPickerSection;
+  const stopPickerAdd = event.target.closest("[data-stop-picker-add]")?.dataset.stopPickerAdd;
 
   if (nav) navigate(nav.dataset.nav);
   if (action === "add-item") openItemDrawer();
@@ -838,13 +961,39 @@ function handleDocumentClick(event) {
   if (stock) toggleStock(stock);
   if (edit) openItemDrawer(edit);
   if (attention) navigate(attention);
-  if (attentionFilter) openAttentionFilter(attentionFilter);
+  if (attentionIssue) openAttentionPopup(attentionIssue);
+  if (attentionMore) openAttentionSummary();
+  if (attentionOpenItem) {
+    closeAttentionPopup({ restoreFocus: false });
+    openItemDrawer(attentionOpenItem);
+  }
+  if (event.target.closest("[data-close-attention-modal]")) closeAttentionPopup();
   if (event.target.closest("[data-logout]")) logout();
   if (event.target.closest("[data-support-status]")) toast("Канал поддержки будет доступен после подключения контакта заведения.");
   if (event.target.closest("[data-close-drawer]")) closeDrawer();
   if (toggleCat) toggleCategory(toggleCat);
   if (editCat) editCategory(editCat);
   if (move) moveCategory(move.dataset.moveCategory, Number(move.dataset.direction));
+  if (categoryAutoTranslate) translateCategoryNames(categoryAutoTranslate);
+  if (openCategorySplitButton) openCategorySplit();
+  if (openCategoryDeleteButton) openCategoryDelete();
+  if (categoryDeleteStage) renderCategoryDelete(categoryDeleteStage);
+  if (categoryDeleteConfirm) executeCategoryDelete(categoryDeleteConfirm);
+  if (event.target.closest("[data-close-category-split]")) el.categorySplitDialog.close();
+  if (event.target.closest("[data-close-category-delete]")) el.categoryDeleteDialog.close();
+  if (openStopPickerButton) openStopPicker();
+  if (event.target.closest("[data-close-stop-picker]")) closeStopPicker();
+  if (event.target.closest("[data-stop-picker-back]")) {
+    state.stopPickerCategory = "all";
+    el.stopPickerSearch.value = "";
+    renderStopPicker();
+  }
+  if (stopPickerSection) {
+    state.stopPickerCategory = stopPickerSection;
+    el.stopPickerSearch.value = "";
+    renderStopPicker();
+  }
+  if (stopPickerAdd) toggleStock(stopPickerAdd, true);
   if (event.target.closest("[data-remove-editor-image]")) removeEditorImage();
   if (event.target.closest("[data-translate-current-item]")) translateCurrentItem();
   if (event.target.closest("[data-translate-missing]")) translateMissingItems();
@@ -1088,26 +1237,97 @@ function openAttentionFilter(filter) {
 }
 
 function renderAttention() {
-  const dishItems = getDishItems();
-  const issues = [
-    { name: "Без фотографии", count: dishItems.filter((item) => !item.image).length, filter: "photo", type: "issue" },
-    { name: "Без русского названия", count: dishItems.filter((item) => !String(item.name_ru || "").trim()).length, filter: "missing-ru", type: "issue" },
-    { name: "Без казахского перевода", count: dishItems.filter((item) => !String(item.name_kz || "").trim() || !String(item.description_kz || "").trim()).length, filter: "missing-kz", type: "issue" },
-    { name: "Без английского перевода", count: dishItems.filter((item) => !String(item.name_en || "").trim() || !String(item.description_en || "").trim()).length, filter: "missing-en", type: "issue" },
-    { name: "Без категории", count: dishItems.filter((item) => !item.category_id).length, filter: "category", type: "issue" },
-    { name: "Неактивные", count: dishItems.filter((item) => !item.is_active).length, filter: "inactive", type: "neutral" },
-    { name: "Стоп-лист", count: dishItems.filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item)).length, filter: "stop", type: "neutral" },
-  ];
-  const total = issues.reduce((sum, issue) => sum + issue.count, 0);
+  const issues = getAttentionIssues();
+  const total = new Set(issues.flatMap((issue) => issue.items.map((item) => item.id))).size;
   el.attentionCount.textContent = total ? `${formatPositionCount(total)}` : "Все хорошо";
-  el.attentionList.innerHTML = issues.map((issue) => {
-    const status = getAttentionStatus(issue.count, issue.type);
-    return `<button class="attention-item attention-item--${status.className}" type="button" data-attention-filter="${issue.filter}">
+  el.attentionList.innerHTML = issues.slice(0, 2).map((issue) => {
+    const status = getAttentionStatus(issue.items.length, issue.type);
+    const description = issue.key === "translation"
+      ? (issue.items.length ? "Есть позиции с незаполненными переводами" : "Все переводы заполнены")
+      : status.description;
+    return `<button class="attention-item attention-item--${status.className}" type="button" data-attention-issue="${issue.key}">
       <i></i>
-      <span class="attention-copy"><strong>${issue.name}</strong><small>${status.description}</small></span>
-      <span class="attention-result"><b>${formatPositionCount(issue.count)}</b><em>${status.label}</em></span>
+      <span class="attention-copy"><strong>${issue.name}</strong><small>${description}</small></span>
+      <span class="attention-result"><b>${formatPositionCount(issue.items.length)}</b><em>${status.label}</em></span>
     </button>`;
-  }).join("");
+  }).join("") + `<div class="attention-more"><button type="button" data-attention-more>Подробнее <span aria-hidden="true">→</span></button></div>`;
+}
+
+function getAttentionIssues() {
+  const dishItems = getDishItems();
+  return [
+    { key: "photo", name: "Без фотографии", type: "issue", items: dishItems.filter((item) => !item.image) },
+    { key: "translation", name: "Без перевода", type: "issue", items: dishItems.filter(hasMissingTranslation) },
+    { key: "category", name: "Без категории", type: "issue", items: dishItems.filter((item) => !item.category_id) },
+    { key: "inactive", name: "Неактивные", type: "neutral", items: dishItems.filter((item) => !item.is_active) },
+    { key: "stop", name: "Стоп-лист", type: "neutral", items: dishItems.filter((item) => item.is_stoplisted || isTemporarilyUnavailable(item)) },
+  ];
+}
+
+function openAttentionPopup(key) {
+  const issue = getAttentionIssues().find((entry) => entry.key === key);
+  if (!issue || !el.attentionModal) return;
+  state.attentionIssue = key;
+  el.attentionModalTitle.textContent = `${issue.name} — ${formatPositionCount(issue.items.length)}`;
+  el.attentionModalBody.innerHTML = renderAttentionTable(issue);
+  el.attentionModal.hidden = false;
+  document.body.classList.add("attention-modal-open");
+  requestAnimationFrame(() => el.attentionModal.querySelector(".attention-modal__close")?.focus());
+}
+
+function openAttentionSummary() {
+  const issues = getAttentionIssues();
+  const total = new Set(issues.flatMap((issue) => issue.items.map((item) => item.id))).size;
+  state.attentionIssue = "all";
+  el.attentionModalTitle.textContent = `Требует внимания — ${formatPositionCount(total)}`;
+  el.attentionModalBody.innerHTML = renderAttentionSummary(issues);
+  el.attentionModal.hidden = false;
+  document.body.classList.add("attention-modal-open");
+  requestAnimationFrame(() => el.attentionModal.querySelector(".attention-modal__close")?.focus());
+}
+
+function closeAttentionPopup({ restoreFocus = true } = {}) {
+  if (!el.attentionModal || el.attentionModal.hidden) return;
+  const key = state.attentionIssue;
+  el.attentionModal.hidden = true;
+  document.body.classList.remove("attention-modal-open");
+  state.attentionIssue = "";
+  if (restoreFocus) requestAnimationFrame(() => el.attentionList.querySelector(key === "all" ? "[data-attention-more]" : `[data-attention-issue="${key}"]`)?.focus());
+}
+
+function renderAttentionSummary(issues) {
+  const rows = issues.map((issue) => `<tr>
+    <th scope="row">${escapeHtml(issue.name)}</th>
+    <td>${formatPositionCount(issue.items.length)}</td>
+    <td><button type="button" data-attention-issue="${issue.key}">Открыть</button></td>
+  </tr>`).join("");
+  return `<div class="attention-modal__table-scroll"><table class="attention-modal__table attention-modal__table--summary">
+    <thead><tr><th>Проблема</th><th>Количество</th><th>Действие</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
+function renderAttentionTable(issue) {
+  const problemHeading = issue.key === "translation" ? "Каких переводов не хватает" : "Проблема";
+  const rows = issue.items.length ? issue.items.map((item) => `<tr>
+    <th scope="row">${escapeHtml(getItemDisplayName(item))}</th>
+    <td>${escapeHtml(item.category_id ? categoryName(item.category_id) : "Не указан")}</td>
+    <td>${escapeHtml(getAttentionProblem(item, issue.key))}</td>
+    <td><button type="button" data-attention-open-item="${escapeHtml(item.id)}">Открыть</button></td>
+  </tr>`).join("") : '<tr><td class="attention-modal__empty" colspan="4">Проблемных позиций нет.</td></tr>';
+  return `<div class="attention-modal__table-scroll"><table class="attention-modal__table">
+    <thead><tr><th>Блюдо</th><th>Раздел</th><th>${problemHeading}</th><th>Действие</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
+function getAttentionProblem(item, key) {
+  if (key === "photo") return "Нет фотографии";
+  if (key === "translation") return getMissingTranslationLanguages(item).map((language) => language.label).join(", ");
+  if (key === "category") return "Категория не указана";
+  if (key === "inactive") return "Позиция неактивна";
+  if (key === "stop") return isTemporarilyUnavailable(item) ? "Временно недоступно" : "В стоп-листе";
+  return "Требует внимания";
 }
 
 function renderDishes() {
@@ -1162,6 +1382,14 @@ function formatPositionCount(count) {
   if (mod10 === 1 && mod100 !== 11) return `${count} позиция`;
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} позиции`;
   return `${count} позиций`;
+}
+
+function formatDishCount(count) {
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) return `${count} блюдо`;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${count} блюда`;
+  return `${count} блюд`;
 }
 
 
@@ -1250,16 +1478,22 @@ async function adminApi(action, payload = {}) {
   return data;
 }
 
-async function toggleStock(id) {
+async function toggleStock(id, requestedStatus = null) {
   const item = state.items.find((entry) => entry.id === id);
-  if (!item) return;
+  if (!item || state.stockUpdating.has(id)) return;
+  const nextStatus = typeof requestedStatus === "boolean" ? requestedStatus : !item.is_stoplisted;
+  state.stockUpdating.add(id);
+  renderStopList();
+  if (el.stopPickerDialog?.open) renderStopPicker();
   try {
-    const result = await adminApi("toggleStock", { itemId: id, is_stoplisted: !item.is_stoplisted });
+    const result = await adminApi("toggleStock", { itemId: id, is_stoplisted: nextStatus });
     upsertLocalItem(result.item);
     toast(result.item.is_stoplisted ? "Блюдо добавлено в стоп-лист" : "Блюдо возвращено в продажу", "success");
-    renderAll();
   } catch (error) {
     toast(toFriendlyError(error.message) || "Не удалось изменить стоп-лист", "danger");
+  } finally {
+    state.stockUpdating.delete(id);
+    renderAll();
   }
 }
 
@@ -1316,6 +1550,15 @@ function bindEvents() {
   el.pinVisibility.addEventListener("click", togglePinVisibility);
 
   document.addEventListener("click", handleDocumentClick);
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (state.attentionIssue) closeAttentionPopup();
+    if (state.splittingCategory || state.deletingCategory) return;
+    [el.stopPickerDialog, el.categoryDeleteDialog, el.categorySplitDialog, el.categoryDialog]
+      .filter(Boolean)
+      .find((dialog) => dialog.open)
+      ?.close();
+  });
   [el.menuSearch, el.categoryFilter, el.statusFilter, el.photoFilter, el.translationFilter]
     .filter(Boolean)
     .forEach((control) => control.addEventListener("input", renderDishes));
@@ -1376,6 +1619,16 @@ function bindEvents() {
 
   el.categoryForm.addEventListener("submit", handleCategorySubmit);
   document.querySelector("[data-close-category]").addEventListener("click", () => el.categoryDialog.close());
+  el.categorySplitForm?.addEventListener("submit", handleCategorySplitSubmit);
+  [el.categoryDialog, el.categorySplitDialog, el.categoryDeleteDialog].filter(Boolean).forEach((dialog) => {
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog && !state.splittingCategory && !state.deletingCategory) dialog.close();
+    });
+  });
+  el.stopPickerSearch?.addEventListener("input", () => renderStopPicker());
+  el.stopPickerDialog?.addEventListener("click", (event) => {
+    if (event.target === el.stopPickerDialog && !state.stockUpdating.size) closeStopPicker();
+  });
 
   document.querySelectorAll("[data-lang-tab]").forEach((tab) => {
     tab.addEventListener("click", () => {
@@ -1570,7 +1823,7 @@ function getEditorPreviewItem() {
     is_stoplisted: isStoplisted,
     inactive_until: null,
     missingPhoto: !el.itemForm?.dataset.image,
-    missingTranslation: ["name_kz", "name_en", "description_kz", "description_en"]
+    missingTranslation: ["name_ru", "name_kz", "name_en"]
       .some((name) => !String(el.itemForm?.elements[name]?.value || "").trim()),
   };
 }
@@ -1756,6 +2009,182 @@ async function handleItemSubmit(event) {
   } finally {
     state.savingItem = false;
     if (submitButton) submitButton.disabled = false;
+  }
+}
+
+function getCategoryItems(categoryId) {
+  return getDishItems().filter((item) => item.category_id === categoryId);
+}
+
+async function translateCategoryNames(button) {
+  const form = button.closest("form");
+  const nameRu = form?.elements.name_ru?.value.trim();
+  if (!form || !nameRu || button.disabled) {
+    if (!nameRu) toast("Сначала заполните русское название", "danger");
+    form?.elements.name_ru?.focus();
+    return;
+  }
+
+  button.disabled = true;
+  const originalText = button.textContent;
+  button.textContent = "Переводим…";
+  try {
+    const [nameEn, nameKz] = await Promise.all([
+      requestGoogleTranslation(nameRu, "en"),
+      requestGoogleTranslation(nameRu, "kk"),
+    ]);
+    form.elements.name_en.value = nameEn;
+    form.elements.name_kz.value = nameKz;
+    toast("Названия переведены", "success");
+  } catch (error) {
+    console.warn("[exort-admin] category translation failed", error);
+    toast("Автоперевод пока недоступен. Заполните названия вручную.", "danger");
+  } finally {
+    button.disabled = false;
+    button.textContent = originalText;
+  }
+}
+
+function openCategorySplit() {
+  const categoryId = el.categoryForm.elements.id.value;
+  const category = state.categories.find((entry) => entry.id === categoryId);
+  if (!category) return;
+  const items = getCategoryItems(categoryId);
+  if (items.length < 2) {
+    toast("Для разделения в разделе должно быть минимум два блюда", "danger");
+    return;
+  }
+
+  state.categoryOperationId = categoryId;
+  el.categoryDialog.close();
+  el.categorySplitForm.reset();
+  el.categorySplitForm.elements.category_id.value = categoryId;
+  el.categorySplitSource.textContent = getCategoryDisplayName(category);
+  el.categorySplitError.textContent = "";
+  el.categorySplitItems.innerHTML = items.map((item) => `<label class="category-dish-option">
+    <input type="checkbox" name="item_ids" value="${escapeHtml(item.id)}" />
+    <span><strong>${escapeHtml(getItemDisplayName(item))}</strong><small>${escapeHtml(formatPrice(item.price, item.currency))}</small></span>
+  </label>`).join("");
+  el.categorySplitDialog.showModal();
+  el.categorySplitForm.elements.name_ru.focus();
+}
+
+async function handleCategorySplitSubmit(event) {
+  event.preventDefault();
+  if (state.splittingCategory) return;
+  const data = new FormData(el.categorySplitForm);
+  const categoryId = String(data.get("category_id") || "");
+  const nameRu = String(data.get("name_ru") || "").trim();
+  const nameKz = String(data.get("name_kz") || "").trim();
+  const nameEn = String(data.get("name_en") || "").trim();
+  const itemIds = [...new Set(data.getAll("item_ids").map(String))];
+  const sourceItems = getCategoryItems(categoryId);
+
+  el.categorySplitError.textContent = "";
+  if (!nameRu || !nameKz || !nameEn) {
+    el.categorySplitError.textContent = "Заполните название нового раздела на всех трёх языках.";
+    el.categorySplitForm.querySelector("input:invalid")?.focus();
+    return;
+  }
+  if (!itemIds.length) {
+    el.categorySplitError.textContent = "Выберите хотя бы одно блюдо для переноса.";
+    el.categorySplitItems.querySelector("input")?.focus();
+    return;
+  }
+  if (itemIds.length >= sourceItems.length) {
+    el.categorySplitError.textContent = "Нельзя перенести все блюда: исходный раздел должен остаться непустым.";
+    return;
+  }
+
+  const submitButton = el.categorySplitForm.querySelector('button[type="submit"]');
+  state.splittingCategory = true;
+  if (submitButton) submitButton.disabled = true;
+  try {
+    const result = await adminApi("splitCategory", {
+      categoryId,
+      itemIds,
+      category: {
+        name_ru: nameRu,
+        name_kz: nameKz,
+        name_en: nameEn,
+      },
+    });
+    el.categorySplitDialog.close();
+    state.categoryOperationId = "";
+    applyAdminData(result);
+    navigate("categories");
+    toast(`Раздел создан, перенесено: ${formatDishCount(itemIds.length)}`, "success");
+  } catch (error) {
+    el.categorySplitError.textContent = toFriendlyError(error.message) || "Не удалось разделить раздел.";
+  } finally {
+    state.splittingCategory = false;
+    if (submitButton) submitButton.disabled = false;
+  }
+}
+
+function openCategoryDelete() {
+  const categoryId = el.categoryForm.elements.id.value;
+  if (!state.categories.some((entry) => entry.id === categoryId)) return;
+  state.categoryOperationId = categoryId;
+  el.categoryDialog.close();
+  renderCategoryDelete("initial");
+  el.categoryDeleteDialog.showModal();
+}
+
+function renderCategoryDelete(stage = "initial") {
+  const category = state.categories.find((entry) => entry.id === state.categoryOperationId);
+  if (!category) return;
+  const items = getCategoryItems(category.id);
+  const categoryNameText = getCategoryDisplayName(category);
+  const otherCategories = state.categories.filter((entry) => entry.id !== category.id);
+  el.categoryDeleteTitle.textContent = `Удалить раздел «${categoryNameText}»`;
+
+  if (!items.length) {
+    el.categoryDeleteBody.innerHTML = `<p>Удалить раздел «${escapeHtml(categoryNameText)}»? Это действие нельзя отменить.</p>`;
+    el.categoryDeleteFooter.innerHTML = `<span></span><div class="category-modal-footer-right"><button type="button" class="secondary-button compact" data-close-category-delete>Отмена</button><button type="button" class="category-delete-button" data-category-delete-confirm="empty">Удалить раздел</button></div>`;
+    return;
+  }
+
+  if (stage === "move") {
+    el.categoryDeleteBody.innerHTML = `<p>Выберите раздел, в который будут перенесены ${formatDishCount(items.length)}.</p><label class="category-delete-select">Новый раздел<select data-category-delete-target><option value="">Выберите раздел</option>${otherCategories.map((entry) => `<option value="${escapeHtml(entry.id)}">${escapeHtml(getCategoryDisplayName(entry))}</option>`).join("")}</select></label>`;
+    el.categoryDeleteFooter.innerHTML = `<button type="button" class="secondary-button compact" data-category-delete-stage="initial">Назад</button><div class="category-modal-footer-right"><button type="button" class="secondary-button compact" data-close-category-delete>Отмена</button><button type="button" class="primary-button compact" data-category-delete-confirm="move" ${otherCategories.length ? "" : "disabled"}>Перенести и удалить</button></div>`;
+    return;
+  }
+
+  if (stage === "cascade") {
+    el.categoryDeleteBody.innerHTML = `<p class="category-delete-warning">Будут удалены раздел и ${formatDishCount(items.length)}. Это действие нельзя отменить.</p>`;
+    el.categoryDeleteFooter.innerHTML = `<button type="button" class="secondary-button compact" data-category-delete-stage="initial">Назад</button><div class="category-modal-footer-right"><button type="button" class="secondary-button compact" data-close-category-delete>Отмена</button><button type="button" class="category-delete-button" data-category-delete-confirm="cascade">Удалить всё</button></div>`;
+    return;
+  }
+
+  el.categoryDeleteBody.innerHTML = `<p>В разделе «${escapeHtml(categoryNameText)}» находится ${formatDishCount(items.length)}. Что сделать с ними?</p><div class="category-delete-options"><button type="button" class="secondary-button" data-category-delete-stage="move" ${otherCategories.length ? "" : "disabled"}>Перенести блюда в другой раздел</button><button type="button" class="category-delete-button" data-category-delete-stage="cascade">Удалить раздел вместе с блюдами</button></div>`;
+  el.categoryDeleteFooter.innerHTML = `<span></span><button type="button" class="secondary-button compact" data-close-category-delete>Отмена</button>`;
+}
+
+async function executeCategoryDelete(mode) {
+  if (state.deletingCategory) return;
+  const categoryId = state.categoryOperationId;
+  const targetCategoryId = mode === "move" ? el.categoryDeleteBody.querySelector("[data-category-delete-target]")?.value || "" : "";
+  if (mode === "move" && !targetCategoryId) {
+    toast("Выберите раздел для переноса блюд", "danger");
+    el.categoryDeleteBody.querySelector("[data-category-delete-target]")?.focus();
+    return;
+  }
+
+  state.deletingCategory = true;
+  el.categoryDeleteDialog.querySelectorAll("button,select").forEach((control) => { control.disabled = true; });
+  try {
+    const result = await adminApi("deleteCategory", { categoryId, mode, targetCategoryId });
+    el.categoryDeleteDialog.close();
+    state.categoryOperationId = "";
+    applyAdminData(result);
+    navigate("categories");
+    toast(mode === "move" ? "Блюда перенесены, раздел удалён" : "Раздел удалён", "success");
+  } catch (error) {
+    toast(toFriendlyError(error.message) || "Не удалось удалить раздел", "danger");
+    renderCategoryDelete(mode === "cascade" ? "cascade" : mode === "move" ? "move" : "initial");
+  } finally {
+    state.deletingCategory = false;
   }
 }
 if (el.viewTitle && viewMeta[state.activeView]) {

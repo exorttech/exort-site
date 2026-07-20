@@ -63,7 +63,7 @@ create table if not exists public.menu_analytics_events (
   constraint menu_analytics_events_device_type_check
     check (device_type is null or device_type in ('mobile', 'tablet', 'desktop')),
   constraint menu_analytics_events_language_check
-    check (language is null or language in ('ru', 'kk', 'kz', 'en')),
+    check (language is null or language in ('ru', 'kk', 'kz', 'en', 'tr')),
   constraint menu_analytics_events_session_length_check
     check (session_id is null or char_length(session_id) <= 120),
   constraint menu_analytics_events_user_agent_length_check

@@ -53,12 +53,15 @@ export default {
       if (action === "deleteItem") return deleteItem(env, restaurantSlug, body.itemId);
       if (action === "toggleStock") return toggleStock(env, restaurantSlug, body.itemId, body.is_stoplisted);
       if (action === "uploadItemPhoto") return uploadItemPhoto(env, restaurantSlug, body.itemId, body.imageData);
-      if (action === "saveCategory") return saveCategory(env, restaurantSlug, body.category);
+      if (action === "saveCategory") return saveCategory(env, restaurantSlug, body.category, body.requireTranslations === true);
+      if (action === "splitCategory") return splitCategory(env, restaurantSlug, body);
+      if (action === "deleteCategory") return deleteCategory(env, restaurantSlug, body);
       if (action === "sortCategories") return sortCategories(env, restaurantSlug, body.categories || []);
       if (action === "getQrSources") return getQrSources(env, restaurantSlug);
       if (action === "createQrSource") return createQrSource(env, restaurantSlug, body);
       if (action === "updateQrSource") return updateQrSource(env, restaurantSlug, body);
       if (action === "archiveQrSource") return archiveQrSource(env, restaurantSlug, body.sourceId);
+      if (action === "deleteQrSource") return deleteQrSource(env, restaurantSlug, body.sourceId);
       if (action === "getAnalytics") return getAnalyticsV2(env, restaurantSlug, body);
 
       return jsonResponse(400, { error: "Unknown admin action." });
@@ -244,10 +247,13 @@ async function uploadItemPhoto(env, slug, itemId, imageData) {
   return jsonResponse(200, { item: rows[0] });
 }
 
-async function saveCategory(env, slug, category) {
+async function saveCategory(env, slug, category, requireTranslations = false) {
   const restaurant = await getRestaurant(env, slug);
   if (!category || !String(category.name_ru || category.name || "").trim()) {
     throw new Error("RU category name is required.");
+  }
+  if (requireTranslations && (!clean(category.name_kz) || !clean(category.name_en))) {
+    throw new Error("All category translations are required.");
   }
 
   const current = category.id ? await getOwnedRow(env, "menu_categories", restaurant.id, category.id) : null;
@@ -274,6 +280,49 @@ async function saveCategory(env, slug, category) {
   });
 
   return jsonResponse(200, { category: rows[0] });
+}
+
+async function splitCategory(env, slug, body) {
+  const restaurant = await getRestaurant(env, slug);
+  const category = body.category || {};
+  const itemIds = [...new Set((Array.isArray(body.itemIds) ? body.itemIds : []).filter(isUuid))];
+  if (!isUuid(body.categoryId)) throw new Error("Category id is invalid.");
+  if (itemIds.length !== (Array.isArray(body.itemIds) ? new Set(body.itemIds).size : 0)) {
+    throw new Error("One or more dish ids are invalid.");
+  }
+
+  await supabaseRest(env, "rpc/admin_split_menu_category", {
+    method: "POST",
+    body: {
+      p_restaurant_id: restaurant.id,
+      p_category_id: body.categoryId,
+      p_name_ru: clean(category.name_ru),
+      p_name_kz: clean(category.name_kz),
+      p_name_en: clean(category.name_en),
+      p_item_ids: itemIds,
+    },
+  });
+
+  return jsonResponse(200, await buildAdminData(env, restaurant));
+}
+
+async function deleteCategory(env, slug, body) {
+  const restaurant = await getRestaurant(env, slug);
+  const mode = ["empty", "move", "cascade"].includes(body.mode) ? body.mode : "";
+  if (!isUuid(body.categoryId) || !mode) throw new Error("Category deletion request is invalid.");
+  const targetCategoryId = mode === "move" && isUuid(body.targetCategoryId) ? body.targetCategoryId : null;
+
+  await supabaseRest(env, "rpc/admin_delete_menu_category", {
+    method: "POST",
+    body: {
+      p_restaurant_id: restaurant.id,
+      p_category_id: body.categoryId,
+      p_mode: mode,
+      p_target_category_id: targetCategoryId,
+    },
+  });
+
+  return jsonResponse(200, await buildAdminData(env, restaurant));
 }
 
 async function sortCategories(env, slug, categories) {
@@ -327,17 +376,41 @@ async function getQrSources(env, slug) {
     stats.set(event.qr_source_id, current);
   });
 
+  const directEvents = events.filter(isDirectAnalyticsEvent);
+  const directSessions = new Set(directEvents
+    .filter((event) => ["session_start", "menu_open"].includes(event.event_type) && event.session_id)
+    .map((event) => event.session_id));
+  const directLastVisit = directEvents
+    .filter((event) => event.event_type === "menu_open")
+    .reduce((latest, event) => !latest || event.created_at > latest ? event.created_at : latest, "");
+  const directSource = {
+    id: "direct",
+    source_key: "direct",
+    source_type: "direct",
+    name: "Прямой вход",
+    is_active: true,
+    is_system: true,
+    visits: directSessions.size,
+    uniqueGuests: directSessions.size,
+    engagedSessions: new Set(directEvents
+      .filter((event) => event.event_type === "dish_open" && event.session_id)
+      .map((event) => event.session_id)).size,
+    lastVisitAt: directLastVisit || null,
+    url: "",
+  };
+
   return jsonResponse(200, {
-    sources: sources.map((source) => {
+    sources: [directSource, ...sources.filter((source) => source.source_type !== "direct").map((source) => {
       const sourceStats = stats.get(source.id);
       return {
         ...source,
         visits: sourceStats?.sessions.size || 0,
+        uniqueGuests: sourceStats?.sessions.size || 0,
         engagedSessions: sourceStats?.engaged.size || 0,
         lastVisitAt: sourceStats?.lastVisitAt || null,
         url: buildPublicMenuUrl(slug, source.public_id, source.menu_path),
       };
-    }),
+    })],
   });
 }
 
@@ -346,7 +419,7 @@ async function fetchQrAnalyticsEvents(env, restaurantId) {
   for (let offset = 0; offset < 20000; offset += 1000) {
     const page = await supabaseRest(env, "menu_analytics_events", {
       query: {
-        select: "id,qr_source_id,event_type,session_id,created_at",
+        select: "id,qr_source_id,source_fallback,event_type,session_id,created_at",
         restaurant_id: `eq.${restaurantId}`,
         order: "created_at.asc",
         limit: "1000",
@@ -357,6 +430,12 @@ async function fetchQrAnalyticsEvents(env, restaurantId) {
     if (page.length < 1000) break;
   }
   return rows;
+}
+
+function isDirectAnalyticsEvent(event) {
+  if (event.qr_source_id) return false;
+  const fallback = clean(event.source_fallback).toLowerCase();
+  return !fallback || ["direct", "прямой вход", "прямой переход"].includes(fallback);
 }
 
 async function createQrSource(env, slug, body) {
@@ -379,7 +458,7 @@ async function createQrSource(env, slug, body) {
     prefer: "return=representation",
   });
   const source = rows[0];
-  return jsonResponse(200, { source: { ...source, visits: 0, engagedSessions: 0, lastVisitAt: null, url: buildPublicMenuUrl(slug, source.public_id, menuPath) } });
+  return jsonResponse(200, { source: { ...source, visits: 0, uniqueGuests: 0, engagedSessions: 0, lastVisitAt: null, url: buildPublicMenuUrl(slug, source.public_id, menuPath) } });
 }
 
 async function updateQrSource(env, slug, body) {
@@ -406,6 +485,31 @@ async function archiveQrSource(env, slug, sourceId) {
     prefer: "return=representation",
   });
   return jsonResponse(200, { source: rows[0] });
+}
+
+async function deleteQrSource(env, slug, sourceId) {
+  if (!isUuid(sourceId)) throw new Error("QR source id is invalid.");
+  const restaurant = await getRestaurant(env, slug);
+  const source = await getOwnedRow(env, "qr_sources", restaurant.id, sourceId);
+
+  await supabaseRest(env, "qr_sources", {
+    method: "PATCH",
+    query: { id: `eq.${source.id}`, restaurant_id: `eq.${restaurant.id}` },
+    body: { is_active: false },
+    prefer: "return=minimal",
+  });
+  await supabaseRest(env, "menu_analytics_events", {
+    method: "DELETE",
+    query: { restaurant_id: `eq.${restaurant.id}`, qr_source_id: `eq.${source.id}` },
+    prefer: "return=minimal",
+  });
+  await supabaseRest(env, "qr_sources", {
+    method: "DELETE",
+    query: { id: `eq.${source.id}`, restaurant_id: `eq.${restaurant.id}` },
+    prefer: "return=minimal",
+  });
+
+  return jsonResponse(200, { ok: true, sourceId: source.id });
 }
 
 function createPublicSourceId() {
@@ -854,7 +958,7 @@ function normalizeDeviceType(value) {
 function normalizeAnalyticsLanguage(value) {
   const normalized = clean(value).toLowerCase();
   if (normalized === "kz") return "kk";
-  return ["ru", "kk", "en"].includes(normalized) ? normalized : null;
+  return ["ru", "kk", "en", "tr"].includes(normalized) ? normalized : null;
 }
 
 function isUuid(value) {

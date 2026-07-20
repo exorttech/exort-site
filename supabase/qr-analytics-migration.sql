@@ -28,6 +28,9 @@ alter table public.menu_analytics_events add constraint menu_analytics_events_ev
     'menu_open', 'session_start', 'category_view', 'dish_open', 'dish_close',
     'search', 'search_no_results', 'language_change', 'menu_exit'
   ));
+alter table public.menu_analytics_events drop constraint if exists menu_analytics_events_language_check;
+alter table public.menu_analytics_events add constraint menu_analytics_events_language_check
+  check (language is null or language in ('ru', 'kk', 'kz', 'en', 'tr'));
 alter table public.menu_analytics_events drop constraint if exists menu_analytics_events_duration_check;
 alter table public.menu_analytics_events add constraint menu_analytics_events_duration_check
   check (duration_ms is null or duration_ms between 0 and 86400000);

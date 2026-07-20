@@ -11,7 +11,7 @@ export async function getAnalyticsV2(env, slug, input = {}) {
     rest(env, "qr_sources", { query: { select: "id,name,public_id,is_active,source_type", restaurant_id: `eq.${restaurant.id}` } }),
   ]);
 
-  const selectedEvents = sourceId === "direct" ? events.filter((event) => !event.qr_source_id) : events;
+  const selectedEvents = sourceId === "direct" ? events.filter(isDirectEvent) : events;
   const current = selectedEvents.filter((event) => inRange(event, period.start, period.end));
   const previous = selectedEvents.filter((event) => inRange(event, period.comparisonStart, period.comparisonEnd));
   const currentMetrics = metrics(current);
@@ -35,6 +35,8 @@ export async function getAnalyticsV2(env, slug, input = {}) {
         dishOpens: metric(currentMetrics.dishOpens, previousMetrics.dishOpens, days.map((day) => day.dishOpens.current)),
         averageStudyMs: metric(currentMetrics.averageStudyMs, previousMetrics.averageStudyMs, days.map((day) => day.averageStudyMs.current), "duration", "neutral"),
       },
+      timeline: timeline(current, period),
+      hourly: hourlyAnalytics(current),
       activity: { days },
       heatmap: heatmap(current, period),
       dishes,
@@ -43,12 +45,14 @@ export async function getAnalyticsV2(env, slug, input = {}) {
       audience: {
         languages: audience(current, "language", (value) => String(value || "").toUpperCase()),
         devices: audience(current, "device_type", (value) => ({ mobile: "Телефон", tablet: "Планшет", desktop: "Компьютер" }[value] || "Другое")),
+        browsers: browserAudience(current),
+        referrers: referrerAudience(current),
       },
       sources: sourceAnalytics(current, previous, sourceNames),
-      recentEvents: recentEvents(current, items),
+      recentEvents: recentEvents(current.filter((event) => event.localDateKey === shiftDate(period.end, -1)), items),
       sourceOptions: [
         { id: "all", name: "Все источники", isActive: true },
-        { id: "direct", name: "Прямые переходы", isActive: true },
+        { id: "direct", name: "Прямой вход", isActive: true, sourceType: "direct", sourceKey: "direct" },
         ...qrSources.map((source) => ({ id: source.id, name: source.name, isActive: source.is_active })),
       ],
       dayDetails: dayDetails(current, period),
@@ -62,7 +66,7 @@ async function fetchEvents(env, restaurantId, fromIso, sourceId, timeZone) {
   for (let offset = 0; offset < 20000; offset += 1000) {
     const page = await rest(env, "menu_analytics_events", {
       query: {
-        select: "id,event_type,menu_item_id,category_id,language,device_type,session_id,qr_source_id,source_fallback,duration_ms,metadata,created_at",
+        select: "id,event_type,menu_item_id,category_id,language,device_type,session_id,qr_source_id,source_fallback,duration_ms,metadata,user_agent,referrer,created_at",
         restaurant_id: `eq.${restaurantId}`,
         created_at: `gte.${fromIso}`,
         ...(sourceId ? { qr_source_id: `eq.${sourceId}` } : {}),
@@ -114,6 +118,60 @@ function metrics(events) {
     dishOpens: events.filter((event) => event.event_type === "dish_open").length,
     averageStudyMs: exits.length ? Math.round(exits.reduce((sum, event) => sum + Number(event.duration_ms), 0) / exits.length) : null,
   };
+}
+
+function timeline(events, period) {
+  if (period.range === "today") {
+    return Array.from({ length: 17 }, (_, index) => {
+      const hour = index + 7;
+      return timelineRow(
+        `${period.start}T${String(hour).padStart(2, "0")}`,
+        `${String(hour).padStart(2, "0")}:00`,
+        hour,
+        events.filter((event) => event.localDateKey === period.start && event.localHour === hour),
+      );
+    });
+  }
+
+  if (period.range === "all") {
+    const monthKeys = [...new Set(events.map((event) => event.localDateKey.slice(0, 7)))].sort();
+    return monthKeys.map((monthKey, index) => timelineRow(
+      monthKey,
+      monthLabel(monthKey),
+      index,
+      events.filter((event) => event.localDateKey.startsWith(monthKey)),
+    ));
+  }
+
+  return Array.from({ length: period.dayCount }, (_, index) => {
+    const date = shiftDate(period.start, index);
+    return timelineRow(date, shortDate(date), index, events.filter((event) => event.localDateKey === date));
+  });
+}
+
+function timelineRow(key, label, sortValue, events) {
+  const values = metrics(events);
+  const exits = events.filter((event) => event.event_type === "menu_exit" && Number.isFinite(Number(event.duration_ms)));
+  return {
+    key,
+    label,
+    sortValue,
+    sessions: values.sessions,
+    engagedSessions: values.engagedSessions,
+    dishOpens: values.dishOpens,
+    engagement: values.engagedRate,
+    averageStudyMs: values.averageStudyMs,
+    completedSessions: exits.length,
+    durationTotalMs: exits.reduce((sum, event) => sum + Number(event.duration_ms), 0),
+  };
+}
+
+function hourlyAnalytics(events) {
+  return Array.from({ length: 17 }, (_, index) => {
+    const hour = index + 7;
+    const slice = events.filter((event) => event.localHour === hour);
+    return { hour, label: `${String(hour).padStart(2, "0")}:00`, sessions: sessionIds(slice).size };
+  });
 }
 
 function sessionIds(events) {
@@ -213,15 +271,15 @@ function funnel(events, totalSessions) {
 }
 
 function sourceAnalytics(current, previous, names) {
-  const ids = new Set([...current, ...previous].map((event) => event.qr_source_id || "direct"));
+  const ids = new Set([...current, ...previous].map(sourceGroupId));
   const total = metrics(current).sessions;
   return [...ids].map((id) => {
-    const a = current.filter((event) => (event.qr_source_id || "direct") === id);
-    const b = previous.filter((event) => (event.qr_source_id || "direct") === id);
+    const a = current.filter((event) => sourceGroupId(event) === id);
+    const b = previous.filter((event) => sourceGroupId(event) === id);
     const am = metrics(a); const bm = metrics(b);
     return {
       id,
-      name: id === "direct" ? (a.find((event) => event.source_fallback)?.source_fallback || "Прямой переход") : (names[id] || "Архивный источник"),
+      name: id === "direct" ? "Прямой вход" : id === "unknown" ? "Источник не определён" : (names[id] || "Архивный источник"),
       sessions: am.sessions,
       share: total ? round((am.sessions / total) * 100) : 0,
       engagement: am.engagedRate,
@@ -230,11 +288,70 @@ function sourceAnalytics(current, previous, names) {
   }).sort((left, right) => right.sessions - left.sessions);
 }
 
+function sourceGroupId(event) {
+  if (event.qr_source_id) return event.qr_source_id;
+  return isDirectEvent(event) ? "direct" : "unknown";
+}
+
+function isDirectEvent(event) {
+  if (event.qr_source_id) return false;
+  const fallback = String(event.source_fallback || "").trim().toLowerCase();
+  return !fallback || ["direct", "прямой вход", "прямой переход"].includes(fallback);
+}
+
 function audience(events, field, formatter) {
   const values = new Map();
   events.filter((event) => event.session_id && event[field]).forEach((event) => { if (!values.has(event.session_id)) values.set(event.session_id, event[field]); });
   const counts = {}; values.forEach((value) => { counts[value] = (counts[value] || 0) + 1; });
   return Object.entries(counts).map(([value, count]) => ({ label: formatter(value), count, percent: values.size ? round((count / values.size) * 100) : 0 })).sort((a, b) => b.count - a.count);
+}
+
+function browserAudience(events) {
+  return sessionAudience(events, (event) => browserLabel(event.user_agent));
+}
+
+function referrerAudience(events) {
+  return sessionAudience(events, (event) => referrerLabel(event.referrer), true);
+}
+
+function sessionAudience(events, selector, omitEmpty = false) {
+  const values = new Map();
+  events.filter((event) => event.session_id).forEach((event) => {
+    if (values.has(event.session_id)) return;
+    const value = selector(event);
+    if (omitEmpty && !value) return;
+    values.set(event.session_id, value || "Другое");
+  });
+  const counts = {};
+  values.forEach((value) => { counts[value] = (counts[value] || 0) + 1; });
+  return Object.entries(counts)
+    .map(([label, count]) => ({ label, count, percent: values.size ? round((count / values.size) * 100) : 0 }))
+    .sort((left, right) => right.count - left.count);
+}
+
+function browserLabel(value) {
+  const userAgent = String(value || "");
+  if (!userAgent) return "Не определено";
+  if (/Instagram/i.test(userAgent)) return "Instagram";
+  if (/FBAN|FBAV|\bFB_IAB\b/i.test(userAgent)) return "Facebook";
+  if (/Telegram/i.test(userAgent)) return "Telegram";
+  if (/WhatsApp/i.test(userAgent)) return "WhatsApp";
+  if (/Edg\//i.test(userAgent)) return "Microsoft Edge";
+  if (/SamsungBrowser/i.test(userAgent)) return "Samsung Internet";
+  if (/Firefox|FxiOS/i.test(userAgent)) return "Firefox";
+  if (/CriOS|Chrome/i.test(userAgent)) return "Chrome";
+  if (/Safari/i.test(userAgent)) return "Safari";
+  return "Другое";
+}
+
+function referrerLabel(value) {
+  const referrer = String(value || "").trim();
+  if (!referrer) return "";
+  try {
+    return new URL(referrer).hostname.replace(/^www\./i, "") || referrer.slice(0, 120);
+  } catch {
+    return referrer.slice(0, 120);
+  }
 }
 
 function dayDetails(events, period) {
@@ -265,7 +382,6 @@ function recentEvents(events, items) {
   };
   return [...events]
     .sort((left, right) => new Date(right.created_at) - new Date(left.created_at))
-    .slice(0, 20)
     .map((event) => ({
       id: event.id,
       type: event.event_type,
@@ -331,6 +447,10 @@ function localParts(value, timeZone) {
 function dateKey(value, timeZone) { return localParts(value, timeZone).localDateKey; }
 function weekday(key) { return new Intl.DateTimeFormat("ru-RU", { weekday: "short", timeZone: "UTC" }).format(utcDate(key)).replace(".", ""); }
 function shortDate(key) { return new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "short", timeZone: "UTC" }).format(utcDate(key)); }
+function monthLabel(key) {
+  const [year, month] = String(key).split("-").map(Number);
+  return new Intl.DateTimeFormat("ru-RU", { month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(Date.UTC(year, month - 1, 1)));
+}
 function periodLabel(start, end, timeZone) {
   const format = new Intl.DateTimeFormat("ru-RU", { day: "numeric", month: "long", year: "numeric", timeZone });
   return start === end ? format.format(utcDate(start)) : `${format.format(utcDate(start))} — ${format.format(utcDate(end))}`;

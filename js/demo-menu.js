@@ -25,13 +25,14 @@
     mode: "production-only",
     track(eventType, extra = {}) {
       if (["localhost", "127.0.0.1"].includes(location.hostname)) return false;
-      const rawSource = new URLSearchParams(location.search).get("source") || "";
+      const sourceParams = new URLSearchParams(location.search);
+      const rawSource = sourceParams.get("source") || sourceParams.get("source_id") || sourceParams.get("qr_id") || "";
       const sourcePublicId = /^[A-Za-z0-9_-]{12,64}$/.test(rawSource) ? rawSource : "";
       const payload = {
         action: "trackAnalyticsEvent",
         restaurantSlug: getRequestedRestaurantSlug(),
         eventType,
-        language: state.language === "tr" ? "en" : state.language,
+        language: state.language,
         deviceType: innerWidth < 768 ? "mobile" : innerWidth < 1024 ? "tablet" : "desktop",
         sessionId: getAnalyticsSessionId(),
         menuPageId: getRequestedRestaurantSlug(),
