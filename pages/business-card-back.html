@@ -3,420 +3,114 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Визитная карточка Exort</title>
+    <title>Логотип Exort — 2000 × 2000</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Martian+Mono:wght@400;500;600&family=Unbounded:wght@500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@700&display=swap"
       rel="stylesheet"
     />
     <style>
       :root {
-        --card-width: 96mm;
-        --card-height: 56mm;
-        --green: #13261f;
-        --cream: #fffdf7;
-        --orange: #ff5a36;
+        --canvas-size: 2000px;
+        --brand-black: #000000;
+        --brand-cream: #fffdf7;
+        --brand-orange: #ff5a36;
       }
 
-      * { box-sizing: border-box; }
+      * {
+        box-sizing: border-box;
+      }
 
-      html, body { min-width: 320px; min-height: 100%; }
+      html,
+      body {
+        width: 100%;
+        min-width: 320px;
+        height: 100%;
+        min-height: 320px;
+        margin: 0;
+      }
 
       body {
-        min-height: 100vh;
-        margin: 0;
         display: grid;
         place-items: center;
         overflow: hidden;
-        background: #fff;
-        font-family: "Manrope", Arial, sans-serif;
+        background: transparent;
         -webkit-font-smoothing: antialiased;
+        text-rendering: geometricPrecision;
       }
 
-      .card-row {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 24px;
-      }
-
-      .business-card {
-        position: relative;
-        width: var(--card-width);
-        height: var(--card-height);
-        overflow: hidden;
-        color: var(--cream);
-        background: var(--green);
-        box-shadow: 0 18px 55px rgba(19, 38, 31, 0.18);
-      }
-
-      .business-card__watermark {
-        position: absolute;
-        inset: 0;
+      .logo-canvas {
         display: grid;
-        place-items: end center;
-        overflow: hidden;
-        color: rgba(255, 253, 247, 0.2);
-        font-family: "Unbounded", Arial, sans-serif;
-        font-size: 0.74in;
-        font-weight: 700;
-        letter-spacing: -0.015em;
-        line-height: 1;
-        opacity: 1;
-        padding-bottom: 0.02in;
-        white-space: nowrap;
-      }
-
-      .business-card__watermark span {
-        display: block;
-        transform: scaleX(1.15);
-        transform-origin: center;
-      }
-
-      .business-card--second .business-card__watermark::after {
-        content: "";
-        position: absolute;
-        top: calc(100% - 0.4in - 0.02in);
-        right: 0;
-        left: 0;
-        height: 2px;
-        background: var(--orange);
-        opacity: 1;
-        transform: translateY(-50%);
-      }
-
-      .business-card--second .business-card__watermark {
-        padding-bottom: 0;
-      }
-
-      .business-card--second .business-card__watermark span {
-        transform: translateY(5px) scaleX(1.15);
-      }
-
-      .business-card__second-title {
-        position: absolute;
-        top: 0.16in;
-        right: 0.2in;
-        left: 0.2in;
-        z-index: 2;
-        color: rgba(255, 253, 247, 0.75);
-        font-family: "Manrope", Arial, sans-serif;
-        font-size: 12px;
-        font-weight: 700;
-        line-height: 1.35;
-        text-align: left;
-      }
-
-      .business-card__second-title strong {
-        color: var(--cream);
-        font-weight: 800;
-      }
-
-      .business-card__second-title > span:not(.business-card__second-contact) {
-        color: var(--cream);
-        font-weight: 500;
-      }
-
-      .business-card__qr-accent {
-        color: var(--orange);
-        font-weight: 800;
-      }
-
-      .business-card__second-qr {
-        position: absolute;
-        top: 0.38in;
-        right: 0.18in;
-        z-index: 3;
-        display: grid;
-        justify-items: center;
-        gap: 7px;
-      }
-
-      .business-card__second-qr-box {
-        display: grid;
-        width: 72px;
-        height: 72px;
+        width: min(100vmin, var(--canvas-size));
+        height: min(100vmin, var(--canvas-size));
         place-items: center;
-        padding: 4px;
         overflow: hidden;
-        background: var(--cream);
-        border-radius: 6px;
-        box-sizing: border-box;
-        aspect-ratio: 1 / 1;
+        color: var(--brand-black);
+        background: transparent;
       }
 
-      .business-card__second-qr-box canvas,
-      .business-card__second-qr-box img {
-        display: block;
-        width: 64px !important;
-        height: 64px !important;
-        aspect-ratio: 1 / 1;
-        object-fit: contain;
-        image-rendering: pixelated;
-      }
-
-      .business-card__second-qr-label {
-        color: var(--orange);
-        font-family: "Martian Mono", monospace;
-        font-size: 7px;
-        font-weight: 800;
-        letter-spacing: 0.08em;
-      }
-
-      .business-card__second-contact {
-        display: block;
-        margin-top: 10px;
-        color: rgba(255, 253, 247, 0.8);
-        font-family: "Manrope", Arial, sans-serif;
-        font-size: 10px;
-        font-weight: 800;
-        line-height: 1.15;
-        text-align: left;
-        white-space: nowrap;
-      }
-
-      .business-card__whatsapp-icon {
-        display: inline-block;
-        width: 11px;
-        height: 11px;
-        margin-right: 4px;
-        vertical-align: -1px;
-        fill: var(--cream);
-      }
-
-      .business-card__phone-line {
-        display: inline-block;
-        margin-top: 4px;
-      }
-
-      .business-card--second .business-card__watermark::after {
-        top: calc(100% - 0.4in + 0.1in + 1px);
-      }
-
-      .business-card__identity {
-        position: absolute;
-        top: 0.28in;
-        left: 0.27in;
-      }
-
-      .business-card__logo {
+      .logo {
         position: relative;
         display: inline-block;
         margin: 0;
+        padding-right: clamp(30px, 4.6vmin, 92px);
         font-family: "Unbounded", Arial, sans-serif;
-        font-size: 26px;
+        font-size: clamp(118px, 18vmin, 360px);
         font-weight: 700;
         line-height: 1;
         letter-spacing: -0.075em;
       }
 
-      .business-card__logo::after {
-        content: "";
+      .logo::after {
         position: absolute;
-        top: -2px;
-        right: -12px;
-        width: 7px;
-        height: 7px;
+        top: clamp(-34px, -1.7vmin, -11px);
+        right: clamp(3px, .5vmin, 10px);
+        width: clamp(24px, 3.6vmin, 72px);
+        height: clamp(24px, 3.6vmin, 72px);
+        content: "";
+        background: var(--brand-orange);
         border-radius: 50%;
-        background: var(--orange);
       }
 
-      .business-card__name {
-        margin: 10px 0 0;
-        font-family: "Manrope", Arial, sans-serif;
-        font-size: 12px;
-        font-weight: 500;
-        line-height: 1.2;
-        letter-spacing: 0.01em;
-      }
-
-      .business-card__services {
-        display: grid;
-        gap: 6px;
-        margin-top: 16px;
-        color: rgba(255, 253, 247, 0.72);
-        font-family: "Manrope", Arial, sans-serif;
-        font-size: 9px;
-        font-weight: 400;
-        line-height: 1.2;
-      }
-
-      .business-card__services span:first-child {
-        color: var(--orange);
-        font-weight: 800;
-      }
-
-      .business-card__services .service-emphasis {
-        color: var(--cream);
-        font-weight: 800;
-      }
-
-      .business-card__footer {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        height: 0.7in;
-        border-top: 2px solid var(--orange);
-      }
-
-      .business-card:not(.business-card--second) .business-card__footer {
-        border-top: 0;
-      }
-
-      .business-card:not(.business-card--second) .business-card__footer::before {
-        content: "";
-        position: absolute;
-        top: 39px;
-        right: 0;
-        left: 0;
-        height: 2px;
-        background: var(--orange);
-      }
-
-      .business-card:not(.business-card--second) .business-card__slogan {
-        top: 46px;
-      }
-
-      .business-card__qr-block {
-        position: absolute;
-        top: -95px;
-        right: 0.18in;
-        display: grid;
-        justify-items: center;
-        text-align: center;
-        gap: 6px;
-      }
-
-      .business-card__qr {
-        display: grid;
-        width: 72px;
-        height: 72px;
-        place-items: center;
-        padding: 4px;
-        overflow: hidden;
-        background: var(--cream);
-        border-radius: 6px;
-        box-sizing: border-box;
-        aspect-ratio: 1 / 1;
-      }
-
-      .business-card__qr img,
-      .business-card__qr canvas {
-        display: block;
-        width: 64px !important;
-        height: 64px !important;
-        aspect-ratio: 1 / 1;
-        object-fit: contain;
-        image-rendering: pixelated;
-      }
-
-      .business-card__qr-label {
-        color: rgba(255, 253, 247, 0.7);
-        font-size: 7px;
-        font-weight: 700;
-        line-height: 1;
-        letter-spacing: 0.04em;
-        transform: translateY(3px);
-      }
-
-      .business-card__slogan {
-        position: absolute;
-        top: 23px;
-        left: 50%;
+      @page {
+        size: 2000px 2000px;
         margin: 0;
-        color: rgba(255, 253, 247, 0.75);
-        font-family: "Manrope", Arial, sans-serif;
-        font-size: 11px;
-        font-weight: 700;
-        letter-spacing: 0.01em;
-        white-space: nowrap;
-        transform: translateX(-50%);
-      }
-
-      @media screen and (max-width: 380px), screen and (max-height: 230px) {
-        .business-card { transform: scale(0.88); }
       }
 
       @media print {
-        /* One card page: 96×56 mm including bleed. */
-        @page {
-          size: 96mm 56mm;
-          margin: 0;
-        }
-
         html,
         body {
-          margin: 0;
-          padding: 0;
+          width: 2000px;
+          min-width: 2000px;
+          height: 2000px;
+          min-height: 2000px;
           print-color-adjust: exact;
           -webkit-print-color-adjust: exact;
         }
 
-        *, *::before, *::after {
-          print-color-adjust: exact;
-          -webkit-print-color-adjust: exact;
+        .logo-canvas {
+          width: 2000px;
+          height: 2000px;
         }
 
+        .logo {
+          padding-right: 92px;
+          font-size: 360px;
+        }
+
+        .logo::after {
+          top: -34px;
+          right: 10px;
+          width: 72px;
+          height: 72px;
+        }
       }
     </style>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   </head>
   <body>
-    <div class="card-row">
-    <article class="business-card" aria-label="Визитная карточка Exort">
-      <div class="business-card__identity">
-        <h1 class="business-card__logo">Exort</h1>
-        <p class="business-card__name">Всё для современного ресторана</p>
-        <div class="business-card__services">
-          <span>QR-меню</span>
-          <span>Аналитика гостей</span>
-          <span>Интеграции с <b class="service-emphasis">r_keeper и iiko</b></span>
-        </div>
-      </div>
-
-      <footer class="business-card__footer">
-        <p class="business-card__slogan">Ваше меню — в новом формате.</p>
-        <div class="business-card__qr-block">
-          <div class="business-card__qr" id="homepage-qr" aria-label="QR-код главной страницы"></div>
-          <span class="business-card__qr-label">Узнать больше</span>
-        </div>
-      </footer>
-    </article>
-    </div>
-
-    <script>
-      window.addEventListener("DOMContentLoaded", () => {
-        const homepageUrl = "https://exort.kz/";
-        const original = document.querySelector(".business-card");
-        const copy = original.cloneNode(true);
-        copy.classList.add("business-card--second");
-        copy.innerHTML = '<div class="business-card__second-title"><strong>Посмотрите, как будет выглядеть ваше меню</strong><br><br><span>Отсканируйте <b class="business-card__qr-accent">QR-код</b><br>и попробуйте Exort</span><span class="business-card__second-contact">Муса Мухтар<br><span class="business-card__phone-line"><svg class="business-card__whatsapp-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a9.9 9.9 0 0 0-8.54 14.93L2 22l5.23-1.37A10 10 0 1 0 12 2Zm0 18a8 8 0 0 1-4.08-1.12l-.29-.17-3.1.81.83-3.02-.19-.31A8 8 0 1 1 12 20Zm4.39-5.98c-.24-.12-1.42-.7-1.64-.78-.22-.08-.38-.12-.54.12-.16.24-.62.78-.76.94-.14.16-.28.18-.52.06-.24-.12-1-.37-1.91-1.18-.71-.63-1.19-1.41-1.33-1.65-.14-.24-.01-.37.1-.49.11-.11.24-.28.36-.42.12-.14.16-.24.24-.4.08-.16.04-.3-.02-.42-.06-.12-.54-1.3-.74-1.78-.19-.46-.39-.4-.54-.41h-.46c-.16 0-.42.06-.64.3-.22.24-.84.82-.84 2s.86 2.32.98 2.48c.12.16 1.68 2.56 4.08 3.59.57.25 1.02.16 1.53.1.47-.07 1.42-.58 1.62-1.14.2-.56.2-1.04.14-1.14-.06-.1-.22-.16-.46-.28Z"/></svg>+7 771 203 30 44</span></span></div><div class="business-card__second-qr"><div class="business-card__second-qr-box" id="coffee-qr"></div><span class="business-card__second-qr-label">QR-меню</span></div><div class="business-card__watermark"><span>EXORT</span></div>';
-        original.replaceWith(copy);
-        new QRCode(document.getElementById("coffee-qr"), {
-          text: "https://exort.kz/pages/coffee-menu-demo.html",
-          width: 600,
-          height: 600,
-          colorDark: "#13261f",
-          colorLight: "#fffdf7",
-          correctLevel: QRCode.CorrectLevel.M
-        });
-        return;
-        [
-          ["homepage-qr", "https://exort.kz/"],
-          ["coffee-qr", "https://exort.kz/pages/coffee-menu-demo.html"]
-        ].forEach(([id, text]) => {
-          new QRCode(document.getElementById(id), {
-            text,
-            width: 600,
-            height: 600,
-            colorDark: "#13261f",
-            colorLight: "#fffdf7",
-            correctLevel: QRCode.CorrectLevel.M
-          });
-        });
-      });
-    </script>
+    <main class="logo-canvas" aria-label="Логотип Exort">
+      <h1 class="logo">Exort</h1>
+    </main>
   </body>
 </html>
