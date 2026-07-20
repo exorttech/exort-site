@@ -4,9 +4,11 @@ export async function getAnalyticsV2(env, slug, input = {}) {
   const restaurant = await getRestaurant(env, slug);
   const timeZone = restaurant.timezone || DEFAULT_TIME_ZONE;
   const period = resolvePeriod(input, timeZone);
+  const heatmapPeriod = resolveHeatmapPeriod(input, timeZone);
+  const eventsFrom = period.comparisonStart < heatmapPeriod.start ? period.comparisonStart : heatmapPeriod.start;
   const sourceId = isUuid(input.sourceId) ? input.sourceId : input.sourceId === "direct" ? "direct" : null;
   const [events, items, qrSources] = await Promise.all([
-    fetchEvents(env, restaurant.id, utcDate(period.comparisonStart).toISOString(), sourceId === "direct" ? null : sourceId, timeZone),
+    fetchEvents(env, restaurant.id, utcDate(eventsFrom).toISOString(), sourceId === "direct" ? null : sourceId, timeZone),
     rest(env, "menu_items", { query: { select: "id,name_ru,title_ru,is_active", restaurant_id: `eq.${restaurant.id}` } }),
     rest(env, "qr_sources", { query: { select: "id,name,public_id,is_active,source_type", restaurant_id: `eq.${restaurant.id}` } }),
   ]);
@@ -14,6 +16,7 @@ export async function getAnalyticsV2(env, slug, input = {}) {
   const selectedEvents = sourceId === "direct" ? events.filter(isDirectEvent) : events;
   const current = selectedEvents.filter((event) => inRange(event, period.start, period.end));
   const previous = selectedEvents.filter((event) => inRange(event, period.comparisonStart, period.comparisonEnd));
+  const heatmapEvents = selectedEvents.filter((event) => inRange(event, heatmapPeriod.start, heatmapPeriod.end));
   const currentMetrics = metrics(current);
   const previousMetrics = metrics(previous);
   const days = comparableDays(current, previous, period);
@@ -38,7 +41,8 @@ export async function getAnalyticsV2(env, slug, input = {}) {
       timeline: timeline(current, period),
       hourly: hourlyAnalytics(current),
       activity: { days },
-      heatmap: heatmap(current, period),
+      heatmap: heatmap(heatmapEvents, heatmapPeriod),
+      heatmapPeriod,
       dishes,
       funnel: funnel(current, currentMetrics.sessions),
       insights: insights(currentMetrics, previousMetrics, days, dishes, current),
@@ -78,11 +82,15 @@ async function fetchEvents(env, restaurantId, fromIso, sourceId, timeZone) {
     rows.push(...page);
     if (page.length < 1000) break;
   }
-  return rows.map((event) => ({ ...event, ...localParts(event.created_at, timeZone) }));
+  return rows.map((event) => ({
+    ...event,
+    referrer: unpackAnalyticsReferrer(event.referrer),
+    ...localParts(event.created_at, timeZone),
+  }));
 }
 
 function resolvePeriod(input, timeZone) {
-  const range = ["today", "7d", "30d", "all", "custom"].includes(input.range) ? input.range : "7d";
+  const range = ["today", "prev_week", "7d", "30d", "all", "custom"].includes(input.range) ? input.range : "7d";
   const today = dateKey(new Date(), timeZone);
   if (range === "all") {
     return {
@@ -97,6 +105,11 @@ function resolvePeriod(input, timeZone) {
   }
   let start = range === "today" ? today : shiftDate(today, range === "30d" ? -29 : -6);
   let end = shiftDate(today, 1);
+  if (range === "prev_week") {
+    const currentWeekStart = shiftDate(today, -((utcDate(today).getUTCDay() + 6) % 7));
+    start = shiftDate(currentWeekStart, -7);
+    end = currentWeekStart;
+  }
   if (range === "custom" && datePattern(input.startDate) && datePattern(input.endDate)) {
     start = input.startDate;
     const requestedDays = Math.round((utcDate(shiftDate(input.endDate, 1)) - utcDate(start)) / 86400000);
@@ -104,6 +117,14 @@ function resolvePeriod(input, timeZone) {
   }
   const dayCount = Math.max(1, Math.round((utcDate(end) - utcDate(start)) / 86400000));
   return { range, start, end, comparisonStart: shiftDate(start, -dayCount), comparisonEnd: start, dayCount };
+}
+
+function resolveHeatmapPeriod(input, timeZone) {
+  const range = input.heatmapRange === "prev_week" ? "prev_week" : "current_week";
+  const today = dateKey(new Date(), timeZone);
+  const currentWeekStart = shiftDate(today, -((utcDate(today).getUTCDay() + 6) % 7));
+  const start = range === "prev_week" ? shiftDate(currentWeekStart, -7) : currentWeekStart;
+  return { range, start, end: shiftDate(start, 7), dayCount: 7 };
 }
 
 function metrics(events) {
@@ -346,11 +367,37 @@ function browserLabel(value) {
 
 function referrerLabel(value) {
   const referrer = String(value || "").trim();
-  if (!referrer) return "";
+  if (!referrer || referrer.startsWith("dish:")) return "";
   try {
-    return new URL(referrer).hostname.replace(/^www\./i, "") || referrer.slice(0, 120);
+    return friendlyReferrerHost(new URL(referrer).hostname) || "Другой сайт";
   } catch {
-    return referrer.slice(0, 120);
+    return "Другой сайт";
+  }
+}
+
+function friendlyReferrerHost(value) {
+  const host = String(value || "").toLowerCase().replace(/^www\./, "");
+  if (!host) return "";
+  if (/(^|\.)instagram\.com$/.test(host)) return "Instagram";
+  if (/(^|\.)facebook\.com$|(^|\.)fb\.com$/.test(host)) return "Facebook";
+  if (/(^|\.)google\.|(^|\.)bing\.com$|(^|\.)yandex\./.test(host)) return "Поиск в интернете";
+  if (/(^|\.)t\.me$|(^|\.)telegram\./.test(host)) return "Telegram";
+  if (/(^|\.)wa\.me$|(^|\.)whatsapp\./.test(host)) return "WhatsApp";
+  if (/tekemetqonaev|exort/.test(host)) return "Сайт ресторана";
+  return host;
+}
+
+function unpackAnalyticsReferrer(value) {
+  const referrer = String(value || "").trim();
+  if (!referrer.startsWith("dish:")) return referrer;
+  try {
+    const encoded = referrer.slice(5).replace(/-/g, "+").replace(/_/g, "/");
+    const padded = encoded.padEnd(Math.ceil(encoded.length / 4) * 4, "=");
+    const bytes = Uint8Array.from(atob(padded), (character) => character.charCodeAt(0));
+    const payload = JSON.parse(new TextDecoder().decode(bytes));
+    return String(payload?.referrer || "").trim();
+  } catch {
+    return "";
   }
 }
 

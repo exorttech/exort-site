@@ -38,11 +38,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="../css/demo-admin-base.css?v=21" />
     <link rel="stylesheet" href="../css/demo-admin-navigation.css?v=11" />
-    <link rel="stylesheet" href="../css/demo-admin.css?v=55" />
+    <link rel="stylesheet" href="../css/demo-admin.css?v=61" />
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script defer src="../js/admin-analytics.js?v=31"></script>
-    <script defer src="../js/admin-qr.js?v=24"></script>
-    <script defer src="../js/demo-admin.js?v=37"></script>
+    <script defer src="../js/admin-analytics.js?v=35"></script>
+    <script defer src="../js/admin-qr.js?v=27"></script>
+    <script defer src="../js/demo-admin.js?v=42"></script>
   </head>
   <body class="demo-admin-live">
     <svg class="icon-sprite" aria-hidden="true">
@@ -106,7 +106,7 @@
         </nav>
         <div class="side-footer">
           <a data-menu-link href="/demo-menu" target="_blank" rel="noreferrer"><svg><use href="#icon-external"/></svg><span>Открыть меню</span></a>
-          <button type="button" data-support-status><svg><use href="#icon-support"/></svg><span>Поддержка Exort</span></button>
+          <a href="https://wa.me/77712033044" target="_blank" rel="noreferrer"><svg><use href="#icon-support"/></svg><span>Поддержка Exort</span></a>
           <button type="button" data-logout><svg><use href="#icon-logout"/></svg><span>Выйти</span></button>
         </div>
       </aside>
@@ -147,7 +147,7 @@
                 <a data-menu-link href="/demo-menu" target="_blank" rel="noreferrer"><span>↗</span><strong>Открыть меню</strong><small>Посмотреть глазами гостя</small></a>
               </div>
             </article>
-            <article class="panel attention-panel">
+            <article class="panel attention-panel" data-attention-more-card>
               <div class="panel-heading"><div><p class="kicker">Контроль качества</p><h2>Требует внимания</h2></div><span data-attention-count></span></div>
               <div class="attention-list" data-attention-list></div>
             </article>
@@ -289,15 +289,15 @@
             <article class="system-state-card is-disabled">
               <span>Только чтение</span>
               <h2>Расширенные настройки</h2>
-              <p>Backend пока не предоставляет безопасное действие для изменения настроек ресторана. Поля не имитируют сохранение и будут включены после отдельного API.</p>
+              <p>Расширенные настройки пока доступны только через поддержку. Здесь появятся рабочие поля, когда их можно будет безопасно изменять из панели.</p>
             </article>
           </div>
         </section>
 
         <section class="view" data-view="integrations">
           <div class="system-state-grid">
-            <article class="system-state-card is-disabled"><span>Не подключено</span><h2>r_keeper</h2><p>Текущий backend не подтверждает подключение этой интеграции. Время синхронизации не показывается.</p></article>
-            <article class="system-state-card is-disabled"><span>Не подключено</span><h2>iiko</h2><p>Текущий backend не подтверждает подключение этой интеграции. Раздел будет доступен после подключения.</p></article>
+            <article class="system-state-card is-disabled"><span>Не подключено</span><h2>r_keeper</h2><p>Обмен меню и стоп-листом пока не настроен. Для подключения обратитесь в поддержку.</p></article>
+            <article class="system-state-card is-disabled"><span>Не подключено</span><h2>iiko</h2><p>Обмен меню и стоп-листом пока не настроен. Для подключения обратитесь в поддержку.</p></article>
           </div>
         </section>
       </main>
@@ -305,9 +305,12 @@
       <nav class="mobile-nav" aria-label="Мобильная навигация">
         <button class="is-active" type="button" data-nav="overview" aria-label="Обзор"><svg><use href="#icon-dashboard"/></svg><span>Обзор</span></button>
         <button type="button" data-nav="menu" aria-label="Меню"><svg><use href="#icon-menu"/></svg><span>Меню</span></button>
+        <button type="button" data-nav="categories" aria-label="Категории"><svg><use href="#icon-categories"/></svg><span>Разделы</span></button>
         <button type="button" data-nav="stoplist" aria-label="Стоп-лист"><svg><use href="#icon-stop"/></svg><span>Стоп</span></button>
         <button type="button" data-nav="analytics" aria-label="Аналитика"><svg><use href="#icon-analytics"/></svg><span>Аналитика</span></button>
         <button type="button" data-nav="qr" aria-label="QR-коды"><svg><use href="#icon-qr"/></svg><span>QR</span></button>
+        <button type="button" data-nav="settings" aria-label="Настройки"><svg><use href="#icon-categories"/></svg><span>Настройки</span></button>
+        <button type="button" data-nav="integrations" aria-label="Интеграции"><svg><use href="#icon-external"/></svg><span>Интеграции</span></button>
       </nav>
     </div>
 
@@ -412,7 +415,7 @@
     <dialog class="confirm-dialog category-dialog category-management-dialog" data-category-dialog>
       <form class="settings-form category-form" data-category-form>
         <input type="hidden" name="id" />
-        <header class="category-modal-header"><p class="kicker">Структура меню</p><h2 data-category-dialog-title>Новая категория</h2></header>
+        <header class="category-modal-header"><div><p class="kicker">Структура меню</p><h2 data-category-dialog-title>Новая категория</h2></div><button class="category-modal-close" type="button" data-close-category aria-label="Закрыть">×</button></header>
         <div class="category-form-fields">
           <label>Название (рус.)<input name="name_ru" maxlength="80" autocomplete="off" required /><span class="field-hint">Все три названия обязательны.</span></label>
           <label>Название (каз.)<input name="name_kz" maxlength="80" autocomplete="off" required /></label>
@@ -430,7 +433,7 @@
     <dialog class="confirm-dialog category-management-dialog category-split-dialog" data-category-split-dialog>
       <form class="settings-form category-form" data-category-split-form>
         <input type="hidden" name="category_id" />
-        <header class="category-modal-header"><p class="kicker">Разделение раздела</p><h2>Создать новый раздел</h2><p class="category-modal-lead">Текущий раздел: <strong data-category-split-source></strong></p></header>
+        <header class="category-modal-header"><div><p class="kicker">Разделение раздела</p><h2>Создать новый раздел</h2><p class="category-modal-lead">Текущий раздел: <strong data-category-split-source></strong></p></div><button class="category-modal-close" type="button" data-close-category-split aria-label="Закрыть">×</button></header>
         <div class="category-form-fields">
           <label>Название нового раздела (рус.)<input name="name_ru" maxlength="80" autocomplete="off" required /></label>
           <label>Название (каз.)<input name="name_kz" maxlength="80" autocomplete="off" required /></label>
@@ -445,7 +448,7 @@
 
     <dialog class="confirm-dialog category-management-dialog category-delete-dialog" data-category-delete-dialog>
       <section class="category-delete-content">
-        <header class="category-modal-header"><p class="kicker">Опасное действие</p><h2 data-category-delete-title>Удаление раздела</h2></header>
+        <header class="category-modal-header"><div><p class="kicker">Опасное действие</p><h2 data-category-delete-title>Удаление раздела</h2></div><button class="category-modal-close" type="button" data-close-category-delete aria-label="Закрыть">×</button></header>
         <div class="category-delete-body" data-category-delete-body></div>
         <footer class="category-modal-footer" data-category-delete-footer></footer>
       </section>

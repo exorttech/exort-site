@@ -21,9 +21,13 @@ const state = {
   attentionIssue: "",
   splittingCategory: false,
   deletingCategory: false,
+  categoryDirty: false,
+  categorySplitDirty: false,
   categoryOperationId: "",
   stopPickerCategory: "all",
   stockUpdating: new Set(),
+  drawerReturnFocus: null,
+  returnAttentionAfterDrawer: "",
 };
 
 const el = {
@@ -284,7 +288,9 @@ async function loadDevAdminData() {
 
 async function handleLogin(event) {
   event.preventDefault();
+  const submitButton = el.pinForm.querySelector('button[type="submit"]');
   el.loginError.textContent = "";
+  setButtonBusy(submitButton, true);
   el.loginLabel.textContent = "Проверяем...";
 
   try {
@@ -299,6 +305,7 @@ async function handleLogin(event) {
     showLoginError(error.message || "Не удалось проверить PIN.");
   } finally {
     el.loginLabel.textContent = "Войти";
+    setButtonBusy(submitButton, false);
   }
 }
 
@@ -624,7 +631,7 @@ function renderStopList() {
     <div class="dish-placeholder">${escapeHtml((getItemDisplayName(item) || "?").charAt(0))}</div>
     <div><strong>${escapeHtml(item.name_ru || "Без названия")}</strong><small>${escapeHtml(categoryName(item.category_id))} · ${formatPrice(item.price, item.currency)}</small></div>
     <span class="stop-state">На стопе</span>
-    <button class="large-switch" type="button" data-toggle-stock="${item.id}" aria-label="Вернуть блюдо в продажу" ${state.stockUpdating.has(item.id) ? "disabled" : ""}></button>
+    <button class="large-switch" type="button" data-toggle-stock="${item.id}" aria-label="Вернуть блюдо в продажу" ${state.stockUpdating.has(item.id) ? 'disabled aria-busy="true"' : ""}></button>
   </article>`).join("") : `<div class="empty-state stop-empty-state">
     <h2>В стоп-листе пока нет блюд</h2>
     <p>Добавьте блюдо из любого раздела меню.</p>
@@ -692,7 +699,7 @@ function renderStopPicker() {
     return `<article class="stop-picker-dish-row">
       <div class="stop-picker-dish-visual">${item.image ? `<img src="${escapeHtml(item.image)}" alt="" />` : `<span>${escapeHtml((getItemDisplayName(item) || "?").charAt(0))}</span>`}</div>
       <div class="stop-picker-dish-copy"><strong>${escapeHtml(getItemDisplayName(item))}</strong><small>${escapeHtml(categoryName(item.category_id) || "Без раздела")} · ${formatPrice(item.price, item.currency)}</small></div>
-      <button class="secondary-button compact" type="button" data-stop-picker-add="${escapeHtml(item.id)}" ${updating ? "disabled" : ""}>${updating ? "Добавляем…" : "Добавить"}</button>
+      <button class="secondary-button compact" type="button" data-stop-picker-add="${escapeHtml(item.id)}" ${updating ? 'disabled aria-busy="true"' : ""}>${updating ? "Добавляем…" : "Добавить"}</button>
     </article>`;
   }).join("")}</div>` : `<div class="stop-picker-empty"><strong>${query ? "Ничего не найдено" : "Все блюда раздела уже в стоп-листе"}</strong><span>${query ? "Попробуйте изменить запрос." : "Вернитесь к разделам и выберите другой."}</span></div>`;
 }
@@ -792,8 +799,16 @@ function syncSortOrderForSelectedCategory(force = false) {
 
 function closeDrawer(force = false) {
   if (state.dirty && !force) return confirmAction("Закрыть без сохранения?", "Изменения в карточке блюда будут потеряны.", () => closeDrawer(true));
+  const focusTarget = state.drawerReturnFocus;
+  const attentionIssue = state.returnAttentionAfterDrawer;
   el.drawer.setAttribute("aria-hidden", "true");
   state.dirty = false;
+  state.drawerReturnFocus = null;
+  state.returnAttentionAfterDrawer = "";
+  requestAnimationFrame(() => {
+    if (attentionIssue) openAttentionPopup(attentionIssue);
+    else focusTarget?.focus?.();
+  });
 }
 
 
@@ -804,6 +819,7 @@ function addCategory() {
   el.categoryForm.elements.id.value = "";
   el.categoryDialogTitle.textContent = "Новая категория";
   setCategoryManagementActionsVisible(false);
+  state.categoryDirty = false;
   el.categoryDialog.showModal();
   el.categoryForm.elements.name_ru.focus();
 }
@@ -817,8 +833,30 @@ function editCategory(id) {
   el.categoryForm.elements.name_en.value = category.name_en || "";
   el.categoryDialogTitle.textContent = "Редактирование категории";
   setCategoryManagementActionsVisible(true);
+  state.categoryDirty = false;
   el.categoryDialog.showModal();
   el.categoryForm.elements.name_ru.focus();
+}
+
+function closeCategoryDialog(force = false) {
+  if (!el.categoryDialog?.open) return;
+  if (state.categoryDirty && !force) {
+    confirmAction("Закрыть без сохранения?", "Изменения в разделе будут потеряны.", () => closeCategoryDialog(true));
+    return;
+  }
+  state.categoryDirty = false;
+  el.categoryDialog.close();
+}
+
+function closeCategorySplitDialog(force = false) {
+  if (!el.categorySplitDialog?.open) return;
+  if (state.categorySplitDirty && !force) {
+    confirmAction("Закрыть без разделения?", "Название и выбранные блюда не сохранятся.", () => closeCategorySplitDialog(true));
+    return;
+  }
+  state.categorySplitDirty = false;
+  state.categoryOperationId = "";
+  el.categorySplitDialog.close();
 }
 
 function setCategoryManagementActionsVisible(visible) {
@@ -846,10 +884,11 @@ async function handleCategorySubmit(event) {
 
   const submitButton = el.categoryForm.querySelector('button[type="submit"]');
   state.savingCategory = true;
-  if (submitButton) submitButton.disabled = true;
+  setButtonBusy(submitButton, true);
   try {
     const result = await adminApi("saveCategory", { category: payload, requireTranslations: true });
     upsertLocalCategory(result.category);
+    state.categoryDirty = false;
     el.categoryDialog.close();
     toast(existing ? "Категория обновлена" : "Категория добавлена", "success");
     navigate("categories");
@@ -858,7 +897,7 @@ async function handleCategorySubmit(event) {
     toast(error.message || "Не удалось сохранить категорию", "danger");
   } finally {
     state.savingCategory = false;
-    if (submitButton) submitButton.disabled = false;
+    setButtonBusy(submitButton, false);
   }
 }
 
@@ -941,6 +980,7 @@ function handleDocumentClick(event) {
   const attention = event.target.closest("[data-attention-view]")?.dataset.attentionView;
   const attentionIssue = event.target.closest("[data-attention-issue]")?.dataset.attentionIssue;
   const attentionMore = event.target.closest("[data-attention-more]");
+  const attentionMoreCard = event.target.closest("[data-attention-more-card]");
   const attentionOpenItem = event.target.closest("[data-attention-open-item]")?.dataset.attentionOpenItem;
   const toggleCat = event.target.closest("[data-toggle-category]")?.dataset.toggleCategory;
   const editCat = event.target.closest("[data-edit-category]")?.dataset.editCategory;
@@ -955,21 +995,28 @@ function handleDocumentClick(event) {
   const stopPickerAdd = event.target.closest("[data-stop-picker-add]")?.dataset.stopPickerAdd;
 
   if (nav) navigate(nav.dataset.nav);
-  if (action === "add-item") openItemDrawer();
+  if (action === "add-item") {
+    state.drawerReturnFocus = event.target.closest("[data-action]");
+    openItemDrawer();
+  }
   if (action === "add-category") addCategory();
   if (action === "open-stop-filter") openStopFilter();
   if (stock) toggleStock(stock);
-  if (edit) openItemDrawer(edit);
+  if (edit) {
+    state.drawerReturnFocus = event.target.closest("[data-edit-item]");
+    openItemDrawer(edit);
+  }
   if (attention) navigate(attention);
   if (attentionIssue) openAttentionPopup(attentionIssue);
-  if (attentionMore) openAttentionSummary();
+  else if (attentionMore || attentionMoreCard) openAttentionSummary();
   if (attentionOpenItem) {
+    state.returnAttentionAfterDrawer = state.attentionIssue;
+    state.drawerReturnFocus = el.attentionList.querySelector(`[data-attention-issue="${state.attentionIssue}"]`) || el.attentionList.querySelector("[data-attention-more]");
     closeAttentionPopup({ restoreFocus: false });
     openItemDrawer(attentionOpenItem);
   }
   if (event.target.closest("[data-close-attention-modal]")) closeAttentionPopup();
   if (event.target.closest("[data-logout]")) logout();
-  if (event.target.closest("[data-support-status]")) toast("Канал поддержки будет доступен после подключения контакта заведения.");
   if (event.target.closest("[data-close-drawer]")) closeDrawer();
   if (toggleCat) toggleCategory(toggleCat);
   if (editCat) editCategory(editCat);
@@ -979,7 +1026,8 @@ function handleDocumentClick(event) {
   if (openCategoryDeleteButton) openCategoryDelete();
   if (categoryDeleteStage) renderCategoryDelete(categoryDeleteStage);
   if (categoryDeleteConfirm) executeCategoryDelete(categoryDeleteConfirm);
-  if (event.target.closest("[data-close-category-split]")) el.categorySplitDialog.close();
+  if (event.target.closest("[data-close-category]")) closeCategoryDialog();
+  if (event.target.closest("[data-close-category-split]")) closeCategorySplitDialog();
   if (event.target.closest("[data-close-category-delete]")) el.categoryDeleteDialog.close();
   if (openStopPickerButton) openStopPicker();
   if (event.target.closest("[data-close-stop-picker]")) closeStopPicker();
@@ -1551,10 +1599,21 @@ function bindEvents() {
 
   document.addEventListener("click", handleDocumentClick);
   document.addEventListener("keydown", (event) => {
+    if (event.key === "Tab") {
+      trapModalFocus(event, getTopCustomModal());
+      return;
+    }
     if (event.key !== "Escape") return;
-    if (state.attentionIssue) closeAttentionPopup();
+    if (state.attentionIssue) {
+      closeAttentionPopup();
+      return;
+    }
+    if (el.drawer.getAttribute("aria-hidden") === "false") {
+      closeDrawer();
+      return;
+    }
     if (state.splittingCategory || state.deletingCategory) return;
-    [el.stopPickerDialog, el.categoryDeleteDialog, el.categorySplitDialog, el.categoryDialog]
+    [el.stopPickerDialog, el.categoryDeleteDialog]
       .filter(Boolean)
       .find((dialog) => dialog.open)
       ?.close();
@@ -1618,11 +1677,25 @@ function bindEvents() {
   });
 
   el.categoryForm.addEventListener("submit", handleCategorySubmit);
-  document.querySelector("[data-close-category]").addEventListener("click", () => el.categoryDialog.close());
+  el.categoryForm.addEventListener("input", () => { state.categoryDirty = true; });
   el.categorySplitForm?.addEventListener("submit", handleCategorySplitSubmit);
+  el.categorySplitForm?.addEventListener("input", () => { state.categorySplitDirty = true; });
+  el.categoryDialog?.addEventListener("cancel", (event) => {
+    if (!state.categoryDirty) return;
+    event.preventDefault();
+    closeCategoryDialog();
+  });
+  el.categorySplitDialog?.addEventListener("cancel", (event) => {
+    if (!state.categorySplitDirty) return;
+    event.preventDefault();
+    closeCategorySplitDialog();
+  });
   [el.categoryDialog, el.categorySplitDialog, el.categoryDeleteDialog].filter(Boolean).forEach((dialog) => {
     dialog.addEventListener("click", (event) => {
-      if (event.target === dialog && !state.splittingCategory && !state.deletingCategory) dialog.close();
+      if (event.target !== dialog || state.splittingCategory || state.deletingCategory) return;
+      if (dialog === el.categoryDialog) closeCategoryDialog();
+      else if (dialog === el.categorySplitDialog) closeCategorySplitDialog();
+      else dialog.close();
     });
   });
   el.stopPickerSearch?.addEventListener("input", () => renderStopPicker());
@@ -1641,7 +1714,7 @@ function bindEvents() {
   setTranslateStatus(getAutoTranslateEnabled() ? "idle" : "off");
 
   window.addEventListener("beforeunload", (event) => {
-    if (!state.dirty) return;
+    if (!state.dirty && !state.categoryDirty && !state.categorySplitDirty) return;
     event.preventDefault();
     event.returnValue = "";
   });
@@ -1996,7 +2069,7 @@ async function handleItemSubmit(event) {
 
   const submitButton = el.itemForm.querySelector('button[type="submit"]');
   state.savingItem = true;
-  if (submitButton) submitButton.disabled = true;
+  setButtonBusy(submitButton, true);
   try {
     const result = await adminApi("saveItem", { item: payload });
     upsertLocalItem(result.item);
@@ -2008,7 +2081,45 @@ async function handleItemSubmit(event) {
     toast(toFriendlyError(error.message) || "Не удалось сохранить блюдо", "danger");
   } finally {
     state.savingItem = false;
-    if (submitButton) submitButton.disabled = false;
+    setButtonBusy(submitButton, false);
+  }
+}
+
+function setButtonBusy(button, busy) {
+  if (!button) return;
+  button.disabled = Boolean(busy);
+  button.toggleAttribute("aria-busy", Boolean(busy));
+}
+
+function getTopCustomModal() {
+  const selectors = [
+    '.drawer[aria-hidden="false"]',
+    ".attention-modal:not([hidden])",
+    ".analytics-detail-modal:not([hidden])",
+    ".qr-detail-modal:not([hidden])",
+  ];
+  return selectors.flatMap((selector) => [...document.querySelectorAll(selector)])
+    .filter((node) => node.getClientRects().length)
+    .at(-1) || null;
+}
+
+function trapModalFocus(event, container) {
+  if (event.key !== "Tab" || !container) return;
+  const focusable = [...container.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+    .filter((node) => node.getClientRects().length && node.getAttribute("aria-hidden") !== "true");
+  if (!focusable.length) {
+    event.preventDefault();
+    container.focus?.();
+    return;
+  }
+  const first = focusable[0];
+  const last = focusable.at(-1);
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
   }
 }
 
@@ -2025,7 +2136,7 @@ async function translateCategoryNames(button) {
     return;
   }
 
-  button.disabled = true;
+  setButtonBusy(button, true);
   const originalText = button.textContent;
   button.textContent = "Переводим…";
   try {
@@ -2035,12 +2146,14 @@ async function translateCategoryNames(button) {
     ]);
     form.elements.name_en.value = nameEn;
     form.elements.name_kz.value = nameKz;
+    if (form === el.categoryForm) state.categoryDirty = true;
+    if (form === el.categorySplitForm) state.categorySplitDirty = true;
     toast("Названия переведены", "success");
   } catch (error) {
     console.warn("[exort-admin] category translation failed", error);
     toast("Автоперевод пока недоступен. Заполните названия вручную.", "danger");
   } finally {
-    button.disabled = false;
+    setButtonBusy(button, false);
     button.textContent = originalText;
   }
 }
@@ -2056,8 +2169,10 @@ function openCategorySplit() {
   }
 
   state.categoryOperationId = categoryId;
+  state.categoryDirty = false;
   el.categoryDialog.close();
   el.categorySplitForm.reset();
+  state.categorySplitDirty = false;
   el.categorySplitForm.elements.category_id.value = categoryId;
   el.categorySplitSource.textContent = getCategoryDisplayName(category);
   el.categorySplitError.textContent = "";
@@ -2098,7 +2213,7 @@ async function handleCategorySplitSubmit(event) {
 
   const submitButton = el.categorySplitForm.querySelector('button[type="submit"]');
   state.splittingCategory = true;
-  if (submitButton) submitButton.disabled = true;
+  setButtonBusy(submitButton, true);
   try {
     const result = await adminApi("splitCategory", {
       categoryId,
@@ -2109,6 +2224,7 @@ async function handleCategorySplitSubmit(event) {
         name_en: nameEn,
       },
     });
+    state.categorySplitDirty = false;
     el.categorySplitDialog.close();
     state.categoryOperationId = "";
     applyAdminData(result);
@@ -2118,7 +2234,7 @@ async function handleCategorySplitSubmit(event) {
     el.categorySplitError.textContent = toFriendlyError(error.message) || "Не удалось разделить раздел.";
   } finally {
     state.splittingCategory = false;
-    if (submitButton) submitButton.disabled = false;
+    setButtonBusy(submitButton, false);
   }
 }
 
@@ -2126,6 +2242,7 @@ function openCategoryDelete() {
   const categoryId = el.categoryForm.elements.id.value;
   if (!state.categories.some((entry) => entry.id === categoryId)) return;
   state.categoryOperationId = categoryId;
+  state.categoryDirty = false;
   el.categoryDialog.close();
   renderCategoryDelete("initial");
   el.categoryDeleteDialog.showModal();
@@ -2193,9 +2310,10 @@ if (el.viewTitle && viewMeta[state.activeView]) {
 }
 
 function showLoginError(message) {
-  el.loginError.textContent = String(message || "").includes("Failed to fetch")
+  const friendlyMessage = toFriendlyError(message);
+  el.loginError.textContent = String(friendlyMessage || "").includes("Failed to fetch")
     ? "Сервис временно недоступен. Попробуйте обновить страницу или обратитесь в поддержку Exort."
-    : message;
+    : friendlyMessage;
 }
 
 function togglePinVisibility() {
@@ -2299,4 +2417,5 @@ function openItemDrawer(id = "") {
   el.drawer.setAttribute("aria-hidden", "false");
   state.dirty = false;
   renderDishPreview();
+  setTimeout(() => el.drawer.querySelector(".drawer-panel [data-close-drawer]")?.focus(), 60);
 }

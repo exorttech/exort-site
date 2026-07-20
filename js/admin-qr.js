@@ -7,6 +7,8 @@
     mounted: false,
     wifi: { payload: "", ssid: "", security: "WPA", hidden: false, createdAt: "" },
     detail: null,
+    detailTrigger: null,
+    detailFocusSelector: "",
   };
 
   async function mount(options = {}) {
@@ -101,27 +103,27 @@
 
   function sourceCard(source) {
     const isDirect = isDirectSource(source);
-    return `<article class="qr-source-card qr-source-card--compact ${isDirect ? "qr-source-card--system" : ""}" data-source-card="${escapeHtml(source.id)}">
+    return `<article class="qr-source-card qr-source-card--compact ${isDirect ? "qr-source-card--system" : ""}" data-source-card="${escapeHtml(source.id)}" data-qr-details="${escapeHtml(source.id)}" role="button" tabindex="0" aria-label="Подробнее: ${escapeHtml(source.name)}">
       <header class="qr-source-title">
         <h4>${escapeHtml(source.name)}</h4>
         <span class="qr-status ${isDirect ? "is-system" : "is-active"}">${isDirect ? "Системный" : "Активен"}</span>
       </header>
       <div class="qr-compact-bottom">
         <strong>${formatVisits(source.visits)}</strong>
-        <button type="button" data-qr-details="${escapeHtml(source.id)}">Подробнее <span aria-hidden="true">→</span></button>
+        <span class="qr-card-more">Подробнее <span aria-hidden="true">→</span></span>
       </div>
     </article>`;
   }
 
   function wifiCard() {
-    return `<article class="qr-source-card qr-source-card--compact qr-source-card--wifi" data-wifi-card>
+    return `<article class="qr-source-card qr-source-card--compact qr-source-card--wifi" data-wifi-card data-wifi-details role="button" tabindex="0" aria-label="Подробнее: ${escapeHtml(state.wifi.ssid)}">
       <header class="qr-source-title">
         <h4>${escapeHtml(state.wifi.ssid)}</h4>
         <span class="qr-status is-local">Локальный</span>
       </header>
       <div class="qr-compact-bottom">
         <strong>Без аналитики</strong>
-        <button type="button" data-wifi-details>Подробнее <span aria-hidden="true">→</span></button>
+        <span class="qr-card-more">Подробнее <span aria-hidden="true">→</span></span>
       </div>
     </article>`;
   }
@@ -222,7 +224,7 @@
       <div class="qr-direct-audience-grid">
         ${renderAudienceList("Устройства", devices)}
         ${renderAudienceList("Браузеры и приложения", browsers)}
-        ${referrers.length ? renderAudienceList("Referrer", referrers) : ""}
+        ${referrers.length ? renderAudienceList("Откуда пришли гости", referrers) : ""}
       </div>
     </section>`;
   }
@@ -261,6 +263,8 @@
   async function openSourceDetails(sourceId) {
     if (!state.sources.some((source) => source.id === sourceId)) return;
     state.detail = { kind: "source", id: sourceId, range: "7d", analytics: null, loading: false, error: "", deleting: false };
+    state.detailFocusSelector = ".qr-detail-close";
+    requestAnimationFrame(() => state.root.querySelector(".qr-detail-close")?.focus());
     await loadSourceAnalytics("7d");
   }
 
@@ -283,6 +287,9 @@
       if (state.detail?.kind === "source" && state.detail.id === sourceId && state.detail.range === requestedRange) {
         state.detail.loading = false;
         render();
+        const focusSelector = state.detailFocusSelector || ".qr-detail-close";
+        state.detailFocusSelector = "";
+        requestAnimationFrame(() => state.root.querySelector(focusSelector)?.focus());
       }
     }
   }
@@ -291,15 +298,26 @@
     if (!state.wifi.payload) return;
     state.detail = { kind: "wifi", id: "wifi", analytics: null, loading: false, error: "", deleting: false };
     render();
+    requestAnimationFrame(() => state.root.querySelector(".qr-detail-close")?.focus());
   }
 
   function closeDetails() {
+    const focusTarget = state.detailTrigger;
     state.detail = null;
+    state.detailTrigger = null;
+    state.detailFocusSelector = "";
     document.body.classList.remove("qr-detail-modal-open");
     render();
+    if (focusTarget) requestAnimationFrame(() => state.root.querySelector(focusTarget)?.focus());
   }
 
   function handleKeydown(event) {
+    const card = event.target.closest?.(".qr-source-card--compact[data-qr-details], .qr-source-card--compact[data-wifi-details]");
+    if (card && event.target === card && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      card.click();
+      return;
+    }
     if (event.key === "Escape" && state.detail) closeDetails();
   }
 
@@ -358,6 +376,7 @@
     const status = form.querySelector("[data-qr-form-status]");
     const button = form.querySelector('button[type="submit"]');
     button.disabled = true;
+    button.setAttribute("aria-busy", "true");
     status.textContent = "Создаём безопасную ссылку...";
     try {
       const data = Object.fromEntries(new FormData(form));
@@ -369,6 +388,7 @@
       status.textContent = friendly(error);
     } finally {
       button.disabled = false;
+      button.removeAttribute("aria-busy");
     }
   }
 
@@ -376,16 +396,25 @@
     if (event.target.closest("[data-qr-retry]")) return load();
     if (event.target.closest("[data-close-qr-detail]")) return closeDetails();
     const rangeButton = event.target.closest("[data-qr-range]");
-    if (rangeButton) return loadSourceAnalytics(rangeButton.dataset.qrRange);
+    if (rangeButton) {
+      state.detailFocusSelector = `[data-qr-range="${rangeButton.dataset.qrRange}"]`;
+      return loadSourceAnalytics(rangeButton.dataset.qrRange);
+    }
     if (event.target.closest("[data-wifi-download]")) return downloadWifiPng();
-    if (event.target.closest("[data-wifi-details]")) return openWifiDetails();
+    if (event.target.closest("[data-wifi-details]")) {
+      state.detailTrigger = "[data-wifi-details]";
+      return openWifiDetails();
+    }
     if (event.target.closest("[data-wifi-delete]")) return deleteWifi();
     const action = ["copy", "download", "details", "delete"].find((name) => event.target.closest(`[data-qr-${name}]`));
     if (!action) return;
     const button = event.target.closest(`[data-qr-${action}]`);
     const source = state.sources.find((item) => item.id === button.dataset[`qr${capitalize(action)}`]);
     if (!source) return;
-    if (action === "details") return openSourceDetails(source.id);
+    if (action === "details") {
+      state.detailTrigger = `[data-qr-details="${cssEscape(source.id)}"]`;
+      return openSourceDetails(source.id);
+    }
     if (action === "delete") return deleteSource(source.id);
     if (action === "copy") {
       await navigator.clipboard.writeText(source.url);
@@ -475,7 +504,12 @@
     if (!window.ExortAdminBridge?.api) return Promise.reject(new Error("Admin API is not ready."));
     return window.ExortAdminBridge.api(action, payload);
   }
-  function friendly(error) { return error?.message || "Не удалось выполнить действие."; }
+  function friendly(error) {
+    const message = String(error?.message || "");
+    return /Netlify|Cloudflare|Worker|Supabase|SERVICE_ROLE|SQL|backend|Admin API/i.test(message)
+      ? "Сервис временно недоступен. Повторите попытку или обратитесь в поддержку Exort."
+      : message || "Не удалось выполнить действие.";
+  }
   function number(value) { return new Intl.NumberFormat("ru-RU").format(Number(value || 0)); }
   function formatVisits(value) {
     const count = Number(value || 0);
