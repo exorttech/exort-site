@@ -437,6 +437,15 @@
     <script>
       window.addEventListener("DOMContentLoaded", () => {
         const homepageUrl = "https://exort.kz/";
+        new QRCode(document.getElementById("homepage-qr"), {
+          text: homepageUrl,
+          width: 600,
+          height: 600,
+          colorDark: "#13261f",
+          colorLight: "#fffdf7",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        return;
         const original = document.querySelector(".business-card");
         const copy = original.cloneNode(true);
         copy.classList.add("business-card--second");
