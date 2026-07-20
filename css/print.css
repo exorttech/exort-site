@@ -36,11 +36,11 @@ body {
 }
 
 .business-card {
-  flex: 0 0 96mm;
-  width: 96mm;
-  height: 56mm;
-  min-width: 96mm;
-  min-height: 56mm;
+  flex: 0 0 3.5in;
+  width: 3.5in;
+  height: 2in;
+  min-width: 3.5in;
+  min-height: 2in;
   margin: 0;
   box-shadow: none;
   transform: none !important;
