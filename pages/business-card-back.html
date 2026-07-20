@@ -12,8 +12,8 @@
     />
     <style>
       :root {
-        --card-width: 3.5in;
-        --card-height: 2in;
+        --card-width: 96mm;
+        --card-height: 56mm;
         --green: #13261f;
         --cream: #fffdf7;
         --orange: #ff5a36;
@@ -335,81 +335,33 @@
         transform: translateX(-50%);
       }
 
-      @media (max-width: 380px), (max-height: 230px) {
+      @media screen and (max-width: 380px), screen and (max-height: 230px) {
         .business-card { transform: scale(0.88); }
       }
 
       @media print {
-        /* Two finished cards stacked vertically: 96×116 mm including 3 mm bleed. */
+        /* One card page: 96×56 mm including bleed. */
         @page {
-          size: 96mm 116mm;
+          size: 96mm 56mm;
           margin: 0;
         }
 
         html,
         body {
-          width: 96mm;
-          min-width: 96mm;
-          height: 116mm;
-          min-height: 116mm;
           margin: 0;
           padding: 0;
-          overflow: hidden;
-          background: #fff;
           print-color-adjust: exact;
           -webkit-print-color-adjust: exact;
         }
 
-        .card-row {
-          width: 96mm;
-          height: 116mm;
-          gap: 4mm;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .business-card {
-          flex: 0 0 90mm;
-          width: 90mm;
-          height: 50mm;
-          min-width: 90mm;
-          min-height: 50mm;
-          box-shadow: 0 0 0 3mm var(--green);
+        *, *::before, *::after {
           print-color-adjust: exact;
           -webkit-print-color-adjust: exact;
         }
 
-        /* Keep all internal artwork inside the 4 mm safe zone from the cut edge. */
-        .business-card__identity,
-        .business-card__footer,
-        .business-card__second-title,
-        .business-card__second-qr {
-          print-color-adjust: exact;
-          -webkit-print-color-adjust: exact;
-        }
-
-        .business-card__watermark,
-        .business-card__diagonal {
-          print-color-adjust: exact;
-          -webkit-print-color-adjust: exact;
-        }
-
-        * {
-          animation: none !important;
-          transition: none !important;
-        }
       }
     </style>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <style>
-      .card-row > .business-card:first-child { display: none !important; }
-      @media print {
-        @page { size: 96mm 56mm; margin: 0; }
-        html, body { width: 96mm; height: 56mm; min-width: 96mm; min-height: 56mm; overflow: hidden; }
-        .card-row { width: 96mm; height: 56mm; }
-        .card-row > .business-card:first-child { display: none !important; }
-      }
-    </style>
   </head>
   <body>
     <div class="card-row">
