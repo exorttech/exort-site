@@ -36,12 +36,14 @@ body {
 }
 
 .business-card {
-  flex: 0 0 90mm;
-  width: 90mm;
-  height: 50mm;
-  min-width: 90mm;
-  min-height: 50mm;
-  box-shadow: 0 0 0 3mm var(--green);
+  flex: 0 0 96mm;
+  width: 96mm;
+  height: 56mm;
+  min-width: 96mm;
+  min-height: 56mm;
+  margin: 0;
+  box-shadow: none;
+  transform: none !important;
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
