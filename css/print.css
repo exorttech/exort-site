@@ -1,0 +1,52 @@
+/* Print-only technical setup for one 96×56 mm card sheet (90×50 mm trim + 3 mm bleed). */
+@page {
+  size: 96mm 56mm;
+  margin: 0;
+}
+
+html,
+body {
+  width: 96mm;
+  height: 56mm;
+  min-width: 96mm;
+  min-height: 56mm;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.card-row {
+  width: 96mm;
+  height: 56mm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.business-card {
+  flex: 0 0 90mm;
+  width: 90mm;
+  height: 50mm;
+  min-width: 90mm;
+  min-height: 50mm;
+  box-shadow: 0 0 0 3mm var(--green);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+* {
+  animation: none !important;
+  transition: none !important;
+}
