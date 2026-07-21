@@ -292,15 +292,20 @@ async function getOwnedRow(table, restaurantId, id) {
 async function uploadImage(slug, filename, dataUrl) {
   const match = String(dataUrl || "").match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
   if (!match) throw new Error("Invalid image payload.");
+  if (match[1].toLowerCase() !== "image/webp") throw new Error("Image must be optimized to WebP before upload.");
   const contentType = "image/webp";
   const buffer = Buffer.from(match[2], "base64");
-  if (buffer.length > 10 * 1024 * 1024) throw new Error("Image is larger than 10 MB.");
+  if (buffer.length > 800 * 1024) throw new Error("Optimized image is larger than 800 KB.");
+  if (buffer.toString("ascii", 0, 4) !== "RIFF" || buffer.toString("ascii", 8, 12) !== "WEBP") {
+    throw new Error("Invalid WebP image payload.");
+  }
 
   const path = `${slug}/${filename}`;
   const upload = await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${path}`, {
     method: "POST",
     headers: createSupabaseHeaders({
       "Content-Type": contentType,
+      "Cache-Control": "public, max-age=31536000, immutable",
       "x-upsert": "true",
     }),
     body: buffer,
