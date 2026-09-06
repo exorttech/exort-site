@@ -15,6 +15,17 @@
   status = 200
 
 [[redirects]]
+  from = "/lee-you-menu"
+  to = "/pages/lee-you-menu.html"
+  status = 200
+
+[[redirects]]
+  from = "https://leeyou.exort.kz/"
+  to = "/pages/lee-you-menu.html"
+  status = 200
+  force = true
+
+[[redirects]]
   from = "/coffee-menu-demo"
   to = "/pages/coffee-menu-demo.html"
   status = 200

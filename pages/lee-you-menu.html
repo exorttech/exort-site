@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f7f1e8" />
+    <title>Цифровое меню</title>
+    <meta name="description" content="Цифровое меню ресторана." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/lee-you-menu.css?v=3" />
+    <script defer src="../js/lee-you-menu.js?v=3"></script>
+  </head>
+  <body class="is-menu-loading" data-restaurant-slug="leeyou">
+    <div class="menu-loading" role="status" aria-live="polite">
+      <span data-loading-message>Загружаем меню…</span>
+    </div>
+
+    <div class="demo-layout">
+      <aside class="atmosphere-panel" data-venue-aside>
+        <div class="atmosphere-panel__image" data-atmosphere-image></div>
+        <div class="atmosphere-panel__veil"></div>
+        <div class="atmosphere-panel__content">
+          <p class="eyebrow">EXORT · DIGITAL MENU</p>
+          <h2>Меню, которое продолжает атмосферу заведения.</h2>
+          <p>Быстрый выбор блюд и напитков после сканирования QR-кода.</p>
+        </div>
+      </aside>
+
+      <main class="menu-app" id="top">
+        <header class="hero">
+          <img class="hero__image" data-venue-hero src="" alt="" fetchpriority="high" />
+          <div class="hero__shade"></div>
+
+          <div class="hero__topbar">
+            <a class="brand-chip brand-chip--stacked" href="#top" data-venue-wordmark aria-label="Наверх">
+              <img class="brand-chip__logo" data-venue-logo alt="" hidden />
+              <span data-venue-wordmark-text></span>
+            </a>
+            <div class="hero__actions">
+              <button class="icon-button" type="button" data-search-toggle aria-label="Открыть поиск">
+                <span aria-hidden="true">⌕</span>
+              </button>
+              <div class="language-switch" aria-label="Выбор языка">
+                <button type="button" data-language="ru" class="is-active">RU</button>
+                <button type="button" data-language="kk">KZ</button>
+                <button type="button" data-language="en">EN</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero__content">
+            <div class="status-line" data-venue-status-row>
+              <span class="status-dot"></span>
+              <span data-venue-status></span>
+            </div>
+            <p class="hero__kicker" data-venue-subtitle></p>
+            <h1 class="hero-title--stacked" data-venue-heading></h1>
+            <p class="hero__address" data-venue-address></p>
+            <div class="hero__links">
+              <button class="primary-button" type="button" data-scroll-menu>
+                <span data-copy="viewMenu">Смотреть меню</span>
+                <span aria-hidden="true">↓</span>
+              </button>
+              <button class="quiet-link" type="button" data-info-open data-copy="aboutLink">О заведении</button>
+            </div>
+          </div>
+        </header>
+
+        <section class="search-drawer" data-search-drawer aria-hidden="true">
+          <label class="search-field">
+            <span aria-hidden="true">⌕</span>
+            <input type="search" data-search-input placeholder="Блюдо, напиток или ингредиент" autocomplete="off" />
+            <button type="button" data-search-clear aria-label="Очистить поиск">×</button>
+          </label>
+          <button class="search-cancel" type="button" data-search-close data-copy="cancel">Отмена</button>
+        </section>
+
+        <nav class="category-nav" data-category-nav aria-label="Категории меню"></nav>
+
+        <div class="menu-content" id="menu">
+          <section class="intro-section">
+            <p class="eyebrow eyebrow--dark" data-featured-eyebrow>ВЫБОР</p>
+            <div class="section-heading">
+              <h2 data-copy="todayTitle">Популярные позиции</h2>
+              <p data-copy="todayText">То, что гости выбирают чаще всего.</p>
+            </div>
+            <div class="featured-grid" data-featured-grid></div>
+          </section>
+
+          <div class="menu-sections" data-menu-sections></div>
+
+          <div class="empty-state" data-empty-state hidden>
+            <span>⌕</span>
+            <h2 data-copy="nothingFound">Ничего не нашли</h2>
+            <p data-copy="tryAnother">Попробуйте другое название или ингредиент.</p>
+            <button type="button" class="secondary-button" data-reset-search data-copy="resetSearch">
+              Сбросить поиск
+            </button>
+          </div>
+        </div>
+
+        <section class="about-section" id="about">
+          <div class="about-section__header">
+            <p class="eyebrow eyebrow--dark" data-copy="aboutEyebrow">О ЗАВЕДЕНИИ</p>
+            <h2 data-venue-about-title></h2>
+          </div>
+          <p class="about-section__lead" data-venue-about></p>
+          <div class="info-list" data-profile-list>
+            <div class="info-row" data-profile-field="address">
+              <span data-copy="addressLabel">Адрес</span>
+              <strong data-profile-address></strong>
+            </div>
+            <div class="info-row" data-profile-field="hours">
+              <span data-copy="hoursLabel">Режим работы</span>
+              <strong data-profile-hours></strong>
+            </div>
+            <div class="info-row" data-profile-field="service">
+              <span data-copy="serviceLabel">Сервис</span>
+              <strong data-profile-service></strong>
+            </div>
+            <div class="info-row" data-profile-field="instagram">
+              <span>Instagram</span>
+              <strong data-profile-instagram></strong>
+            </div>
+            <div class="info-row" data-profile-field="phone">
+              <span data-copy="phoneLabel">Телефон</span>
+              <strong data-profile-phone></strong>
+            </div>
+            <div class="info-row" data-profile-field="whatsapp">
+              <span>WhatsApp</span>
+              <strong data-profile-whatsapp></strong>
+            </div>
+            <div class="info-row" data-profile-field="wifi">
+              <span>Wi-Fi</span>
+              <strong data-profile-wifi></strong>
+            </div>
+            <div class="info-row" data-profile-field="additional">
+              <span data-copy="additionalLabel">Дополнительно</span>
+              <strong data-profile-additional></strong>
+            </div>
+          </div>
+        </section>
+
+        <footer class="powered-footer">
+          <div>
+            <span data-copy="poweredBy">Меню работает на</span>
+            <strong>EXORT</strong>
+          </div>
+          <a href="../index.html" data-copy="wantMenu">Хочу такое меню</a>
+        </footer>
+      </main>
+    </div>
+
+    <div class="sheet-layer" data-sheet-layer aria-hidden="true">
+      <button class="sheet-backdrop" type="button" data-sheet-close aria-label="Закрыть карточку"></button>
+      <article class="product-sheet" data-product-sheet role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <button class="sheet-close" type="button" data-sheet-close aria-label="Закрыть">×</button>
+        <div data-sheet-content></div>
+      </article>
+    </div>
+
+    <div class="restaurant-info-layer" data-info-layer aria-hidden="true">
+      <button class="restaurant-info-backdrop" type="button" data-info-close aria-label="Закрыть"></button>
+      <article class="restaurant-info-modal" data-info-modal role="dialog" aria-modal="true" aria-labelledby="restaurant-info-title">
+        <header class="restaurant-info-modal__head">
+          <h2 id="restaurant-info-title" data-copy="aboutLink">О заведении</h2>
+          <button class="restaurant-info-close" type="button" data-info-close aria-label="Закрыть">×</button>
+        </header>
+        <div class="restaurant-info-modal__body">
+          <div class="restaurant-info-modal__brand">
+            <img class="restaurant-info-modal__logo" data-info-logo alt="" hidden />
+            <strong data-info-name></strong>
+          </div>
+          <p class="restaurant-info-modal__about" data-info-about></p>
+          <div class="info-list" data-info-list></div>
+        </div>
+      </article>
+    </div>
+  </body>
+</html>
