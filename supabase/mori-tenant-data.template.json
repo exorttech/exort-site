@@ -1,0 +1,851 @@
+{
+  "status": "template-only-do-not-apply-without-real-profile",
+  "slug": "mori-coffee",
+  "restaurant": {
+    "slug": "mori-coffee",
+    "name": "MORI Coffee",
+    "is_active": false,
+    "hero_image_url": null,
+    "logo_url": null,
+    "subtitle_ru": null,
+    "subtitle_kk": null,
+    "subtitle_en": null,
+    "about_ru": null,
+    "about_kk": null,
+    "about_en": null,
+    "address_ru": null,
+    "address_kk": null,
+    "address_en": null,
+    "address_url": null,
+    "hours_ru": null,
+    "hours_kk": null,
+    "hours_en": null,
+    "phone": null,
+    "instagram_url": null,
+    "instagram_handle": null,
+    "whatsapp_url": null,
+    "wifi_name": null,
+    "additional_info_ru": null,
+    "supported_languages": [
+      "ru",
+      "kk",
+      "en"
+    ]
+  },
+  "categories": [
+    {
+      "key": "breakfast",
+      "title_ru": "Завтраки",
+      "title_kk": "Таңғы ас",
+      "title_en": "Breakfast",
+      "sort_order": 10,
+      "is_active": true
+    },
+    {
+      "key": "coffee",
+      "title_ru": "Кофе",
+      "title_kk": "Кофе",
+      "title_en": "Coffee",
+      "sort_order": 20,
+      "is_active": true
+    },
+    {
+      "key": "signature",
+      "title_ru": "Авторские напитки",
+      "title_kk": "Авторлық сусындар",
+      "title_en": "Signature drinks",
+      "sort_order": 30,
+      "is_active": true
+    },
+    {
+      "key": "noncoffee",
+      "title_ru": "Не кофе",
+      "title_kk": "Кофесіз",
+      "title_en": "Not coffee",
+      "sort_order": 40,
+      "is_active": true
+    },
+    {
+      "key": "desserts",
+      "title_ru": "Десерты",
+      "title_kk": "Десерттер",
+      "title_en": "Desserts",
+      "sort_order": 50,
+      "is_active": true
+    },
+    {
+      "key": "sandwiches",
+      "title_ru": "Сэндвичи",
+      "title_kk": "Сэндвичтер",
+      "title_en": "Sandwiches",
+      "sort_order": 60,
+      "is_active": true
+    },
+    {
+      "key": "seasonal",
+      "title_ru": "Сезонное",
+      "title_kk": "Маусымдық",
+      "title_en": "Seasonal",
+      "sort_order": 70,
+      "is_active": true
+    }
+  ],
+  "items": [
+    {
+      "content_key": "pistachio-raf",
+      "category_key": "signature",
+      "title_ru": "Фисташковый раф",
+      "title_kk": "Пістелі раф",
+      "title_en": "Pistachio raf",
+      "description_ru": "Сливочный кофе с пастой из обжаренной фисташки и щепоткой морской соли.",
+      "description_kk": "Қуырылған пісте пастасы мен теңіз тұзы қосылған кілегейлі кофе.",
+      "description_en": "Creamy coffee with roasted pistachio paste and a pinch of sea salt.",
+      "price": 2400,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1100&q=84",
+      "badge_key": "hitBadge",
+      "weight": "300 мл",
+      "sort_order": 10,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Эспрессо, сливки, молоко, фисташковая паста, соль",
+          "kk": "Эспрессо, кілегей, сүт, пісте пастасы, тұз",
+          "en": "Espresso, cream, milk, pistachio paste, salt"
+        },
+        "allergens": {
+          "ru": "Молоко, орехи",
+          "kk": "Сүт, жаңғақтар",
+          "en": "Milk, nuts"
+        },
+        "pairing": {
+          "ru": "Тирамису MORI",
+          "kk": "MORI тирамисуы",
+          "en": "MORI tiramisu"
+        },
+        "featured": true
+      }
+    },
+    {
+      "content_key": "strawberry-matcha",
+      "category_key": "seasonal",
+      "title_ru": "Айс-матча с клубникой",
+      "title_kk": "Құлпынайлы айс-матча",
+      "title_en": "Strawberry iced matcha",
+      "description_ru": "Церемониальная матча, клубничное пюре и холодное молоко.",
+      "description_kk": "Салтанатты матча, құлпынай езбесі және салқын сүт.",
+      "description_en": "Ceremonial matcha, strawberry purée and chilled milk.",
+      "price": 2600,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=900&q=84",
+      "badge_key": "seasonalBadge",
+      "weight": "400 мл",
+      "sort_order": 20,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Матча, клубника, молоко, ваниль",
+          "kk": "Матча, құлпынай, сүт, ваниль",
+          "en": "Matcha, strawberry, milk, vanilla"
+        },
+        "allergens": {
+          "ru": "Молоко",
+          "kk": "Сүт",
+          "en": "Milk"
+        },
+        "pairing": {
+          "ru": "Лимонный тарт",
+          "kk": "Лимон тарты",
+          "en": "Lemon tart"
+        },
+        "featured": true
+      }
+    },
+    {
+      "content_key": "salmon-croissant",
+      "category_key": "breakfast",
+      "title_ru": "Круассан с лососем",
+      "title_kk": "Албырт қосылған круассан",
+      "title_en": "Salmon croissant",
+      "description_ru": "Тёплый круассан, слабосолёный лосось, скрэмбл и крем-чиз.",
+      "description_kk": "Жылы круассан, аз тұздалған албырт, скрэмбл және крем-чиз.",
+      "description_en": "Warm croissant, cured salmon, soft scrambled eggs and cream cheese.",
+      "price": 4200,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=900&q=84",
+      "badge_key": "hitBadge",
+      "weight": "310 г",
+      "sort_order": 30,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Круассан, лосось, яйцо, крем-чиз, шпинат",
+          "kk": "Круассан, албырт, жұмыртқа, крем-чиз, шпинат",
+          "en": "Croissant, salmon, egg, cream cheese, spinach"
+        },
+        "allergens": {
+          "ru": "Глютен, молоко, яйцо, рыба",
+          "kk": "Глютен, сүт, жұмыртқа, балық",
+          "en": "Gluten, milk, egg, fish"
+        },
+        "pairing": {
+          "ru": "Фильтр-кофе",
+          "kk": "Фильтр-кофе",
+          "en": "Filter coffee"
+        },
+        "featured": true
+      }
+    },
+    {
+      "content_key": "tiramisu",
+      "category_key": "desserts",
+      "title_ru": "Тирамису MORI",
+      "title_kk": "MORI тирамисуы",
+      "title_en": "MORI tiramisu",
+      "description_ru": "Воздушный крем маскарпоне, савоярди и наш эспрессо-бленд.",
+      "description_kk": "Жеңіл маскарпоне кремі, савоярди және біздің эспрессо қоспасы.",
+      "description_en": "Light mascarpone cream, savoiardi and our house espresso blend.",
+      "price": 2500,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=900&q=84",
+      "badge_key": "newBadge",
+      "weight": "170 г",
+      "sort_order": 40,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Маскарпоне, савоярди, эспрессо, какао",
+          "kk": "Маскарпоне, савоярди, эспрессо, какао",
+          "en": "Mascarpone, savoiardi, espresso, cocoa"
+        },
+        "allergens": {
+          "ru": "Молоко, яйцо, глютен",
+          "kk": "Сүт, жұмыртқа, глютен",
+          "en": "Milk, egg, gluten"
+        },
+        "pairing": {
+          "ru": "Эспрессо",
+          "kk": "Эспрессо",
+          "en": "Espresso"
+        },
+        "featured": true
+      }
+    },
+    {
+      "content_key": "syrniki",
+      "category_key": "breakfast",
+      "title_ru": "Сырники со сметанным кремом",
+      "title_kk": "Қаймақ кремі мен жидекті тосап қосылған ірімшік құймақтары",
+      "title_en": "Syrniki with sour cream",
+      "description_ru": "Нежные сырники, сметанный крем, сезонные ягоды и фисташка.",
+      "description_kk": "Жұмсақ сырниктер, қаймақ кремі, маусымдық жидектер мен пісте.",
+      "description_en": "Soft cottage cheese pancakes, sour cream, seasonal berries and pistachio.",
+      "price": 3200,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1528207776546-365bb710ee93?auto=format&fit=crop&w=900&q=84",
+      "badge_key": null,
+      "weight": "280 г",
+      "sort_order": 50,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Творог, яйцо, сметана, ягоды, фисташка",
+          "kk": "Сүзбе, жұмыртқа, қаймақ, жидектер, пісте",
+          "en": "Cottage cheese, egg, sour cream, berries, pistachio"
+        },
+        "allergens": {
+          "ru": "Молоко, яйцо, орехи",
+          "kk": "Сүт, жұмыртқа, жаңғақтар",
+          "en": "Milk, egg, nuts"
+        },
+        "pairing": {
+          "ru": "Капучино",
+          "kk": "Капучино",
+          "en": "Cappuccino"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "turkish-eggs",
+      "category_key": "breakfast",
+      "title_ru": "Турецкие яйца",
+      "title_kk": "Түрікше жұмыртқа",
+      "title_en": "Turkish eggs",
+      "description_ru": "Яйца пашот, йогурт с чесноком, пряное масло и тартин.",
+      "description_kk": "Пашот жұмыртқасы, сарымсақты йогурт, дәмдеуіш май және тартин.",
+      "description_en": "Poached eggs, garlic yogurt, spiced butter and sourdough tartine.",
+      "price": 3600,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=900&q=84",
+      "badge_key": null,
+      "weight": "330 г",
+      "sort_order": 60,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Яйцо, йогурт, сливочное масло, хлеб, зелень",
+          "kk": "Жұмыртқа, йогурт, сары май, нан, көк",
+          "en": "Egg, yogurt, butter, sourdough, herbs"
+        },
+        "allergens": {
+          "ru": "Яйцо, молоко, глютен",
+          "kk": "Жұмыртқа, сүт, глютен",
+          "en": "Egg, milk, gluten"
+        },
+        "pairing": {
+          "ru": "Американо",
+          "kk": "Американо",
+          "en": "Americano"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "granola",
+      "category_key": "breakfast",
+      "title_ru": "Домашняя гранола",
+      "title_kk": "Үй граноласы",
+      "title_en": "House granola",
+      "description_ru": "Греческий йогурт, мёд, ореховая гранола и свежие фрукты.",
+      "description_kk": "Грек йогурты, бал, жаңғақты гранола және балғын жеміс.",
+      "description_en": "Greek yogurt, honey, nut granola and fresh fruit.",
+      "price": 2800,
+      "currency": "₸",
+      "image_url": null,
+      "badge_key": null,
+      "weight": "260 г",
+      "sort_order": 70,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Йогурт, овсяные хлопья, орехи, мёд, фрукты",
+          "kk": "Йогурт, сұлы, жаңғақтар, бал, жеміс",
+          "en": "Yogurt, oats, nuts, honey, fruit"
+        },
+        "allergens": {
+          "ru": "Молоко, орехи",
+          "kk": "Сүт, жаңғақтар",
+          "en": "Milk, nuts"
+        },
+        "pairing": {
+          "ru": "Матча-латте",
+          "kk": "Матча-латте",
+          "en": "Matcha latte"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "cappuccino",
+      "category_key": "coffee",
+      "title_ru": "Капучино",
+      "title_kk": "Капучино",
+      "title_en": "Cappuccino",
+      "description_ru": "Эспрессо-бленд MORI и шелковистое молоко.",
+      "description_kk": "MORI эспрессо қоспасы және жібектей сүт.",
+      "description_en": "MORI espresso blend with silky steamed milk.",
+      "price": 1600,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&q=84",
+      "badge_key": null,
+      "weight": "250 мл",
+      "sort_order": 80,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Эспрессо, молоко",
+          "kk": "Эспрессо, сүт",
+          "en": "Espresso, milk"
+        },
+        "allergens": {
+          "ru": "Молоко",
+          "kk": "Сүт",
+          "en": "Milk"
+        },
+        "pairing": {
+          "ru": "Круассан классический",
+          "kk": "Классикалық круассан",
+          "en": "Classic croissant"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "filter",
+      "category_key": "coffee",
+      "title_ru": "Фильтр-кофе",
+      "title_kk": "Фильтр-кофе",
+      "title_en": "Filter coffee",
+      "description_ru": "Зерно недели с чистым, ягодным профилем.",
+      "description_kk": "Таза, жидекті профилі бар аптаның дәні.",
+      "description_en": "Our bean of the week with a clean, berry-led profile.",
+      "price": 1800,
+      "currency": "₸",
+      "image_url": null,
+      "badge_key": "hitBadge",
+      "weight": "300 мл",
+      "sort_order": 90,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Кофе, вода",
+          "kk": "Кофе, су",
+          "en": "Coffee, water"
+        },
+        "allergens": {
+          "ru": "Нет",
+          "kk": "Жоқ",
+          "en": "None"
+        },
+        "pairing": {
+          "ru": "Тирамису MORI",
+          "kk": "MORI тирамисуы",
+          "en": "MORI tiramisu"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "flat-white",
+      "category_key": "coffee",
+      "title_ru": "Флэт уайт",
+      "title_kk": "Флэт уайт",
+      "title_en": "Flat white",
+      "description_ru": "Двойной ристретто и тонкая молочная текстура.",
+      "description_kk": "Қос ристретто және жұқа сүт текстурасы.",
+      "description_en": "Double ristretto with a thin, velvety milk texture.",
+      "price": 1900,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&w=900&q=84",
+      "badge_key": null,
+      "weight": "200 мл",
+      "sort_order": 100,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Двойной ристретто, молоко",
+          "kk": "Қос ристретто, сүт",
+          "en": "Double ristretto, milk"
+        },
+        "allergens": {
+          "ru": "Молоко",
+          "kk": "Сүт",
+          "en": "Milk"
+        },
+        "pairing": {
+          "ru": "Канеле",
+          "kk": "Канеле",
+          "en": "Canelé"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "espresso-tonic",
+      "category_key": "signature",
+      "title_ru": "Эспрессо-тоник с юдзу",
+      "title_kk": "Юдзулі эспрессо-тоник",
+      "title_en": "Yuzu espresso tonic",
+      "description_ru": "Яркий эспрессо, сухой тоник и цитрусовый юдзу.",
+      "description_kk": "Жарқын эспрессо, құрғақ тоник және цитрусты юдзу.",
+      "description_en": "Bright espresso, dry tonic and citrusy yuzu.",
+      "price": 2300,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=900&q=84",
+      "badge_key": "newBadge",
+      "weight": "350 мл",
+      "sort_order": 110,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Эспрессо, тоник, юдзу, лёд",
+          "kk": "Эспрессо, тоник, юдзу, мұз",
+          "en": "Espresso, tonic, yuzu, ice"
+        },
+        "allergens": {
+          "ru": "Нет",
+          "kk": "Жоқ",
+          "en": "None"
+        },
+        "pairing": {
+          "ru": "Лимонный тарт",
+          "kk": "Лимон тарты",
+          "en": "Lemon tart"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "salted-maple",
+      "category_key": "signature",
+      "title_ru": "Солёный клён",
+      "title_kk": "Тұзды үйеңкі",
+      "title_en": "Salted maple",
+      "description_ru": "Латте с кленовым сиропом, солёной карамелью и мускатным орехом.",
+      "description_kk": "Үйеңкі шәрбаты, тұзды карамель және мускат жаңғағы қосылған латте.",
+      "description_en": "Latte with maple syrup, salted caramel and nutmeg.",
+      "price": 2300,
+      "currency": "₸",
+      "image_url": null,
+      "badge_key": null,
+      "weight": "300 мл",
+      "sort_order": 120,
+      "is_active": true,
+      "is_stoplisted": true,
+      "source_details": {
+        "ingredients": {
+          "ru": "Эспрессо, молоко, клён, карамель, мускат",
+          "kk": "Эспрессо, сүт, үйеңкі, карамель, мускат",
+          "en": "Espresso, milk, maple, caramel, nutmeg"
+        },
+        "allergens": {
+          "ru": "Молоко",
+          "kk": "Сүт",
+          "en": "Milk"
+        },
+        "pairing": {
+          "ru": "Банановый кекс",
+          "kk": "Банан кексі",
+          "en": "Banana bread"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "matcha-latte",
+      "category_key": "noncoffee",
+      "title_ru": "Матча-латте",
+      "title_kk": "Матча-латте",
+      "title_en": "Matcha latte",
+      "description_ru": "Церемониальная матча и молоко на выбор.",
+      "description_kk": "Салтанатты матча және таңдауыңыздағы сүт.",
+      "description_en": "Ceremonial matcha with your choice of milk.",
+      "price": 2100,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=900&q=84",
+      "badge_key": null,
+      "weight": "300 мл",
+      "sort_order": 130,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Матча, молоко",
+          "kk": "Матча, сүт",
+          "en": "Matcha, milk"
+        },
+        "allergens": {
+          "ru": "Молоко",
+          "kk": "Сүт",
+          "en": "Milk"
+        },
+        "pairing": {
+          "ru": "Сырники",
+          "kk": "Сырниктер",
+          "en": "Syrniki"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "cocoa",
+      "category_key": "noncoffee",
+      "title_ru": "Какао 70%",
+      "title_kk": "70% какао",
+      "title_en": "70% cocoa",
+      "description_ru": "Горький шоколад, какао и молоко без лишней сладости.",
+      "description_kk": "Ащы шоколад, какао және аса тәтті емес сүт.",
+      "description_en": "Dark chocolate, cocoa and milk, kept deliberately not too sweet.",
+      "price": 1900,
+      "currency": "₸",
+      "image_url": null,
+      "badge_key": null,
+      "weight": "300 мл",
+      "sort_order": 140,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Шоколад, какао, молоко",
+          "kk": "Шоколад, какао, сүт",
+          "en": "Chocolate, cocoa, milk"
+        },
+        "allergens": {
+          "ru": "Молоко",
+          "kk": "Сүт",
+          "en": "Milk"
+        },
+        "pairing": {
+          "ru": "Круассан",
+          "kk": "Круассан",
+          "en": "Croissant"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "buckwheat-tea",
+      "category_key": "noncoffee",
+      "title_ru": "Гречишный чай",
+      "title_kk": "Қарақұмық шайы",
+      "title_en": "Buckwheat tea",
+      "description_ru": "Тёплый орехово-карамельный вкус без кофеина.",
+      "description_kk": "Кофеинсіз жылы жаңғақ-карамель дәмі.",
+      "description_en": "A warm nutty-caramel cup without caffeine.",
+      "price": 1500,
+      "currency": "₸",
+      "image_url": null,
+      "badge_key": null,
+      "weight": "450 мл",
+      "sort_order": 150,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Татарская гречиха, вода",
+          "kk": "Татар қарақұмығы, су",
+          "en": "Tartary buckwheat, water"
+        },
+        "allergens": {
+          "ru": "Нет",
+          "kk": "Жоқ",
+          "en": "None"
+        },
+        "pairing": {
+          "ru": "Баскский чизкейк",
+          "kk": "Баск чизкейкі",
+          "en": "Basque cheesecake"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "basque",
+      "category_key": "desserts",
+      "title_ru": "Баскский чизкейк",
+      "title_kk": "Баск чизкейкі",
+      "title_en": "Basque cheesecake",
+      "description_ru": "Карамельная корочка и мягкая сливочная середина.",
+      "description_kk": "Карамельді қабық және жұмсақ кілегейлі ортасы.",
+      "description_en": "Caramelised top with a soft, creamy centre.",
+      "price": 2600,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=900&q=84",
+      "badge_key": null,
+      "weight": "160 г",
+      "sort_order": 160,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Крем-чиз, сливки, яйцо, сахар",
+          "kk": "Крем-чиз, кілегей, жұмыртқа, қант",
+          "en": "Cream cheese, cream, egg, sugar"
+        },
+        "allergens": {
+          "ru": "Молоко, яйцо",
+          "kk": "Сүт, жұмыртқа",
+          "en": "Milk, egg"
+        },
+        "pairing": {
+          "ru": "Фильтр-кофе",
+          "kk": "Фильтр-кофе",
+          "en": "Filter coffee"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "lemon-tart",
+      "category_key": "desserts",
+      "title_ru": "Лимонный тарт",
+      "title_kk": "Лимон тарты",
+      "title_en": "Lemon tart",
+      "description_ru": "Яркий лимонный курд и тонкая меренга.",
+      "description_kk": "Жарқын лимон курды және жеңіл меренга.",
+      "description_en": "Bright lemon curd with a light torched meringue.",
+      "price": 2300,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1519915028121-7d3463d20b13?auto=format&fit=crop&w=900&q=84",
+      "badge_key": "seasonalBadge",
+      "weight": "140 г",
+      "sort_order": 170,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Лимон, яйцо, сливочное масло, мука",
+          "kk": "Лимон, жұмыртқа, сары май, ұн",
+          "en": "Lemon, egg, butter, flour"
+        },
+        "allergens": {
+          "ru": "Яйцо, молоко, глютен",
+          "kk": "Жұмыртқа, сүт, глютен",
+          "en": "Egg, milk, gluten"
+        },
+        "pairing": {
+          "ru": "Эспрессо-тоник",
+          "kk": "Эспрессо-тоник",
+          "en": "Espresso tonic"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "chicken-sandwich",
+      "category_key": "sandwiches",
+      "title_ru": "Сэндвич с цыплёнком",
+      "title_kk": "Тауық еті қосылған сэндвич",
+      "title_en": "Chicken sandwich",
+      "description_ru": "Цыплёнок, песто, вяленые томаты и моцарелла на чиабатте.",
+      "description_kk": "Чиабаттадағы тауық еті, песто, кептірілген қызанақ және моцарелла.",
+      "description_en": "Chicken, pesto, sun-dried tomato and mozzarella on ciabatta.",
+      "price": 3500,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&w=900&q=84",
+      "badge_key": null,
+      "weight": "290 г",
+      "sort_order": 180,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Чиабатта, цыплёнок, песто, томаты, моцарелла",
+          "kk": "Чиабатта, тауық еті, песто, қызанақ, моцарелла",
+          "en": "Ciabatta, chicken, pesto, tomato, mozzarella"
+        },
+        "allergens": {
+          "ru": "Глютен, молоко, орехи",
+          "kk": "Глютен, сүт, жаңғақтар",
+          "en": "Gluten, milk, nuts"
+        },
+        "pairing": {
+          "ru": "Айс-американо",
+          "kk": "Айс-американо",
+          "en": "Iced americano"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "veggie-sandwich",
+      "category_key": "sandwiches",
+      "title_ru": "Зелёный сэндвич",
+      "title_kk": "Жасыл сэндвич",
+      "title_en": "Green sandwich",
+      "description_ru": "Авокадо, огурец, шпинат, фета и зелёный соус.",
+      "description_kk": "Авокадо, қияр, шпинат, фета және жасыл тұздық.",
+      "description_en": "Avocado, cucumber, spinach, feta and a bright herb sauce.",
+      "price": 3300,
+      "currency": "₸",
+      "image_url": null,
+      "badge_key": null,
+      "weight": "270 г",
+      "sort_order": 190,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Хлеб, авокадо, огурец, шпинат, фета",
+          "kk": "Нан, авокадо, қияр, шпинат, фета",
+          "en": "Bread, avocado, cucumber, spinach, feta"
+        },
+        "allergens": {
+          "ru": "Глютен, молоко",
+          "kk": "Глютен, сүт",
+          "en": "Gluten, milk"
+        },
+        "pairing": {
+          "ru": "Матча-латте",
+          "kk": "Матча-латте",
+          "en": "Matcha latte"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "peach-soda",
+      "category_key": "seasonal",
+      "title_ru": "Белый персик и жасмин",
+      "title_kk": "Ақ шабдалы және жасмин",
+      "title_en": "White peach and jasmine",
+      "description_ru": "Домашняя газировка с белым персиком, жасмином и лаймом.",
+      "description_kk": "Ақ шабдалы, жасмин және лайм қосылған үй лимонады.",
+      "description_en": "House soda with white peach, jasmine and lime.",
+      "price": 2200,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=900&q=84",
+      "badge_key": "newBadge",
+      "weight": "400 мл",
+      "sort_order": 200,
+      "is_active": true,
+      "is_stoplisted": false,
+      "source_details": {
+        "ingredients": {
+          "ru": "Персик, жасмин, лайм, содовая",
+          "kk": "Шабдалы, жасмин, лайм, сода",
+          "en": "Peach, jasmine, lime, soda"
+        },
+        "allergens": {
+          "ru": "Нет",
+          "kk": "Жоқ",
+          "en": "None"
+        },
+        "pairing": {
+          "ru": "Лимонный тарт",
+          "kk": "Лимон тарты",
+          "en": "Lemon tart"
+        },
+        "featured": false
+      }
+    },
+    {
+      "content_key": "berry-bowl",
+      "category_key": "seasonal",
+      "title_ru": "Летний ягодный боул",
+      "title_kk": "Жазғы жидек боулы",
+      "title_en": "Summer berry bowl",
+      "description_ru": "Густой ягодный смузи, гранола, банан и свежие ягоды.",
+      "description_kk": "Қою жидек смузиі, гранола, банан және балғын жидектер.",
+      "description_en": "Thick berry smoothie, granola, banana and fresh berries.",
+      "price": null,
+      "currency": "₸",
+      "image_url": "https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?auto=format&fit=crop&w=900&q=84",
+      "badge_key": null,
+      "weight": "320 г",
+      "sort_order": 210,
+      "is_active": true,
+      "is_stoplisted": true,
+      "source_details": {
+        "ingredients": {
+          "ru": "Ягоды, банан, гранола, кокос",
+          "kk": "Жидектер, банан, гранола, кокос",
+          "en": "Berries, banana, granola, coconut"
+        },
+        "allergens": {
+          "ru": "Орехи, глютен",
+          "kk": "Жаңғақтар, глютен",
+          "en": "Nuts, gluten"
+        },
+        "pairing": {
+          "ru": "Фильтр-кофе",
+          "kk": "Фильтр-кофе",
+          "en": "Filter coffee"
+        },
+        "featured": false
+      }
+    }
+  ]
+}

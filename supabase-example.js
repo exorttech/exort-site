@@ -190,6 +190,7 @@ export async function loadRestaurantMenu(
             "description_en",
             "description_kk",
             "price",
+            "old_price",
             "currency",
             "image_url",
             "image_path",
@@ -198,7 +199,10 @@ export async function loadRestaurantMenu(
             "badge_kk",
             "sort_order",
             "is_active",
+            "is_stoplisted",
             "inactive_until",
+            "weight",
+            "calories",
           ].join(",")
         )
         .eq("restaurant_id", restaurant.id)

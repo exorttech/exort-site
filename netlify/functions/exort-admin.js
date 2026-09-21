@@ -21,6 +21,8 @@ exports.handler = async (event) => {
 
     if (action === "login") return login(restaurantSlug, body.pin);
 
+    if (action === "getPublicMenuData") return getPublicMenuData(restaurantSlug);
+
     const session = verifySession(body.sessionToken, restaurantSlug);
     if (!session) return response(401, { error: "?????? ?????????????? ???????. ??????? ?????." });
 
@@ -67,6 +69,65 @@ async function login(slug, pin) {
 async function getData(slug) {
   const restaurant = await getRestaurant(slug);
   return response(200, await buildAdminData(restaurant));
+}
+
+async function getPublicMenuData(slug) {
+  const restaurant = await getRestaurant(slug);
+  const data = await buildAdminData(restaurant);
+  const categories = data.categories.filter((category) => category.is_active !== false);
+  const categoryIds = new Set(categories.map((category) => category.id));
+  const items = data.items.filter((item) => item.content_key !== "menu-hero" && categoryIds.has(item.category_id));
+
+  return response(200, {
+    restaurant: {
+      id: restaurant.id,
+      slug: restaurant.slug,
+      name: restaurant.name,
+      city: restaurant.city,
+      hero_image_url: restaurant.hero_image_url,
+      menu_cover_url: restaurant.menu_cover_url,
+      logo_url: restaurant.logo_url,
+      brand_line_1: restaurant.brand_line_1,
+      brand_line_2: restaurant.brand_line_2,
+      accent_color: restaurant.accent_color,
+      subtitle_ru: restaurant.subtitle_ru,
+      subtitle_kk: restaurant.subtitle_kk,
+      subtitle_en: restaurant.subtitle_en,
+      subtitle_tr: restaurant.subtitle_tr,
+      about_ru: restaurant.about_ru,
+      about_kk: restaurant.about_kk,
+      about_en: restaurant.about_en,
+      about_tr: restaurant.about_tr,
+      address_ru: restaurant.address_ru,
+      address_kk: restaurant.address_kk,
+      address_en: restaurant.address_en,
+      address_tr: restaurant.address_tr,
+      address_url: restaurant.address_url,
+      hours_ru: restaurant.hours_ru,
+      hours_kk: restaurant.hours_kk,
+      hours_en: restaurant.hours_en,
+      hours_tr: restaurant.hours_tr,
+      open_status_ru: restaurant.open_status_ru,
+      open_status_kk: restaurant.open_status_kk,
+      open_status_en: restaurant.open_status_en,
+      open_status_tr: restaurant.open_status_tr,
+      phone: restaurant.phone,
+      instagram_url: restaurant.instagram_url,
+      instagram_handle: restaurant.instagram_handle,
+      whatsapp_url: restaurant.whatsapp_url,
+      whatsapp_label: restaurant.whatsapp_label,
+      wifi_name: restaurant.wifi_name,
+      additional_info_ru: restaurant.additional_info_ru,
+      additional_info_kk: restaurant.additional_info_kk,
+      additional_info_en: restaurant.additional_info_en,
+      additional_info_tr: restaurant.additional_info_tr,
+      service_fee_percent: restaurant.service_fee_percent,
+      supported_languages: restaurant.supported_languages,
+      is_demo: restaurant.is_demo,
+    },
+    categories,
+    items,
+  });
 }
 
 async function buildAdminData(restaurant) {

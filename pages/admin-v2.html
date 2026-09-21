@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="theme-color" content="#13261f" />
+    <title>Exort — управление рестораном</title>
+    <link rel="icon" href="../favicon.ico?v=2" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="../css/admin-v2.css?v=2" />
+    <script
+      defer
+      src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
+    ></script>
+    <script defer src="../js/admin-image-optimizer.js"></script>
+    <script defer src="../js/admin-v2.js?v=2"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#workspace">К содержимому</a>
+    <section id="login" class="login-layout" aria-labelledby="login-title">
+      <div class="login-brand">
+        <img src="../assets/exort-logo.png" alt="Exort" />
+        <div>
+          <p class="eyebrow">Рабочее пространство ресторана</p>
+          <h1>Всё меню.<br />Под вашим контролем.</h1>
+          <p>Блюда, доступность и поведение гостей — в одном месте.</p>
+        </div>
+        <span>EXORT · УПРАВЛЕНИЕ МЕНЮ</span>
+      </div>
+      <div class="login-panel">
+        <form id="login-form" method="post">
+          <span class="eyebrow">Добро пожаловать</span>
+          <h2 id="login-title">Вход в ресторан</h2>
+          <p class="muted">Используйте PIN вашего заведения.</p>
+          <label
+            >Идентификатор ресторана<input
+              name="restaurant"
+              required
+              autocomplete="organization"
+              maxlength="100"
+              pattern="[a-z0-9-]+" /></label
+          ><label
+            >PIN-код
+            <div class="password-field">
+              <input
+                name="pin"
+                type="password"
+                required
+                autocomplete="current-password"
+                maxlength="100"
+              /><button
+                type="button"
+                data-action="pin"
+                aria-label="Показать PIN"
+              >
+                Показать
+              </button>
+            </div></label
+          >
+          <p class="form-error" id="login-error" role="alert"></p>
+          <button class="button primary" type="submit" disabled>
+            Войти в пространство <span aria-hidden="true">→</span></button
+          ><small>Доступ проверяется для выбранного ресторана.</small>
+        </form>
+      </div>
+    </section>
+    <div id="admin-protected" hidden>
+    <div id="app" hidden>
+      <button
+        class="nav-scrim"
+        data-action="nav-close"
+        aria-label="Закрыть навигацию"
+        hidden
+      ></button>
+      <aside class="sidebar" id="sidebar" aria-label="Навигация ресторана">
+        <a href="../index.html" class="brand"
+          ><img src="../assets/exort-logo.png" alt="Exort" /><span
+            >WORKSPACE</span
+          ></a
+        >
+        <div class="restaurant-switch">
+          <span class="restaurant-avatar" aria-hidden="true">E</span>
+          <div>
+            <strong data-restaurant-name>Ресторан</strong
+            ><small data-restaurant-city></small>
+          </div>
+          <button
+            class="icon-button mobile-only"
+            data-action="nav-close"
+            aria-label="Закрыть навигацию"
+          >
+            ×
+          </button>
+        </div>
+        <p class="nav-caption">УПРАВЛЕНИЕ</p>
+        <nav id="main-nav"></nav>
+        <div class="sidebar-bottom">
+          <a class="nav-link" data-menu-link target="_blank" rel="noopener"
+            >Открыть меню <span aria-hidden="true">↗</span></a
+          ><button class="nav-link" data-action="logout">
+            Выйти из аккаунта <span aria-hidden="true">↪</span>
+          </button>
+          <div class="sidebar-footer">
+            <span>Exort</span><span>Панель ресторана</span>
+          </div>
+        </div>
+      </aside>
+      <div class="main-shell">
+        <header class="topbar">
+          <div class="breadcrumb">
+            <button
+              class="icon-button mobile-only"
+              data-action="nav-open"
+              aria-label="Открыть навигацию"
+              aria-controls="sidebar"
+              aria-expanded="false"
+            >
+              ☰</button
+            ><span class="desktop-only" data-restaurant-name></span
+            ><span class="desktop-only muted">/</span
+            ><strong id="section-label">Обзор</strong>
+          </div>
+          <div class="topbar-right">
+            <span id="sync-status" class="sync-status" role="status"
+              >Загрузка…</span
+            ><span id="demo-badge" class="badge demo" hidden>Демо</span>
+            <details class="account-menu">
+              <summary aria-label="Меню аккаунта">АД</summary>
+              <div>
+                <strong>Администратор</strong
+                ><small data-restaurant-name></small
+                ><button data-action="logout">Выйти</button>
+              </div>
+            </details>
+          </div>
+        </header>
+        <main id="workspace" tabindex="-1">
+          <div id="content" aria-live="polite"></div>
+        </main>
+      </div>
+    </div>
+    <dialog
+      id="editor"
+      class="editor-dialog"
+      aria-labelledby="editor-title"
+    ></dialog>
+    <dialog
+      id="utility-dialog"
+      class="utility-dialog"
+      aria-labelledby="utility-title"
+    ></dialog>
+    <dialog
+      id="confirmation"
+      class="confirmation"
+      aria-labelledby="confirm-title"
+    >
+      <form method="dialog">
+        <span class="eyebrow">Подтверждение</span>
+        <h2 id="confirm-title"></h2>
+        <p id="confirm-message"></p>
+        <div class="dialog-actions">
+          <button class="button" value="cancel" autofocus>Отмена</button
+          ><button class="button danger" value="accept" id="confirm-accept">
+            Продолжить
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <div
+      id="toasts"
+      class="toast-stack"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+    </div>
+    <noscript>Для работы панели включите JavaScript в браузере.</noscript>
+  </body>
+</html>

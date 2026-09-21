@@ -5,6 +5,7 @@
   const money = (value) => value == null ? null : `${new Intl.NumberFormat("ru-RU").format(value)} ₸`;
   const imagePath = (name) => `../assets/demo-menu/${name}.webp`;
   const DEFAULT_RESTAURANT_SLUG = "exort-demo";
+  const PUBLIC_MENU_API = getExortAdminApiUrl();
   const LOCAL_IMAGE_BY_CONTENT_KEY = Object.freeze({
     "chicken-caesar": "salad",
     "flat-white": "coffee",
@@ -44,9 +45,9 @@
       };
       const body = JSON.stringify(payload);
       try {
-        if (navigator.sendBeacon?.("/api/exort-admin", new Blob([body], { type: "application/json" }))) return true;
+        if (navigator.sendBeacon?.(PUBLIC_MENU_API, new Blob([body], { type: "application/json" }))) return true;
       } catch {}
-      fetch("/api/exort-admin", {
+      fetch(PUBLIC_MENU_API, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body,
@@ -228,6 +229,12 @@
     return String(raw).toLowerCase().replace(/[^a-z0-9-]/g, "") || DEFAULT_RESTAURANT_SLUG;
   }
 
+  function getExortAdminApiUrl() {
+    return ["localhost", "127.0.0.1", "::1"].includes(window.location.hostname.toLowerCase())
+      ? "https://exort.kz/api/exort-admin"
+      : "/api/exort-admin";
+  }
+
   function getAnalyticsSessionId() {
     const key = `exort-showcase-session:${getRequestedRestaurantSlug()}`;
     try {
@@ -246,7 +253,7 @@
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), 6500);
     try {
-      const response = await fetch("/api/exort-admin", {
+      const response = await fetch(PUBLIC_MENU_API, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -320,6 +327,7 @@
           price: Number.isFinite(price) ? price : null,
           weight: safeText(item.weight, "", 40),
           image: safePublicImage(item.image_url) || localImageForItem(item),
+          imageFallback: localImageForItem(item),
           featured: false,
           available: item.is_active !== false && !item.is_stoplisted && !(inactiveUntil > now),
           badge: Object.values(badge).some(Boolean) ? badge : null,
@@ -381,9 +389,12 @@
   }
 
   function featureCard(item, index) {
+    const fallback = item.imageFallback && item.imageFallback !== item.image
+      ? ` data-fallback-image="${escapeHtml(item.imageFallback)}"`
+      : "";
     return `
       <button class="showcase-feature-card" type="button" data-dish-id="${item.id}" aria-label="${escapeHtml(localeValue(item.name))}">
-        <img src="${item.image}" alt="${escapeHtml(localeValue(item.name))}" loading="${index ? "lazy" : "eager"}" />
+        <img src="${item.image}" alt="${escapeHtml(localeValue(item.name))}" loading="${index ? "lazy" : "eager"}"${fallback} />
         <span class="showcase-feature-card__body">
           <span class="showcase-feature-card__meta"><small>${escapeHtml(localeValue(item.badge) || currentCopy().available)}</small><strong>${escapeHtml(formatPrice(item.price))}</strong></span>
           <h3>${escapeHtml(localeValue(item.name))}</h3>
@@ -395,7 +406,7 @@
     const name = localeValue(item.name);
     const description = localeValue(item.description);
     const visual = item.image
-      ? `<span class="showcase-dish-card__visual"><img src="${item.image}" alt="${escapeHtml(name)}" loading="lazy" /></span>`
+      ? `<span class="showcase-dish-card__visual"><img src="${item.image}" alt="${escapeHtml(name)}" loading="lazy"${item.imageFallback && item.imageFallback !== item.image ? ` data-fallback-image="${escapeHtml(item.imageFallback)}"` : ""} /></span>`
       : `<span class="showcase-dish-card__visual showcase-dish-card__visual--abstract" data-letter="${escapeHtml(name.slice(0, 1))}" aria-hidden="true"></span>`;
     return `
       <button class="showcase-dish-card ${item.image ? "" : "has-no-image"} ${item.available ? "" : "is-unavailable"}" type="button" data-dish-id="${item.id}" aria-label="${escapeHtml(name)}">
@@ -533,7 +544,9 @@
   function pairingMarkup(id) {
     const item = getDish(id);
     if (!item) return "";
-    const visual = item.image ? `<img src="${item.image}" alt="" />` : "<i></i>";
+    const visual = item.image
+      ? `<img src="${item.image}" alt=""${item.imageFallback && item.imageFallback !== item.image ? ` data-fallback-image="${escapeHtml(item.imageFallback)}"` : ""} />`
+      : "<i></i>";
     return `<button type="button" data-pairing-id="${item.id}">${visual}<span><strong>${escapeHtml(localeValue(item.name))}</strong><small>${escapeHtml(formatPrice(item.price))}</small></span></button>`;
   }
 
@@ -542,7 +555,7 @@
     const name = localeValue(item.name);
     const description = localeValue(item.description);
     const visual = item.image
-      ? `<img class="showcase-dish-modal__image" src="${item.image}" alt="${escapeHtml(name)}" />`
+      ? `<img class="showcase-dish-modal__image" src="${item.image}" alt="${escapeHtml(name)}"${item.imageFallback && item.imageFallback !== item.image ? ` data-fallback-image="${escapeHtml(item.imageFallback)}"` : ""} />`
       : `<div class="showcase-dish-modal__visual" aria-label="${escapeHtml(name)}">${escapeHtml(name.slice(0, 1))}</div>`;
     elements.dishModalContent.innerHTML = `
       ${visual}
@@ -736,6 +749,15 @@
   }
 
   function bindEvents() {
+    document.addEventListener("error", (event) => {
+      const image = event.target;
+      if (!(image instanceof HTMLImageElement)) return;
+      const fallback = image.dataset.fallbackImage;
+      if (!fallback || image.src === new URL(fallback, location.href).href) return;
+      image.removeAttribute("data-fallback-image");
+      image.src = fallback;
+    }, true);
+
     document.addEventListener("click", (event) => {
       if (event.target.closest("[data-loader-accept]")) {
         if (elements.loaderAccept.dataset.loaderRetry === "true") return location.reload();
