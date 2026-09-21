@@ -165,7 +165,10 @@ async function run() {
     "Expected frontend initialization entry point",
   );
   assert.match(html, /id="admin-protected" hidden/);
+  assert.match(html, /id="stat-dialog"/);
   assert.match(code, /protectedRoot\.remove\(\)/);
+  assert.match(code, /data-action="stat-open"/);
+  assert.doesNotMatch(code, /Старая цена|old_price/);
   assert.match(code, /https:\/\/exort\.kz\/demo-menu\?restaurant=/);
   assert.match(redirects, /^\/demo-admin \/pages\/admin-v2\.html 200$/m);
   for (const action of [
@@ -245,7 +248,6 @@ async function run() {
     name_en: "",
     category_id: "",
     price: "-1",
-    old_price: "",
     calories: "",
     sort_order: "0",
     currency: "KZT",
@@ -287,7 +289,7 @@ async function run() {
   assert.equal(save.item.price, 123.45);
   assert.equal(save.item.is_active, true);
   assert.equal(save.item.is_stoplisted, true);
-  assert.equal(save.item.old_price, null);
+  assert.equal("old_price" in save.item, false);
   assert.equal(save.item.imageData, "data:image/webp;base64,TEST");
   assert.equal(valid.button.disabled, false);
 

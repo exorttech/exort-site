@@ -345,7 +345,54 @@
       content.innerHTML = restaurantView();
   }
   function metrics(items) {
-    return `<div class="metrics">${items.map(([label, value, note]) => `<div class="metric"><span>${esc(label)}</span><strong>${value}</strong><small>${note || ""}</small></div>`).join("")}</div>`;
+    return `<div class="metrics">${items.map(([label, value, note, detail]) => detail ? `<button class="metric metric-button" type="button" data-action="stat-open" data-stat="${esc(detail)}"><span>${esc(label)}</span><strong>${value}</strong><small>${note || ""}</small><i class="metric-open" aria-hidden="true">↗</i></button>` : `<div class="metric"><span>${esc(label)}</span><strong>${value}</strong><small>${note || ""}</small></div>`).join("")}</div>`;
+  }
+  function statDishList(items, emptyText) {
+    if (!items.length) return empty(emptyText);
+    return `<div class="stat-list">${items.map((item, index) => `<div class="stat-list-row"><span>${String(index + 1).padStart(2, "0")}</span><div><strong>${esc(name(item))}</strong><small>${esc(categoryName(item.category_id))}</small></div><b>${money(item)}</b></div>`).join("")}</div>`;
+  }
+  function statDetail(kind) {
+    const a = state.analytics;
+    const period = a?.period?.label || "Текущий период";
+    const allDishes = dishes();
+    const active = allDishes.filter((item) => item.is_active !== false && !stopped(item) && !temporary(item));
+    const titles = {
+      available: ["Доступно гостям", "Позиции, которые сейчас видны и доступны в меню"],
+      stoplist: ["Стоп-лист", "Позиции, временно недоступные гостям"],
+      categories: ["Категории меню", "Структура публичного меню"],
+      sessions: ["Сессии меню", period],
+      engagement: ["Вовлечённые гости", period],
+      opens: ["Открытия блюд", period],
+      duration: ["Среднее время изучения", period],
+      activity: [state.range === "today" ? "Активность по часам" : state.range === "all" ? "Активность по месяцам" : "Активность по дням", "Сессии и открытия карточек блюд"],
+      insights: ["Выводы за период", period],
+      popular: ["Популярные блюда", "По количеству открытий карточки"],
+      hourly: ["Активность в течение дня", `Часовой пояс: ${a?.timeZone || "ресторана"}`],
+      sources: ["Источники переходов", "Распределение сессий в выбранном периоде"],
+    };
+    let body = "";
+    if (kind === "available") body = `<div class="stat-hero"><strong>${active.length}</strong><span>из ${allDishes.length} позиций доступны гостям</span></div>${statDishList(active, "Нет доступных блюд")}`;
+    if (kind === "stoplist") body = `<div class="stat-hero"><strong>${allDishes.filter(stopped).length}</strong><span>позиций временно скрыты из продажи</span></div>${statDishList(allDishes.filter(stopped), "Стоп-лист пуст")}`;
+    if (kind === "categories") body = `<div class="stat-hero"><strong>${state.categories.length}</strong><span>${state.categories.filter((c) => c.is_active !== false).length} видны гостям</span></div><div class="stat-list">${state.categories.map((category, index) => `<div class="stat-list-row"><span>${String(index + 1).padStart(2, "0")}</span><div><strong>${esc(name(category))}</strong><small>${category.is_active === false ? "Скрыта" : "Активна"}</small></div><b>${allDishes.filter((item) => item.category_id === category.id).length}</b></div>`).join("")}</div>`;
+    if (["sessions", "activity"].includes(kind) && a) body = `<div class="stat-hero"><strong>${fmt(a.summary.sessions.value)}</strong><span>сессий за период</span></div>${chart(a.timeline || [])}`;
+    if (kind === "engagement" && a) body = `<div class="stat-hero"><strong>${metricValue(a.summary.engagedRate)}</strong><span>гостей открыли хотя бы одну карточку блюда</span></div><div class="funnel-list">${(a.funnel || []).map((step) => `<div><span>${esc(step.label)}</span><strong>${fmt(step.value)}</strong><i style="width:${Math.max(2, Number(step.rate || 0))}%"></i><small>${fmt(step.rate)}% от предыдущего шага</small></div>`).join("")}</div>`;
+    if (["opens", "popular", "duration"].includes(kind) && a) {
+      const rows = [...(a.dishes || [])].sort((left, right) => kind === "duration" ? Number(right.averageViewMs || 0) - Number(left.averageViewMs || 0) : Number(right.opens || 0) - Number(left.opens || 0));
+      const mainValue = kind === "duration" ? metricValue(a.summary.averageStudyMs) : metricValue(a.summary.dishOpens);
+      const mainLabel = kind === "duration" ? "среднее время изучения меню" : "открытий карточек блюд";
+      body = `<div class="stat-hero"><strong>${mainValue}</strong><span>${mainLabel}</span></div><div class="stat-list">${rows.map((item, index) => `<div class="stat-list-row"><span>${String(index + 1).padStart(2, "0")}</span><div><strong>${esc(item.title)}</strong><small>${fmt(item.sessionShare)}% сессий · ${duration(item.averageViewMs)}</small></div><b>${fmt(item.opens)}</b></div>`).join("")}</div>`;
+    }
+    if (kind === "insights" && a) body = a.insights?.length ? `<ul class="stat-insights">${a.insights.map((text) => `<li>${icon("arrow")}<span>${esc(text)}</span></li>`).join("")}</ul>` : empty("Пока недостаточно данных", "Выводы появятся после накопления как минимум пяти сессий.");
+    if (kind === "hourly" && a) body = `<div class="stat-hero"><strong>${esc(a.dayDetails?.[state.hourDay]?.label || "—")}</strong><span>выбранный день</span></div>${chart(a.dayDetails?.[state.hourDay]?.hours || [], "sessions", true)}`;
+    if (kind === "sources" && a) body = a.sources?.length ? `<div class="source-row muted"><span>Источник</span><span>Сессии</span><span>Вовлечённость</span></div>${a.sources.map((source) => `<div class="source-row"><strong>${esc(source.name)}</strong><span>${fmt(source.sessions)}</span><span>${fmt(source.engagement)}%</span></div>`).join("")}` : empty("Нет переходов", "Данные появятся после посещений меню.");
+    if (!body) body = empty("Данные ещё загружаются", "Попробуйте открыть статистику через несколько секунд.");
+    return { title: titles[kind]?.[0] || "Статистика", subtitle: titles[kind]?.[1] || period, body };
+  }
+  function openStatPopup(kind) {
+    const detail = statDetail(kind);
+    const dialog = $("#stat-dialog");
+    dialog.innerHTML = `<section class="stat-dialog-shell"><header><div><span class="eyebrow">Подробная статистика</span><h2 id="stat-dialog-title">${esc(detail.title)}</h2><p>${esc(detail.subtitle)}</p></div><button class="icon-button" type="button" data-action="stat-close" aria-label="Закрыть статистику">${icon("close")}</button></header><div class="stat-dialog-body">${detail.body}</div></section>`;
+    if (!dialog.open) dialog.showModal();
   }
   function overview() {
     const items = dishes();
@@ -368,16 +415,18 @@
     const a = state.analytics;
     return `${heading(addItemButton())}<section class="menu-status"><div class="status-copy"><span class="status-icon">${icon("check")}</span><div><div class="eyebrow">Ваше цифровое меню</div><h2>${state.restaurant.is_active === false ? "Ресторан неактивен" : "Меню доступно гостям"}</h2><p>${esc(state.restaurant.name)} · ${active.length} ${plural(active.length, "блюдо", "блюда", "блюд")} доступны к выбору</p></div></div><a class="button" href="${menuUrl()}" target="_blank" rel="noopener">Открыть меню ${icon("arrow")}</a></section>
       ${metrics([
-        ["Доступно гостям", active.length, `из ${items.length} позиций меню`],
+        ["Доступно гостям", active.length, `из ${items.length} позиций меню`, "available"],
         [
           "В стоп-листе",
           items.filter(stopped).length,
           "Временно нет в наличии",
+          "stoplist",
         ],
         [
           "Категории",
           state.categories.length,
           `${state.categories.filter((c) => c.is_active !== false).length} видны гостям`,
+          "categories",
         ],
         [
           {
@@ -390,9 +439,10 @@
           state.source === "all"
             ? "Полноценные открытия меню"
             : "По выбранному источнику",
+          "sessions",
         ],
       ])}
-      <div class="two-columns"><section class="panel"><div class="panel-head"><div><h3>Посещаемость меню</h3><p>${a ? esc(a.period.label) : "Данные о взаимодействии гостей"}</p></div><button class="text-button" data-action="view" data-view="analytics">Аналитика ${icon("arrow")}</button></div>${state.analyticsLoading ? loading("Загружаем аналитику…") : state.analyticsError ? `<div class="panel-body">${errorBox(state.analyticsError, "analytics-retry")}</div>` : a ? `<div class="chart-stats"><strong>${fmt(a.summary.sessions.value)}</strong><span>сессий за период</span></div>${chart(a.timeline || [], "sessions")}` : empty("Нет данных аналитики")}</section>
+      <div class="two-columns"><section class="panel stat-expandable" tabindex="0" data-action="stat-open" data-stat="activity"><div class="panel-head"><div><h3>Посещаемость меню</h3><p>${a ? esc(a.period.label) : "Данные о взаимодействии гостей"}</p></div><button class="text-button" data-action="view" data-view="analytics">Аналитика ${icon("arrow")}</button></div>${state.analyticsLoading ? loading("Загружаем аналитику…") : state.analyticsError ? `<div class="panel-body">${errorBox(state.analyticsError, "analytics-retry")}</div>` : a ? `<div class="chart-stats"><strong>${fmt(a.summary.sessions.value)}</strong><span>сессий за период</span></div>${chart(a.timeline || [], "sessions")}` : empty("Нет данных аналитики")}</section>
       <section class="panel"><div class="panel-head"><div><h3>Требует внимания</h3><p>Проверьте перед началом смены</p></div><span class="badge">${missingPhotos + missingTranslations + items.filter(stopped).length}</span></div><div class="panel-body">${attention("stop", items.filter(stopped).length, "В стоп-листе", "Верните доступные блюда в меню")}${attention("photo", missingPhotos, "Без фотографии", "Покажите гостям, что они выбирают")}${attention("translation", missingTranslations, "Неполные переводы", "Проверьте названия на KZ и EN")}</div></section></div>
       <section class="panel"><div class="panel-head"><div><h3>Последние изменения</h3><p>По времени обновления блюд</p></div><button class="text-button" data-action="view" data-view="menu">Все блюда ${icon("arrow")}</button></div>${recent.length ? recent.map((i) => `<div class="recent-row">${photo(i)}<div><button class="dish-name" data-action="item-edit" data-id="${esc(i.id)}">${esc(name(i))}</button><small>${esc(categoryName(i.category_id))} · ${money(i)}</small></div><span class="badge ${stopped(i) ? "stop" : ""}">${stopped(i) ? "Стоп-лист" : i.is_active === false ? "Скрыто" : "Активно"}</span><time datetime="${esc(i.updated_at)}">${date(i.updated_at)}</time></div>`).join("") : empty("История обновлений пока недоступна", "Здесь появятся записи с датой последнего изменения.")}</section>`;
   }
@@ -581,9 +631,9 @@
             `<option value="${esc(s.id)}" ${state.source === s.id ? "selected" : ""}>${esc(s.name)}${s.isActive === false ? " · архив" : ""}</option>`,
         )
         .join("")}</select></div>
-      ${metrics(summary.map(([label, m]) => [label, metricValue(m), state.range === "all" ? "За всё время" : m?.change == null ? "Нет данных для сравнения" : `<span class="delta">${m.change > 0 ? "+" : ""}${fmt(m.change)}%</span> к предыдущему периоду`]))}
-      <div class="two-columns"><section class="panel"><div class="panel-head"><div><h3>${state.range === "today" ? "Активность по часам" : state.range === "all" ? "Активность по месяцам" : "Активность по дням"}</h3><p>Сессии и открытия карточек блюд</p></div><span class="badge">${fmt(a.summary.sessions.value)} сессий</span></div>${chart(a.timeline || [])}</section><section class="panel"><div class="panel-head"><div><h3>Выводы за период</h3><p>На основе поведения гостей</p></div>${icon("chart")}</div>${a.insights?.length ? `<ul class="insights">${a.insights.map((text) => `<li>${icon("arrow")}<span>${esc(text)}</span></li>`).join("")}</ul>` : empty("Пока недостаточно данных", "Выводы появятся после накопления как минимум пяти сессий.")}</section></div>
-      <div class="two-columns equal-columns"><section class="panel"><div class="panel-head"><div><h3>Популярные блюда</h3><p>По количеству открытий карточки</p></div></div><div class="panel-body">${topDishes.some((d) => d.opens > 0) ? topDishes.map((d, i) => `<div class="rank-row"><span class="muted">${String(i + 1).padStart(2, "0")}</span><div><strong>${esc(d.title)}</strong><div class="rank-track"><i style="width:${(d.opens / maxOpens) * 100}%"></i></div><small>${fmt(d.sessionShare)}% сессий · ${duration(d.averageViewMs)}</small></div><strong>${fmt(d.opens)}</strong></div>`).join("") : empty("Нет открытий блюд", "За выбранный период гости ещё не открывали карточки.")}</div></section><section class="panel"><div class="panel-head"><div><h3>Активность в течение дня</h3><p>Часовой пояс: ${esc(a.timeZone || "ресторана")}</p></div></div><div class="panel-body"><label>День<select id="hour-day">${Object.entries(
+      ${metrics(summary.map(([label, m], index) => [label, metricValue(m), state.range === "all" ? "За всё время" : m?.change == null ? "Нет данных для сравнения" : `<span class="delta">${m.change > 0 ? "+" : ""}${fmt(m.change)}%</span> к предыдущему периоду`, ["sessions", "engagement", "opens", "duration"][index]]))}
+      <div class="two-columns"><section class="panel stat-expandable" tabindex="0" data-action="stat-open" data-stat="activity"><div class="panel-head"><div><h3>${state.range === "today" ? "Активность по часам" : state.range === "all" ? "Активность по месяцам" : "Активность по дням"}</h3><p>Сессии и открытия карточек блюд</p></div><span class="badge">${fmt(a.summary.sessions.value)} сессий</span></div>${chart(a.timeline || [])}</section><section class="panel stat-expandable" tabindex="0" data-action="stat-open" data-stat="insights"><div class="panel-head"><div><h3>Выводы за период</h3><p>На основе поведения гостей</p></div>${icon("chart")}</div>${a.insights?.length ? `<ul class="insights">${a.insights.map((text) => `<li>${icon("arrow")}<span>${esc(text)}</span></li>`).join("")}</ul>` : empty("Пока недостаточно данных", "Выводы появятся после накопления как минимум пяти сессий.")}</section></div>
+      <div class="two-columns equal-columns"><section class="panel stat-expandable" tabindex="0" data-action="stat-open" data-stat="popular"><div class="panel-head"><div><h3>Популярные блюда</h3><p>По количеству открытий карточки</p></div></div><div class="panel-body">${topDishes.some((d) => d.opens > 0) ? topDishes.map((d, i) => `<div class="rank-row"><span class="muted">${String(i + 1).padStart(2, "0")}</span><div><strong>${esc(d.title)}</strong><div class="rank-track"><i style="width:${(d.opens / maxOpens) * 100}%"></i></div><small>${fmt(d.sessionShare)}% сессий · ${duration(d.averageViewMs)}</small></div><strong>${fmt(d.opens)}</strong></div>`).join("") : empty("Нет открытий блюд", "За выбранный период гости ещё не открывали карточки.")}</div></section><section class="panel stat-expandable" tabindex="0" data-action="stat-open" data-stat="hourly"><div class="panel-head"><div><h3>Активность в течение дня</h3><p>Часовой пояс: ${esc(a.timeZone || "ресторана")}</p></div></div><div class="panel-body"><label>День<select id="hour-day">${Object.entries(
         hourDetails,
       )
         .map(
@@ -593,7 +643,7 @@
         .join(
           "",
         )}</select></label></div><div id="hour-chart">${chart(hourDetails[state.hourDay]?.hours || [], "sessions", true)}</div></section></div>
-      <section class="panel"><div class="panel-head"><div><h3>Источники переходов</h3><p>Распределение сессий в выбранном периоде</p></div><button class="text-button" data-action="view" data-view="qr">QR-источники ${icon("arrow")}</button></div>${a.sources?.length ? `<div class="source-row muted"><span>Источник</span><span>Сессии</span><span>Вовлечённость</span></div>${a.sources.map((s) => `<div class="source-row"><strong>${esc(s.name)}</strong><span>${fmt(s.sessions)}</span><span>${fmt(s.engagement)}%</span></div>`).join("")}` : empty("Нет переходов", "Данные появятся после посещений меню.")}</section>`
+      <section class="panel stat-expandable" tabindex="0" data-action="stat-open" data-stat="sources"><div class="panel-head"><div><h3>Источники переходов</h3><p>Распределение сессий в выбранном периоде</p></div><button class="text-button" data-action="view" data-view="qr">QR-источники ${icon("arrow")}</button></div>${a.sources?.length ? `<div class="source-row muted"><span>Источник</span><span>Сессии</span><span>Вовлечённость</span></div>${a.sources.map((s) => `<div class="source-row"><strong>${esc(s.name)}</strong><span>${fmt(s.sessions)}</span><span>${fmt(s.engagement)}%</span></div>`).join("")}` : empty("Нет переходов", "Данные появятся после посещений меню.")}</section>`
     );
   }
   function restaurantView() {
@@ -655,7 +705,7 @@
         )
         .join(
           "",
-        )}</div>${["ru", "kz", "en"].map((lang) => `<div id="fields-${lang}" role="tabpanel" aria-labelledby="tab-${lang}" ${lang !== "ru" ? "hidden" : ""}>${field(`Название${lang === "ru" ? " *" : ""}`, `name_${lang}`, item[`name_${lang}`] || item[`title_${lang === "kz" ? "kk" : lang}`] || "", "text", 'maxlength="200"')}<label>Описание<textarea name="description_${lang}" rows="3" maxlength="4000" placeholder="Ингредиенты и особенности блюда">${esc(item[`description_${lang}`] || item[`description_${lang === "kz" ? "kk" : lang}`] || "")}</textarea></label></div>`).join("")}<div class="field-row"><label>Категория *<select name="category_id" aria-describedby="error-category_id"><option value="">Выберите категорию</option>${state.categories.map((c) => `<option value="${esc(c.id)}" ${c.id === item.category_id ? "selected" : ""}>${esc(name(c))}</option>`).join("")}</select><span class="form-error" id="error-category_id"></span></label>${field("Цена *", "price", item.price, "number", 'min="0" step="0.01"')}</div><div class="field-row">${field("Старая цена", "old_price", item.old_price, "number", 'min="0" step="0.01"')}<label>Валюта<select name="currency">${[...new Set([item.currency || "KZT", "KZT", "USD", "EUR", "RUB"])].map((c) => `<option ${c === (item.currency || "KZT") ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></label></div><details class="section-gap"><summary class="note">Дополнительные параметры</summary><div class="field-row">${field("Вес / объём", "weight", item.weight)}${field("Калории, ккал", "calories", item.calories, "number", 'min="0" step="1"')}</div><div class="field-row">${field("Порядок в категории", "sort_order", item.sort_order, "number", 'min="0" step="1"')}<label>Острота<select name="spice_level">${[
+        )}</div>${["ru", "kz", "en"].map((lang) => `<div id="fields-${lang}" role="tabpanel" aria-labelledby="tab-${lang}" ${lang !== "ru" ? "hidden" : ""}>${field(`Название${lang === "ru" ? " *" : ""}`, `name_${lang}`, item[`name_${lang}`] || item[`title_${lang === "kz" ? "kk" : lang}`] || "", "text", 'maxlength="200"')}<label>Описание<textarea name="description_${lang}" rows="3" maxlength="4000" placeholder="Ингредиенты и особенности блюда">${esc(item[`description_${lang}`] || item[`description_${lang === "kz" ? "kk" : lang}`] || "")}</textarea></label></div>`).join("")}<div class="field-row"><label>Категория *<select name="category_id" aria-describedby="error-category_id"><option value="">Выберите категорию</option>${state.categories.map((c) => `<option value="${esc(c.id)}" ${c.id === item.category_id ? "selected" : ""}>${esc(name(c))}</option>`).join("")}</select><span class="form-error" id="error-category_id"></span></label>${field("Цена *", "price", item.price, "number", 'min="0" step="0.01"')}</div><div class="field-row"><label>Валюта<select name="currency">${[...new Set([item.currency || "KZT", "KZT", "USD", "EUR", "RUB"])].map((c) => `<option ${c === (item.currency || "KZT") ? "selected" : ""}>${esc(c)}</option>`).join("")}</select></label></div><details class="section-gap"><summary class="note">Дополнительные параметры</summary><div class="field-row">${field("Вес / объём", "weight", item.weight)}${field("Калории, ккал", "calories", item.calories, "number", 'min="0" step="1"')}</div><div class="field-row">${field("Порядок в категории", "sort_order", item.sort_order, "number", 'min="0" step="1"')}<label>Острота<select name="spice_level">${[
         ["", "Не указана"],
         ["mild", "Лёгкая"],
         ["medium", "Средняя"],
@@ -751,7 +801,7 @@
     }
     if (!data.category_id)
       fieldError(form, "category_id", "Выберите категорию.");
-    for (const key of ["price", "old_price", "calories", "sort_order"])
+    for (const key of ["price", "calories", "sort_order"])
       if (
         (key === "price" && data[key] === "") ||
         (data[key] !== "" &&
@@ -779,7 +829,6 @@
         ].map((key) => [key, String(data[key] || "").trim()]),
       ),
       price: Number(data.price),
-      old_price: data.old_price === "" ? null : Number(data.old_price),
       calories: data.calories === "" ? null : Number(data.calories),
       sort_order: Number(data.sort_order) || 0,
       is_active: data.is_active === "on",
@@ -1324,6 +1373,11 @@
     const button = event.target.closest("[data-action]");
     if (!button || button.disabled) return;
     const { action, id } = button.dataset;
+    if (action === "stat-open") {
+      if (event.target.closest("select, input, label, a")) return;
+      openStatPopup(button.dataset.stat);
+    }
+    if (action === "stat-close") $("#stat-dialog").close();
     if (action === "pin") {
       const pin = $("#login-form").elements.pin;
       pin.type = pin.type === "password" ? "text" : "password";
@@ -1491,6 +1545,18 @@
     closeUtility();
   });
   document.addEventListener("keydown", (e) => {
+    const stat = e.target.closest(".stat-expandable[data-stat]");
+    const nestedAction = e.target.closest("[data-action]");
+    if (
+      stat &&
+      nestedAction === stat &&
+      !e.target.matches("select, input, label, a") &&
+      ["Enter", " "].includes(e.key)
+    ) {
+      e.preventDefault();
+      openStatPopup(stat.dataset.stat);
+      return;
+    }
     const tab = e.target.closest("[role=tab]");
     if (tab && ["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) {
       e.preventDefault();

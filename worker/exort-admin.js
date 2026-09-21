@@ -227,7 +227,6 @@ async function saveItem(env, slug, item) {
     ...imageData,
   };
 
-  if (item.old_price !== undefined) payload.old_price = cleanIntegerOrNull(item.old_price);
   if (item.weight !== undefined) payload.weight = cleanOrNull(item.weight);
   if (item.calories !== undefined) payload.calories = cleanIntegerOrNull(item.calories);
   if (item.spice_level !== undefined) payload.spice_level = cleanOrNull(item.spice_level);

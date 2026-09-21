@@ -306,12 +306,6 @@
     return `${new Intl.NumberFormat("ru-RU").format(amount)} ${currency}`;
   }
 
-  function formatOldPrice(item) {
-    const amount = Number(item.old_price);
-    if (!Number.isFinite(amount) || amount <= Number(item.price)) return "";
-    return `${new Intl.NumberFormat("ru-RU").format(amount)} ${item.currency || "₸"}`;
-  }
-
   function itemMeta(item) {
     return [item.weight, item.calories ? `${item.calories} ккал` : ""].filter(Boolean).join(" · ");
   }
@@ -463,7 +457,7 @@
           <h3>${escapeHtml(itemName(item))}</h3>
           <span class="featured-card__meta">
             <span>${escapeHtml(itemMeta(item))}</span>
-            <strong>${formatOldPrice(item) ? `<del>${escapeHtml(formatOldPrice(item))}</del>` : ""}${escapeHtml(formatPrice(item))}</strong>
+            <strong>${escapeHtml(formatPrice(item))}</strong>
           </span>
         </span>
       </button>
@@ -480,7 +474,7 @@
           ${itemDescription(item) ? `<span class="menu-card__description">${escapeHtml(itemDescription(item))}</span>` : ""}
           <span class="menu-card__footer">
             <span class="menu-card__meta">${escapeHtml(itemMeta(item))}</span>
-            <strong class="menu-card__price">${formatOldPrice(item) ? `<del>${escapeHtml(formatOldPrice(item))}</del>` : ""}${escapeHtml(formatPrice(item))}</strong>
+            <strong class="menu-card__price">${escapeHtml(formatPrice(item))}</strong>
           </span>
         </span>
         ${item.image_url ? `
@@ -610,7 +604,7 @@
       <div class="sheet-body">
         <div class="sheet-body__top">
           <h2 id="sheet-title">${escapeHtml(itemName(item))}</h2>
-          <strong class="sheet-price">${formatOldPrice(item) ? `<del>${escapeHtml(formatOldPrice(item))}</del>` : ""}${escapeHtml(formatPrice(item))}</strong>
+          <strong class="sheet-price">${escapeHtml(formatPrice(item))}</strong>
         </div>
         ${itemDescription(item) ? `<p class="sheet-description">${escapeHtml(itemDescription(item))}</p>` : ""}
         <div class="sheet-meta">
