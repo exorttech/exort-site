@@ -1,4 +1,4 @@
-name = "exort-admin"
+name = "exort-site"
 main = "worker/exort-admin.js"
 compatibility_date = "2025-01-01"
 
